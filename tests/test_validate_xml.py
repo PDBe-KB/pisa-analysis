@@ -3,7 +3,7 @@ from unittest import TestCase
 import os
 import xmlschema
 
-from pisa_to_json import main
+from pisa_utils import analyse
 test_data_path= os.path.join('tests', 'data')
 
 class TestXmlFiles(TestCase):
@@ -15,7 +15,7 @@ class TestXmlFiles(TestCase):
 
         path_pisa_config=os.path.join(test_data_path,'pisa.cfg')
         
-        ap= main.AnalysePisa(pdbid_id="6nxr", assembly_id="1", pisa_config = path_pisa_config,output_dir=test_data_path,force=True,result_json_file="output.json",input_dir=test_data_path)
+        ap= analyse.AnalysePisa(pdbid_id="6nxr", assembly_id="1", pisa_config = path_pisa_config, output_dir=test_data_path, force=True, result_json_file="output.json", input_dir=test_data_path)
         
         ap.run_process()
 
