@@ -45,15 +45,14 @@ def main():
     ap = AnalysePisa(
         pdb_id=args.pdb_id,
         assembly_id=args.assembly_id,
-        pisa_config=args.config,
         output_dir=args.output_dir,
-        force=args.force,
         result_json_file=args.result_json,
         input_dir=args.input_dir,
         input_updated_cif=args.input_updated_cif,
         input_cif_file=args.input_cif_file,
     )
-    ap.analyize()
+    ap.process_pisa_xml()
+    ap.set_results()
     ap.save_to_json()
 
 

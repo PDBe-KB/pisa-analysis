@@ -15,19 +15,18 @@ class TestXmlFiles(TestCase):
         schema_interfaces = os.path.join(test_data_path, "interfaces_schema.xsd")
         schema_assembly = os.path.join(test_data_path, "assembly_schema.xsd")
 
-        path_pisa_config = os.path.join(test_data_path, "pisa.cfg")
-
         ap = analyze.AnalysePisa(
             pdb_id="6nxr",
             assembly_id="1",
-            pisa_config=path_pisa_config,
             output_dir=test_data_path,
-            force=True,
             result_json_file="output.json",
             input_dir=test_data_path,
+            input_updated_cif=None,
+            input_cif_file=None,
         )
 
-        ap.analyize()
+        ap.process_pisa_xml()
+        ap.set_results()
 
         output_interfaces_xml = os.path.join(test_data_path, "interfaces.xml")
         output_assembly_xml = os.path.join(test_data_path, "assembly.xml")
