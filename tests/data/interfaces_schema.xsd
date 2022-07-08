@@ -1,0 +1,181 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="pdb_entry">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element type="xs:string" name="pdb_code"/>
+        <xs:element type="xs:string" name="status"/>
+        <xs:element type="xs:byte" name="n_interfaces"/>
+        <xs:element name="interface" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:byte" name="id"/>
+              <xs:element type="xs:byte" name="type"/>
+              <xs:element type="xs:byte" name="n_occ"/>
+              <xs:element type="xs:float" name="int_area"/>
+              <xs:element type="xs:float" name="int_solv_en"/>
+              <xs:element type="xs:float" name="pvalue"/>
+              <xs:element type="xs:float" name="stab_en"/>
+              <xs:element name="h-bonds">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="n_bonds"/>
+                    <xs:element name="bond" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="chain-1"/>
+                          <xs:element type="xs:string" name="label_asym_id-1"/>
+                          <xs:element type="xs:string" name="orig_label_asym_id-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_num-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_name-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_acc-1"/>
+                          <xs:element type="xs:string" name="res-1"/>
+                          <xs:element type="xs:short" name="seqnum-1"/>
+                          <xs:element type="xs:short" name="label_seqnum-1"/>
+                          <xs:element type="xs:string" name="inscode-1"/>
+                          <xs:element type="xs:string" name="atname-1"/>
+                          <xs:element type="xs:string" name="chain-2"/>
+                          <xs:element type="xs:string" name="label_asym_id-2"/>
+                          <xs:element type="xs:string" name="orig_label_asym_id-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_acc-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_num-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_name-2"/>
+                          <xs:element type="xs:string" name="res-2"/>
+                          <xs:element type="xs:short" name="seqnum-2"/>
+                          <xs:element type="xs:int" name="label_seqnum-2"/>
+                          <xs:element type="xs:string" name="inscode-2"/>
+                          <xs:element type="xs:string" name="atname-2"/>
+                          <xs:element type="xs:float" name="dist"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="salt-bridges">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="n_bonds"/>
+                    <xs:element name="bond" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="chain-1"/>
+                          <xs:element type="xs:string" name="label_asym_id-1"/>
+                          <xs:element type="xs:string" name="orig_label_asym_id-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_num-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_name-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_acc-1"/>
+                          <xs:element type="xs:string" name="res-1"/>
+                          <xs:element type="xs:byte" name="seqnum-1"/>
+                          <xs:element type="xs:byte" name="label_seqnum-1"/>
+                          <xs:element type="xs:string" name="inscode-1"/>
+                          <xs:element type="xs:string" name="atname-1"/>
+                          <xs:element type="xs:string" name="chain-2"/>
+                          <xs:element type="xs:string" name="label_asym_id-2"/>
+                          <xs:element type="xs:string" name="orig_label_asym_id-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_acc-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_num-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_name-2"/>
+                          <xs:element type="xs:string" name="res-2"/>
+                          <xs:element type="xs:byte" name="seqnum-2"/>
+                          <xs:element type="xs:byte" name="label_seqnum-2"/>
+                          <xs:element type="xs:string" name="inscode-2"/>
+                          <xs:element type="xs:string" name="atname-2"/>
+                          <xs:element type="xs:float" name="dist"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="ss-bonds">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="n_bonds"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="cov-bonds">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="n_bonds"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="other-bonds">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:short" name="n_bonds"/>
+                    <xs:element name="bond" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="chain-1"/>
+                          <xs:element type="xs:string" name="label_asym_id-1"/>
+                          <xs:element type="xs:string" name="orig_label_asym_id-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_num-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_name-1"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_acc-1"/>
+                          <xs:element type="xs:string" name="res-1"/>
+                          <xs:element type="xs:short" name="seqnum-1"/>
+                          <xs:element type="xs:short" name="label_seqnum-1"/>
+                          <xs:element type="xs:string" name="inscode-1"/>
+                          <xs:element type="xs:string" name="atname-1"/>
+                          <xs:element type="xs:string" name="chain-2"/>
+                          <xs:element type="xs:string" name="label_asym_id-2"/>
+                          <xs:element type="xs:string" name="orig_label_asym_id-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_acc-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_num-2"/>
+                          <xs:element type="xs:string" name="pdbx_sifts_xref_db_name-2"/>
+                          <xs:element type="xs:string" name="res-2"/>
+                          <xs:element type="xs:short" name="seqnum-2"/>
+                          <xs:element type="xs:int" name="label_seqnum-2"/>
+                          <xs:element type="xs:string" name="inscode-2"/>
+                          <xs:element type="xs:string" name="atname-2"/>
+                          <xs:element type="xs:float" name="dist"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="molecule" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:byte" name="id"/>
+                    <xs:element type="xs:string" name="chain_id"/>
+                    <xs:element type="xs:string" name="class"/>
+                    <xs:element type="xs:short" name="int_natoms"/>
+                    <xs:element type="xs:byte" name="int_nres"/>
+                    <xs:element type="xs:float" name="int_area"/>
+                    <xs:element type="xs:float" name="int_solv_en"/>
+                    <xs:element type="xs:float" name="pvalue"/>
+                    <xs:element name="residues">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="residue" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element type="xs:short" name="ser_no"/>
+                                <xs:element type="xs:string" name="name"/>
+                                <xs:element type="xs:short" name="seq_num"/>
+                                <xs:element type="xs:int" name="label_seq_num"/>
+                                <xs:element type="xs:string" name="ins_code"/>
+                                <xs:element type="xs:string" name="bonds"/>
+                                <xs:element type="xs:float" name="asa"/>
+                                <xs:element type="xs:float" name="bsa"/>
+                                <xs:element type="xs:float" name="solv_en"/>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
