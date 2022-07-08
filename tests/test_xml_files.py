@@ -4,7 +4,7 @@ import os
 import xmltodict
 
 from pisa_to_json import main
-test_data_path="tests/data"
+test_data_path= os.path.join('tests', 'data')
 
 class TestXmlFiles(TestCase):
         

@@ -28,9 +28,7 @@ class AnalysePisa:
         self.output_dir = output_dir if output_dir else None
         self.input_updated_cif=input_updated_cif if input_updated_cif else output_dir
         self.input_cif_file = input_cif_file if input_cif_file else None
-        
 
-        
     def get_pisa_result(self, input_file, interfaces_xml_file, assembly_xml_file,pdb_id,pisa_config):
         """
         This function runs pisa-lite to obtain interface and xml files 
@@ -54,7 +52,7 @@ class AnalysePisa:
         if self.force or not os.path.exists(interfaces_xml_file) or not os.path.exists(assembly_xml_file):
             try:
                 print('test=',pdb_id)
-                self.RP.run_pisalite(session_name=pdb_id,input_cif=input_file,cfg_input=pisa_config,output_dir=self.output_dir,pisa_binary=self.pisa_binary)
+                #self.RP.run_pisalite(session_name=pdb_id,input_cif=input_file,cfg_input=pisa_config,output_dir=self.output_dir,pisa_binary=self.pisa_binary)
                 #run_pisalite(session_name=pdbid,input_cif=input_file,cfg_input=cfg_input,src_directory=src_directory)
             except Exception as e:
                 logging.error('failed to run pisa on {}'.format(input_file))
@@ -354,7 +352,7 @@ class AnalysePisa:
                            'solvation_energies': solvation_energy_effects,
                            'accessible_surface_areas': accessible_surface_areas,
                            'buried_surface_areas': buried_surface_areas
-                           #'residues_list' : residues_dicts                                                                                               
+                           #'residues_list' : residues_dicts
                            }
             molecules_dicts.append(molecule_dict)
 
@@ -553,7 +551,6 @@ class AnalysePisa:
                                  'assembly' : assem_dict
                                  }
             self.results.setdefault('PISA', assembly_dictionary)
-
    
     def analyse_pisa_result(self, interfaces_xml_file, pdb_id, assembly_id,assembly_xml_file, entry_type='assembly'):
 
@@ -573,7 +570,6 @@ class AnalysePisa:
         interfaces_results = self.process_pisa_interface_xml(interfaces_xml_file=interfaces_xml_file,assembly_xml_file=assembly_xml_file)
 
         self.set_results(interfaces_results=interfaces_results, entry_type=entry_type, pdb_id=pdb_id, assembly_id=assembly_id)
-
 
     def get_entry_result(self,pdb_id,assembly_id,pisa_config,output_dir):
         """ Runs pisa-lite to generate xml files and analyse results to create dictionaries
@@ -598,15 +594,13 @@ class AnalysePisa:
             self.get_pisa_result(input_file=pdbid_file, interfaces_xml_file=interfaces_xml_file,
                                  assembly_xml_file=assembly_xml_file,pdb_id=pdb_id,pisa_config=pisa_config)
             self.analyse_pisa_result(interfaces_xml_file=interfaces_xml_file, pdb_id=pdb_id, assembly_id=assembly_id, entry_type='assembly',                                     assembly_xml_file=assembly_xml_file)
-        
-    
+
     def write_result_json(self):
         
         if self.results:
             output_file = os.path.join(self.output_dir,self.result_json_file) if self.result_json_file else os.path.join(self.output_dir,'{}-assembly{}.json'.format(self.pdb_id,self.assembly_id))
             with open(output_file, 'w') as out_file:
                 json.dump(self.results, out_file)
-
 
     def run_process(self):
         """
