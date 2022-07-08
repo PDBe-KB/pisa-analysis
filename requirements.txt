@@ -5,3 +5,4 @@ xmlschema
 jsonschema
 pytest-cov
 coverage
+pre-commit
