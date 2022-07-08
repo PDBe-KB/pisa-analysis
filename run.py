@@ -1,6 +1,7 @@
 import argparse
 import logging
 from pisa_utils.analyse import AnalysePisa
+from pisa_utils.run_pisa import run_pisalite
 
 def main():
     parser = argparse.ArgumentParser()
@@ -27,6 +28,13 @@ def main():
     args = parser.parse_args()
 
     logging.getLogger()
+
+    run_pisalite(session_name=args.pdb_id,
+                 input_cif=args.input_cif_file,
+                 cfg_input=args.config,
+                 output_dir=args.output_dir,
+                 pisa_binary=args.pisa_binary
+                 )
 
     ap = AnalysePisa(pdbid_id=args.pdb_id, assembly_id=args.assembly_id,
                      pisa_config=args.config, output_dir=args.output_dir,
