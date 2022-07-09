@@ -1,7 +1,7 @@
 from pisa_utils.utils import read_uniprot_info
 
 
-def get_molecules_dictionary(molecules):
+def get_molecules_dict(molecules):
     """
     Function creates molecules and residues dictionaries from xml data
 
@@ -92,7 +92,7 @@ def get_molecules_dictionary(molecules):
     return molecules_dicts, interface_residues_count, is_ligand
 
 
-def get_bond_dictionary(bonds, bondtype, pdb_id, input_updated_cif):
+def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
     """
     Creates bond dictionary
 
