@@ -1,0 +1,25 @@
+<bond>
+    <chain-1>A-2</chain-1>
+    <label_asym_id-1>A-2</label_asym_id-1>
+    <orig_label_asym_id-1>A</orig_label_asym_id-1>
+    <pdbx_sifts_xref_db_num-1></pdbx_sifts_xref_db_num-1>
+    <pdbx_sifts_xref_db_name-1></pdbx_sifts_xref_db_name-1>
+    <pdbx_sifts_xref_db_acc-1></pdbx_sifts_xref_db_acc-1>
+    <res-1>ASN</res-1>
+    <seqnum-1>10</seqnum-1>
+    <label_seqnum-1>13</label_seqnum-1>
+    <inscode-1></inscode-1>
+    <atname-1>ND2</atname-1>
+    <chain-2>A</chain-2>
+    <label_asym_id-2>A</label_asym_id-2>
+    <orig_label_asym_id-2>A</orig_label_asym_id-2>
+    <pdbx_sifts_xref_db_acc-2></pdbx_sifts_xref_db_acc-2>
+    <pdbx_sifts_xref_db_num-2></pdbx_sifts_xref_db_num-2>
+    <pdbx_sifts_xref_db_name-2></pdbx_sifts_xref_db_name-2>
+    <res-2>THR</res-2>
+    <seqnum-2>76</seqnum-2>
+    <label_seqnum-2>79</label_seqnum-2>
+    <inscode-2></inscode-2>
+    <atname-2>OG1</atname-2>
+    <dist>2.9943930938</dist>
+</bond>

@@ -1,11 +1,48 @@
 import os
 import xml.etree.ElementTree as ET
 from unittest import TestCase
+from unittest.mock import patch
 
-from pisa_utils.dictionaries import get_molecules_dict
+from pisa_utils.dictionaries import get_bond_dict, get_molecules_dict
 
 
 class TestDictionaries(TestCase):
+
+    # Note that the mocked function is imported in dictionaries
+    @patch("pisa_utils.dictionaries.read_uniprot_info")
+    def test_get_bond_dict(self, mock):
+        mock.return_value = ("P48491", "2")
+        bond = ET.parse(
+            os.path.join(".", "tests", "data", "mocks", "bonds.xml")
+        ).getroot()
+        bonds = [bond]
+        result = get_bond_dict(bonds, "H-bond", "pdbid", "cifpath")
+        expected = {
+            "bond_distances": [2.99],
+            "atom_site_1_chains": ["A-2"],
+            "atom_site_1_residues": ["ASN"],
+            "atom_site_1_label_asym_ids": ["A-2"],
+            "atom_site_1_orig_label_asym_ids": ["A"],
+            "atom_site_1_unp_accs": ["P48491"],
+            "atom_site_1_unp_nums": ["2"],
+            "atom_site_1_seq_nums": ["10"],
+            "atom_site_1_label_seq_ids": ["13"],
+            "atom_site_1_label_atom_ids": ["ND2"],
+            "atom_site_1_inscodes": [None],
+            "atom_site_2_chains": ["A"],
+            "atom_site_2_residues": ["THR"],
+            "atom_site_2_label_asym_ids": ["A"],
+            "atom_site_2_orig_label_asym_ids": ["A"],
+            "atom_site_2_unp_accs": ["P48491"],
+            "atom_site_2_unp_nums": ["2"],
+            "atom_site_2_seq_nums": ["76"],
+            "atom_site_2_label_seq_ids": ["79"],
+            "atom_site_2_label_atom_ids": ["OG1"],
+            "atom_site_2_inscodes": [None],
+        }
+
+        self.assertEqual(result, expected)
+
     def test_get_molecules_dict(self):
         """
         Test that the function returns a correct dictionary
