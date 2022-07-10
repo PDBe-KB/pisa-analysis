@@ -12,9 +12,7 @@ class TestDictionaries(TestCase):
     @patch("pisa_utils.dictionaries.read_uniprot_info")
     def test_get_bond_dict(self, mock):
         mock.return_value = ("P48491", "2")
-        bond = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "bonds.xml")
-        ).getroot()
+        bond = ET.parse(os.path.join(".", "tests", "data", "bonds.xml")).getroot()
         bonds = [bond]
         result = get_bond_dict(bonds, "H-bond", "pdbid", "cifpath")
         expected = {
@@ -48,32 +46,30 @@ class TestDictionaries(TestCase):
         Test that the function returns a correct dictionary
         """
         molecule = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "molecules.xml")
+            os.path.join(".", "tests", "data", "molecules.xml")
         ).getroot()
         molecules = [molecule]
-        expected_dictionary = [
-            {
-                "molecule_id": "1",
-                "molecule_class": "Protein",
-                "chain_id": "A-2",
-                "residue_label_comp_ids": ["ALA"],
-                "residue_seq_ids": ["2"],
-                "residue_label_seq_ids": ["5"],
-                "residue_ins_codes": [None],
-                "residue_bonds": [None],
-                "solvation_energies": [0],
-                "accessible_surface_areas": [158.39],
-                "buried_surface_areas": [0],
-            }
-        ]
-        self.assertEqual(get_molecules_dict(molecules)[0][0], expected_dictionary[0])
+        expected_dictionary = {
+            "molecule_id": "1",
+            "molecule_class": "Protein",
+            "chain_id": "A-2",
+            "residue_label_comp_ids": ["ALA"],
+            "residue_seq_ids": ["2"],
+            "residue_label_seq_ids": ["5"],
+            "residue_ins_codes": [None],
+            "residue_bonds": [None],
+            "solvation_energies": [0],
+            "accessible_surface_areas": [158.39],
+            "buried_surface_areas": [0],
+        }
+        self.assertEqual(get_molecules_dict(molecules)[0][0], expected_dictionary)
 
     def test_get_molecules_counts(self):
         """
         Test that the function returns a correct count
         """
         molecule = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "molecules.xml")
+            os.path.join(".", "tests", "data", "molecules.xml")
         ).getroot()
         molecules = [molecule]
         self.assertEqual(get_molecules_dict(molecules)[1], 1)
@@ -83,7 +79,7 @@ class TestDictionaries(TestCase):
         Test that the function returns invalid when only 1 interface
         """
         molecule = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "molecules.xml")
+            os.path.join(".", "tests", "data", "molecules.xml")
         ).getroot()
         molecules = [molecule]
         self.assertTrue(get_molecules_dict(molecules)[2])
@@ -93,7 +89,7 @@ class TestDictionaries(TestCase):
         Test that the function returns invalid when ligand interface
         """
         molecule = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "interfaces_ligand.xml")
+            os.path.join(".", "tests", "data", "interfaces_ligand.xml")
         ).getroot()
         molecules = [molecule]
         self.assertTrue(get_molecules_dict(molecules)[2])

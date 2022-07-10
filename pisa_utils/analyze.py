@@ -182,8 +182,7 @@ class AnalysePisa:
                 result["assembly_formula"] = assembly_formula
                 result["assembly_composition"] = assembly_composition
 
-        print(result)
-        return result
+        self.interfaces_results = result
 
     def set_results(self):
         """
@@ -228,6 +227,7 @@ class AnalysePisa:
                 "assembly": assem_dict,
             }
             self.results.setdefault("PISA", assembly_dictionary)
+            print(self.results)
 
     def save_to_json(self):
         """
@@ -246,3 +246,5 @@ class AnalysePisa:
             )
             with open(output_file, "w") as out_file:
                 json.dump(self.results, out_file)
+                logging.info("saving to JSON successful")
+        logging.warning("saving to JSON failed")
