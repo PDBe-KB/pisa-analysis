@@ -5,13 +5,13 @@ def get_molecules_dict(molecules):
     """
     Function creates molecules and residues dictionaries from xml data
 
-    :param molecules: xml data for interfaces molecues and residues
+    :param molecules: xml data for interfaces molecules and residues
     :return: molecules_dicts: type dict - molecules dictionary
     :return: interface_residues_count : type int - residue count
-    :return: is_ligand: type bool - is molecule class a 'Ligand'?
+    :return: is_invalid: type bool - is molecule class a 'Ligand'?
     """
 
-    is_ligand = False
+    is_invalid = False
     molecules_dicts = []
 
     for molecule in molecules:
@@ -22,7 +22,7 @@ def get_molecules_dict(molecules):
         residues_dicts = []
 
         if molecule_class in ["Ligand"]:
-            is_ligand = True
+            is_invalid = True
         interface_residues = molecule.findall("residues/residue")
         residue_label_ids = []
         residue_sequence_numbers = []
@@ -87,9 +87,9 @@ def get_molecules_dict(molecules):
         # if there is only one inteface residues,
         # discard interface as valid interface
         if len(interface_residues) == 1:
-            is_ligand = True
+            is_invalid = True
 
-    return molecules_dicts, interface_residues_count, is_ligand
+    return molecules_dicts, interface_residues_count, is_invalid
 
 
 def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
