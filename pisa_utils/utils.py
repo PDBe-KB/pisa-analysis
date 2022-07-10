@@ -37,7 +37,6 @@ def read_uniprot_info(
     :param input_updated_cif: type str - path to updated cif file
     :return: (atom uniprot accession number, atom uniprot sequence number)
     """
-
     unp_acc = None
     unp_num = None
 

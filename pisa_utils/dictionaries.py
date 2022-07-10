@@ -147,7 +147,7 @@ def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
         dist = round(float(distance), 2)
         bond_type = bondtype
 
-        # *** Read uniprot accession and sequence numbers for
+        # Read uniprot accession and sequence numbers for
         # atoms in bonds, from updated cif file
 
         uniprot_info_1 = read_uniprot_info(
