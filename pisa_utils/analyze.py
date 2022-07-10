@@ -42,7 +42,7 @@ class AnalysePisa:
         :return: type dict - interfaces dictionary
         """
 
-        interfaces_xml_file = os.path.join(self.output_dir, "interfaces.xml")
+        interfaces_xml_file = os.path.join(self.output_dir, "molecules.xml")
         assembly_xml_file = os.path.join(self.output_dir, "assembly.xml")
         result = {}
 
@@ -88,7 +88,6 @@ class AnalysePisa:
                 result["num_interfaces"] = num_interfaces
 
                 non_ligand_interface_count = 0
-
                 for interface in interfaces:
 
                     # Interface General information
@@ -183,6 +182,7 @@ class AnalysePisa:
                 result["assembly_formula"] = assembly_formula
                 result["assembly_composition"] = assembly_composition
 
+        print(result)
         return result
 
     def set_results(self):
@@ -234,10 +234,6 @@ class AnalysePisa:
         Dump the data into a JSON file
         :return:
         """
-        # TODO - ADD TEST
-        # TODO - REFACTOR
-        # TODO - TRUE IF SUCCESS FALSE IF FAIL
-        # TODO - ADD LOGGING
 
         if self.results:
             output_file = (

@@ -48,7 +48,7 @@ class TestDictionaries(TestCase):
         Test that the function returns a correct dictionary
         """
         molecule = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "interfaces.xml")
+            os.path.join(".", "tests", "data", "mocks", "molecules.xml")
         ).getroot()
         molecules = [molecule]
         expected_dictionary = [
@@ -73,7 +73,7 @@ class TestDictionaries(TestCase):
         Test that the function returns a correct count
         """
         molecule = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "interfaces.xml")
+            os.path.join(".", "tests", "data", "mocks", "molecules.xml")
         ).getroot()
         molecules = [molecule]
         self.assertEqual(get_molecules_dict(molecules)[1], 1)
@@ -83,7 +83,7 @@ class TestDictionaries(TestCase):
         Test that the function returns invalid when only 1 interface
         """
         molecule = ET.parse(
-            os.path.join(".", "tests", "data", "mocks", "interfaces.xml")
+            os.path.join(".", "tests", "data", "mocks", "molecules.xml")
         ).getroot()
         molecules = [molecule]
         self.assertTrue(get_molecules_dict(molecules)[2])
