@@ -7,6 +7,9 @@ from pisa_utils.dictionaries import get_molecules_dict
 
 class TestDictionaries(TestCase):
     def test_get_molecules_dict(self):
+        """
+        Test that the function returns a correct dictionary
+        """
         molecule = ET.parse(
             os.path.join(".", "tests", "data", "mocks", "interfaces.xml")
         ).getroot()
@@ -29,6 +32,9 @@ class TestDictionaries(TestCase):
         self.assertEqual(get_molecules_dict(molecules)[0][0], expected_dictionary[0])
 
     def test_get_molecules_counts(self):
+        """
+        Test that the function returns a correct count
+        """
         molecule = ET.parse(
             os.path.join(".", "tests", "data", "mocks", "interfaces.xml")
         ).getroot()
@@ -36,6 +42,9 @@ class TestDictionaries(TestCase):
         self.assertEqual(get_molecules_dict(molecules)[1], 1)
 
     def test_get_molecules_invalid(self):
+        """
+        Test that the function returns invalid when only 1 interface
+        """
         molecule = ET.parse(
             os.path.join(".", "tests", "data", "mocks", "interfaces.xml")
         ).getroot()
@@ -43,6 +52,9 @@ class TestDictionaries(TestCase):
         self.assertTrue(get_molecules_dict(molecules)[2])
 
     def test_get_molecules_ligand(self):
+        """
+        Test that the function returns invalid when ligand interface
+        """
         molecule = ET.parse(
             os.path.join(".", "tests", "data", "mocks", "interfaces_ligand.xml")
         ).getroot()
