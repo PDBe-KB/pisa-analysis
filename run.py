@@ -41,7 +41,6 @@ def main():
         pisa_binary=args.pisa_binary,
     )
 
-    # TODO: Remove obsolete arguments
     ap = AnalysePisa(
         pdb_id=args.pdb_id,
         assembly_id=args.assembly_id,

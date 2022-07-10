@@ -1,0 +1,23 @@
+<molecule>
+    <id>1</id>
+    <chain_id>A-2</chain_id>
+    <class>Ligand</class>
+    <int_natoms>139</int_natoms>
+    <int_nres>37</int_nres>
+    <int_area>1428.8952212</int_area>
+    <int_solv_en>-9.090132434</int_solv_en>
+    <pvalue>0.097809502916</pvalue>
+    <residues>
+        <residue>
+            <ser_no>1</ser_no>
+            <name>ALA</name>
+            <seq_num>2</seq_num>
+            <label_seq_num>5</label_seq_num>
+            <ins_code></ins_code>
+            <bonds></bonds>
+            <asa>158.38814497</asa>
+            <bsa>0</bsa>
+            <solv_en>0</solv_en>
+        </residue>
+    </residues>
+</molecule>
