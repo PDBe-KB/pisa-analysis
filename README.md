@@ -32,10 +32,12 @@ OR
 ```
 pisa-analysis/run/run.py --config PISA_CONFIGURATION_FILE  --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE --output-dir OUTPUT_PATH
 ```
-Or install module **pisa_analysis**:
+OR install module **pisa_analysis**:
 
 ```
-python pisa-analysis/setup.py install
+cd pisa-analysis/
+
+python setup.py install
 ```
 usage: pisa_analysis [-h] -c PISA_CONFIGURATION_FILE --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_PATH
 
@@ -78,15 +80,26 @@ xxx-assembly*.json
 
 ```
 
+## Dependencies 
 
+See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/requirements.txt)
 
-pre-commit usage
------------------
+For development: 
+
+### pre-commit usage
+
+```
 pip install pre-commit
 pre-commit
 pre-commit install
-pre-commit usage
------------------
-pip install pre-commit
-pre-commit
-pre-commit install
+```
+
+## Versioning
+
+We use [SemVer](https://semver.org) for versioning.
+
+## Authors
+
+## License
+
+## Acknowledgements
