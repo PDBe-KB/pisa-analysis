@@ -42,7 +42,7 @@ class AnalysePisa:
         :return: type dict - interfaces dictionary
         """
 
-        interfaces_xml_file = os.path.join(self.output_dir, "molecules.xml")
+        interfaces_xml_file = os.path.join(self.output_dir, "interfaces.xml")
         assembly_xml_file = os.path.join(self.output_dir, "assembly.xml")
         result = {}
 
@@ -227,7 +227,7 @@ class AnalysePisa:
                 "assembly": assem_dict,
             }
             self.results.setdefault("PISA", assembly_dictionary)
-            print(self.results)
+            #print(self.results)
 
     def save_to_json(self):
         """
@@ -247,4 +247,5 @@ class AnalysePisa:
             with open(output_file, "w") as out_file:
                 json.dump(self.results, out_file)
                 logging.info("saving to JSON successful")
-        logging.warning("saving to JSON failed")
+        else:
+            logging.warning("saving to JSON failed")

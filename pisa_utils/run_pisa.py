@@ -14,7 +14,8 @@ def run_pisalite(session_name, input_cif, cfg_input, output_dir, pisa_binary):
     :param input_cif: type str - path to input cif file
     :param cfg_input: type str - path to configuration file
     :param output_dir: type str - path to output folder
-    :param pisa_binary: type str - path to pisa binary
+    :param pisa_binary: type str - path to pisa binary (optional)
+    
     :return: None
     """
 
@@ -23,7 +24,7 @@ def run_pisalite(session_name, input_cif, cfg_input, output_dir, pisa_binary):
 
     binary = os.path.join(pisa_binary, "pisa") if pisa_binary else "pisa"
 
-    xml_interfaces_file = open(os.path.join(output_dir, "molecules.xml"), "w")
+    xml_interfaces_file = open(os.path.join(output_dir, "interfaces.xml"), "w")
     xml_assembly_file = open(os.path.join(output_dir, "assembly.xml"), "w")
 
     sub.run([binary, session_name, "-analyse", input_cif, cfg_input])
