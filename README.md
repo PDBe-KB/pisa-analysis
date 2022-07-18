@@ -51,9 +51,9 @@ Other optional arguments are:
 --input_cif_file 
 --force  
 ```
-**input_updated_cif**: updated cif file, by default it reads 'XXX_updated.cif' where XXX is the pdb_id entry
+**input_updated_cif**: updated cif file, by default process reads 'XXX_updated.cif' where XXX is the pdb_id entry
 
-**pisa_binary** : Include different path to PISA binary
+**pisa_binary** : path to PISA binary, by default uses environmental 
 
 **result_json** : Select different name for the output json file. By default it writes '[pdb_id]-assembly[assembly_code].json
 
