@@ -50,137 +50,151 @@ class AnalysePisa:
             asroot = parse_xml_file(xml_file=assembly_xml_file)
             root = parse_xml_file(xml_file=interfaces_xml_file)
             if root and asroot:
-                assembly_status = asroot.find("status").text
-                assemblies = asroot.findall("asu_complex")
 
-                # Assembly information
-                for assem in assemblies:
-                    assem_mmsize = assem.find("assembly/mmsize").text
-                    assem_diss_energy = assem.find("assembly/diss_energy").text
-                    assem_asa = assem.find("assembly/asa").text
-                    assem_bsa = assem.find("assembly/bsa").text
-                    assem_entropy = assem.find("assembly/entropy").text
-                    assem_diss_area = assem.find("assembly/diss_area").text
-                    assem_int_energy = assem.find("assembly/int_energy").text
-                    assem_formula = assem.find("assembly/formula").text
-                    assem_composition = assem.find("assembly/composition").text
+                try:
+                    assembly_status = asroot.find("status").text
+                    assemblies = asroot.findall("asu_complex")
+                
+                    # Assembly information
+                    for assem in assemblies:
+                        assem_mmsize = assem.find("assembly/mmsize").text
+                        assem_diss_energy = assem.find("assembly/diss_energy").text
+                        assem_asa = assem.find("assembly/asa").text
+                        assem_bsa = assem.find("assembly/bsa").text
+                        assem_entropy = assem.find("assembly/entropy").text
+                        assem_diss_area = assem.find("assembly/diss_area").text
+                        assem_int_energy = assem.find("assembly/int_energy").text
+                        assem_formula = assem.find("assembly/formula").text
+                        assem_composition = assem.find("assembly/composition").text
 
-                result["assembly_status"] = assembly_status
+                    result["assembly_status"] = assembly_status
 
-                # Round to two decimals some assembly properties
-                assembly_mmsize = assem_mmsize
-                assembly_diss_energy = round(float(assem_diss_energy), 2)
-                assembly_asa = round(float(assem_asa), 2)
-                assembly_bsa = round(float(assem_bsa), 2)
-                assembly_entropy = round(float(assem_entropy), 2)
-                assembly_diss_area = round(float(assem_diss_area), 2)
-                assembly_int_energy = round(float(assem_int_energy), 2)
-                assembly_formula = assem_formula
-                assembly_composition = assem_composition
+                    # Round to two decimals some assembly properties
+                    assembly_mmsize = assem_mmsize
+                    assembly_diss_energy = round(float(assem_diss_energy), 2)
+                    assembly_asa = round(float(assem_asa), 2)
+                    assembly_bsa = round(float(assem_bsa), 2)
+                    assembly_entropy = round(float(assem_entropy), 2)
+                    assembly_diss_area = round(float(assem_diss_area), 2)
+                    assembly_int_energy = round(float(assem_int_energy), 2)
+                    assembly_formula = assem_formula
+                    assembly_composition = assem_composition
 
+                    # Assembly information added to dictionary                                              
+
+                    #result["non_ligand_interface_count"] = non_ligand_interface_count
+                    result["assembly_mmsize"] = assembly_mmsize
+                    result["assembly_diss_energy"] = assembly_diss_energy
+                    result["assembly_asa"] = assembly_asa
+                    result["assembly_bsa"] = assembly_bsa
+                    result["assembly_entropy"] = assembly_entropy
+                    result["assembly_diss_area"] = assembly_diss_area
+                    result["assembly_int_energy"] = assembly_int_energy
+                    result["assembly_formula"] = assembly_formula
+                    result["assembly_composition"] = assembly_composition
+                    
+                except Exception as e:
+                    logging.error("invalid assembly xml file: probably fields not found")
+                    logging.error(e)
+                    
                 # Create interfaces dictionaries
-                status = root.find("status").text
-                num_interfaces = root.find("n_interfaces").text
-                interfaces = root.findall("interface")
-                logging.debug("number of interfaces: {}".format(len(interfaces)))
 
-                result["status"] = status
-                result["num_interfaces"] = num_interfaces
+                try:
+                    status = root.find("status").text
+                    num_interfaces = root.find("n_interfaces").text
+                    interfaces = root.findall("interface")
+                    logging.debug("number of interfaces: {}".format(len(interfaces)))
 
-                non_ligand_interface_count = 0
-                for interface in interfaces:
+                    result["status"] = status
+                    result["num_interfaces"] = num_interfaces
 
-                    # Interface General information
-                    interface_id = interface.find("id").text
-                    interface_area = round(float(interface.find("int_area").text), 2)
-                    interface_solvation_energy = round(
-                        float(interface.find("int_solv_en").text), 2
-                    )
-                    interface_stabilization_energy = round(
-                        float(interface.find("stab_en").text), 2
-                    )
-                    p_value = round(float(interface.find("pvalue").text), 3)
+                    non_ligand_interface_count = 0
+                    for interface in interfaces:
 
-                    # No. of bonds counted
+                        # Interface General information
+                        interface_id = interface.find("id").text
+                        interface_area = round(float(interface.find("int_area").text), 2)
+                        interface_solvation_energy = round(
+                            float(interface.find("int_solv_en").text), 2
+                        )
+                        interface_stabilization_energy = round(
+                            float(interface.find("stab_en").text), 2
+                        )
+                        p_value = round(float(interface.find("pvalue").text), 3)
 
-                    n_h_bonds = int(interface.find("h-bonds/n_bonds").text)
-                    n_ss_bonds = int(interface.find("ss-bonds/n_bonds").text)
-                    n_covalent_bonds = int(interface.find("cov-bonds/n_bonds").text)
-                    n_salt_bridges = int(interface.find("salt-bridges/n_bonds").text)
-                    other_contacts = int(interface.find("other-bonds/n_bonds").text)
+                        # No. of bonds counted
 
-                    # Reading bonds
-                    hbonds = interface.findall("h-bonds/bond")
-                    sbridges = interface.findall("salt-bridges/bond")
-                    covbonds = interface.findall("cov-bonds/bond")
-                    ssbonds = interface.findall("ss-bonds/bond")
-                    othbonds = interface.findall("other-bonds/bond")
+                        n_h_bonds = int(interface.find("h-bonds/n_bonds").text)
+                        n_ss_bonds = int(interface.find("ss-bonds/n_bonds").text)
+                        n_covalent_bonds = int(interface.find("cov-bonds/n_bonds").text)
+                        n_salt_bridges = int(interface.find("salt-bridges/n_bonds").text)
+                        other_contacts = int(interface.find("other-bonds/n_bonds").text)
 
-                    # Writing bonds dictionaries
-                    hbond_dict = get_bond_dict(
-                        hbonds, "H-bond", self.pdb_id, self.input_updated_cif
-                    )
-                    sbridge_dict = get_bond_dict(
-                        sbridges, "salt-bridges", self.pdb_id, self.input_updated_cif
-                    )
-                    covbond_dict = get_bond_dict(
-                        covbonds, "cov-bonds", self.pdb_id, self.input_updated_cif
-                    )
-                    ssbond_dict = get_bond_dict(
-                        ssbonds, "ss-bonds", self.pdb_id, self.input_updated_cif
-                    )
-                    othbond_dict = get_bond_dict(
-                        othbonds, "other-bond", self.pdb_id, self.input_updated_cif
-                    )
-                    molecules = interface.findall("molecule")
+                        # Reading bonds
+                        hbonds = interface.findall("h-bonds/bond")
+                        sbridges = interface.findall("salt-bridges/bond")
+                        covbonds = interface.findall("cov-bonds/bond")
+                        ssbonds = interface.findall("ss-bonds/bond")
+                        othbonds = interface.findall("other-bonds/bond")
 
-                    (
-                        molecules_dicts,
-                        interface_residues_count,
-                        is_ligand,
-                    ) = get_molecules_dict(molecules)
+                        # Writing bonds dictionaries
+                        hbond_dict = get_bond_dict(
+                            hbonds, "H-bond", self.pdb_id, self.input_updated_cif
+                        )
+                        sbridge_dict = get_bond_dict(
+                            sbridges, "salt-bridges", self.pdb_id, self.input_updated_cif
+                        )
+                        covbond_dict = get_bond_dict(
+                            covbonds, "cov-bonds", self.pdb_id, self.input_updated_cif
+                        )
+                        ssbond_dict = get_bond_dict(
+                            ssbonds, "ss-bonds", self.pdb_id, self.input_updated_cif
+                        )
+                        othbond_dict = get_bond_dict(
+                            othbonds, "other-bond", self.pdb_id, self.input_updated_cif
+                        )
+                        molecules = interface.findall("molecule")
+                        
+                        (
+                            molecules_dicts,
+                            interface_residues_count,
+                            is_ligand,
+                        ) = get_molecules_dict(molecules)
 
-                    if not is_ligand:
-                        non_ligand_interface_count += 1
+                        if not is_ligand:
+                            non_ligand_interface_count += 1
 
-                        interface_dict = {
-                            "interface_id": interface_id,
-                            "interface_area": interface_area,
-                            "solvation_energy": interface_solvation_energy,
-                            "stabilization_energy": interface_stabilization_energy,
-                            "p_value": p_value,
-                            "number_interface_residues": interface_residues_count,
-                            "number_hydrogen_bonds": n_h_bonds,
-                            "number_covalent_bonds": n_covalent_bonds,
-                            "number_disulfide_bonds": n_ss_bonds,
-                            "number_salt_bridges": n_salt_bridges,
-                            "number_other_bonds": other_contacts,
-                            "hydrogen_bonds": hbond_dict,
-                            "salt_bridges": sbridge_dict,
-                            "disulfide_bonds": ssbond_dict,
-                            "covalent_bonds": covbond_dict,
-                            "other_bonds": othbond_dict,
-                            "molecules": molecules_dicts,
-                        }
+                            interface_dict = {
+                                "interface_id": interface_id,
+                                "interface_area": interface_area,
+                                "solvation_energy": interface_solvation_energy,
+                                "stabilization_energy": interface_stabilization_energy,
+                                "p_value": p_value,
+                                "number_interface_residues": interface_residues_count,
+                                "number_hydrogen_bonds": n_h_bonds,
+                                "number_covalent_bonds": n_covalent_bonds,
+                                "number_disulfide_bonds": n_ss_bonds,
+                                "number_salt_bridges": n_salt_bridges,
+                                "number_other_bonds": other_contacts,
+                                "hydrogen_bonds": hbond_dict,
+                                "salt_bridges": sbridge_dict,
+                                "disulfide_bonds": ssbond_dict,
+                                "covalent_bonds": covbond_dict,
+                                "other_bonds": othbond_dict,
+                                "molecules": molecules_dicts,
+                            }
 
-                        # Append all dictionaries in 'result'
+                            # Append all dictionaries in 'result'
 
-                        result.setdefault("id", []).append(interface_id)
-                        result.setdefault("int_area", []).append(interface_area)
-                        result.setdefault("interface_dicts", []).append(interface_dict)
-
-                # Assembly information added to dictionary
-
-                result["non_ligand_interface_count"] = non_ligand_interface_count
-                result["assembly_mmsize"] = assembly_mmsize
-                result["assembly_diss_energy"] = assembly_diss_energy
-                result["assembly_asa"] = assembly_asa
-                result["assembly_bsa"] = assembly_bsa
-                result["assembly_entry"] = assembly_entropy
-                result["assembly_diss_area"] = assembly_diss_area
-                result["assembly_int_energy"] = assembly_int_energy
-                result["assembly_formula"] = assembly_formula
-                result["assembly_composition"] = assembly_composition
+                            result.setdefault("id", []).append(interface_id)
+                            result.setdefault("int_area", []).append(interface_area)
+                            result.setdefault("interface_dicts", []).append(interface_dict)
+                            
+                    result["non_ligand_interface_count"] = non_ligand_interface_count
+                    
+                except Exception as e:
+                    logging.error("something wrong creating dictionary: probably invalid interfaces.xml file")
+                    logging.error(e)
 
         self.interfaces_results = result
 
