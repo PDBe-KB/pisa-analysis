@@ -116,6 +116,6 @@ Mihaly Varadi
 
 ## License
 
-See  [license.txt](https://github.com/PDBe-KB/pisa-analysis/license.txt)
+See  [license.txt](https://github.com/PDBe-KB/pisa-analysis/license.txt
 
 ## Acknowledgements
