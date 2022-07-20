@@ -93,7 +93,7 @@ https://pisalite.docs.apiary.io/#reference/0/pisaqualifierjson/interaction-inter
 
 ## Dependencies 
 
-See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/requirements.txt)
+See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/blob/main/requirements.txt)
 
 For development: 
 
@@ -116,6 +116,6 @@ Mihaly Varadi
 
 ## License
 
-See  [license.txt](https://github.com/PDBe-KB/pisa-analysis/license.txt
+See  [license.txt](https://github.com/PDBe-KB/pisa-analysis/blob/main/license.txt)
 
 ## Acknowledgements
