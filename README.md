@@ -53,7 +53,7 @@ Other optional arguments are:
 ```
 **input_updated_cif**: updated cif file, by default process reads 'XXX_updated.cif' where XXX is the pdb_id entry
 
-**pisa_binary** : path to PISA binary, by default uses environmental 
+**pisa_binary** : path to PISA binary, by default uses environmental variable 'pisa'
 
 **result_json** : Select different name for the output json file. By default it writes '[pdb_id]-assembly[assembly_code].json
 
@@ -115,5 +115,7 @@ Grisell Diaz Leines
 Mihaly Varadi 
 
 ## License
+
+See  [license.txt](https://github.com/PDBe-KB/pisa-analysis/license.txt)
 
 ## Acknowledgements
