@@ -18,6 +18,10 @@ cd pisa-analysis
 ``` 
 Dependecies:
 
+The process runs PISA-Lite in a subprocess and needs a binary path to PISA. For more information on how to compile PISA-LITE visit our internal page: 
+
+https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies
+
 ```
 pip install -r requirements.txt
 
@@ -61,9 +65,6 @@ Other optional arguments are:
 
 **force**: always runs PISA and recalculates interfaces
 
-The process runs PISA-Lite in a subprocess and needs a binary path to PISA. For more information on how to compile PISA-LITE visit our internal page: 
-
-https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies
 
 The process is as follows:
 
