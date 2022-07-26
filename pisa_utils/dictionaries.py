@@ -10,20 +10,21 @@ def get_molecules_dict(molecules):
     :return: interface_residues_count : type int - residue count
     :return: is_invalid: type bool - is molecule class a 'Ligand'?
     """
-
+    
     is_invalid = False
     molecules_dicts = []
-
     for molecule in molecules:
         interface_residues_count = 0
         molecule_id = molecule.find("id").text
         molecule_class = molecule.find("class").text
         chain_id = molecule.find("chain_id").text
         residues_dicts = []
-
         if molecule_class in ["Ligand"]:
             is_invalid = True
-        interface_residues = molecule.findall("residues/residue")
+        
+        
+        #interface_residues = molecule.findall("residues/residue")
+        interface_residues = molecule.iter("residue")
         residue_label_ids = []
         residue_sequence_numbers = []
         residue_label_sequence_numbers = []
@@ -33,8 +34,16 @@ def get_molecules_dict(molecules):
         solvation_energy_effects = []
         residue_bonds = []
 
-        # Creating residues dictionaries
+        n_residues=0
+        #for res in interface_residues:
+        #    n_residues=n_residues+1
+        
+        #if n_residues == 1:
+        #    is_invalid = True
+            
+            # Creating residues dictionaries            
         for residue in interface_residues:
+                #n_residues=n_residues+1
             residue_sernum = residue.find("ser_no").text
             residue_name = residue.find("name").text
             residue_seqnum = residue.find("seq_num").text
@@ -44,7 +53,7 @@ def get_molecules_dict(molecules):
             residue_solv_en = round(float(residue.find("solv_en").text), 2)
             residue_ins_code = residue.find("ins_code").text
             residue_bond = residue.find("bonds").text
-
+            
             # Writing interface residues dictionary
             residue_dict = {
                 "residue_sernum": residue_sernum,
@@ -83,16 +92,18 @@ def get_molecules_dict(molecules):
             "buried_surface_areas": buried_surface_areas,
         }
         molecules_dicts.append(molecule_dict)
-
+            
+        
         # if there is only one inteface residues,
         # discard interface as valid interface
-        if len(interface_residues) == 1:
+        #if len(interface_residues) == 1:
+        if interface_residues_count == 1:
             is_invalid = True
 
     return molecules_dicts, interface_residues_count, is_invalid
 
 
-def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
+def get_bond_dict(bondtag, bondtype, pdb_id, input_updated_cif):
     """
     Creates bond dictionary
 
@@ -100,7 +111,7 @@ def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
     :param bondtype: type str - bond interaction type
     :return: type dict - bonds dictionary
     """
-
+    bonds=bondtag.iter('bond')
     atom_site1_chains = []
     atom_site1_residues = []
     atom_site1_label_asym_ids = []

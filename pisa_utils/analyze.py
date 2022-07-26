@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 
 from pisa_utils.dictionaries import get_bond_dict, get_molecules_dict
 from pisa_utils.utils import parse_xml_file
@@ -42,6 +43,10 @@ class AnalysePisa:
         :return: type dict - interfaces dictionary
         """
 
+        start = datetime.now()
+        logging.info("creating assembly dictionary")
+        print("creating assembly dictionary")
+
         interfaces_xml_file = os.path.join(self.output_dir, "interfaces.xml")
         assembly_xml_file = os.path.join(self.output_dir, "assembly.xml")
         result = {}
@@ -49,12 +54,13 @@ class AnalysePisa:
         if os.path.exists(interfaces_xml_file) and os.path.exists(assembly_xml_file):
             asroot = parse_xml_file(xml_file=assembly_xml_file)
             root = parse_xml_file(xml_file=interfaces_xml_file)
+            
             if root and asroot:
 
                 try:
                     assembly_status = asroot.find("status").text
-                    assemblies = asroot.findall("asu_complex")
-                
+                    assemblies = asroot.iter('asu_complex')
+                    
                     # Assembly information
                     for assem in assemblies:
                         assem_mmsize = assem.find("assembly/mmsize").text
@@ -96,19 +102,25 @@ class AnalysePisa:
                 except Exception as e:
                     logging.error("invalid assembly xml file: probably fields not found")
                     logging.error(e)
-                    
+
+                
                 # Create interfaces dictionaries
 
                 try:
+                    
                     status = root.find("status").text
                     num_interfaces = root.find("n_interfaces").text
-                    interfaces = root.findall("interface")
-                    logging.debug("number of interfaces: {}".format(len(interfaces)))
+                    #interfaces = root.findall("interface")
+                    
+                    #logging.debug("number of interfaces: {}".format(len(interfaces)))
 
                     result["status"] = status
                     result["num_interfaces"] = num_interfaces
 
                     non_ligand_interface_count = 0
+
+                    interfaces = root.iter('interface')
+                    
                     for interface in interfaces:
 
                         # Interface General information
@@ -121,7 +133,7 @@ class AnalysePisa:
                             float(interface.find("stab_en").text), 2
                         )
                         p_value = round(float(interface.find("pvalue").text), 3)
-
+                        
                         # No. of bonds counted
 
                         n_h_bonds = int(interface.find("h-bonds/n_bonds").text)
@@ -129,41 +141,51 @@ class AnalysePisa:
                         n_covalent_bonds = int(interface.find("cov-bonds/n_bonds").text)
                         n_salt_bridges = int(interface.find("salt-bridges/n_bonds").text)
                         other_contacts = int(interface.find("other-bonds/n_bonds").text)
-
-                        # Reading bonds
-                        hbonds = interface.findall("h-bonds/bond")
-                        sbridges = interface.findall("salt-bridges/bond")
-                        covbonds = interface.findall("cov-bonds/bond")
-                        ssbonds = interface.findall("ss-bonds/bond")
-                        othbonds = interface.findall("other-bonds/bond")
-
-                        # Writing bonds dictionaries
-                        hbond_dict = get_bond_dict(
-                            hbonds, "H-bond", self.pdb_id, self.input_updated_cif
-                        )
-                        sbridge_dict = get_bond_dict(
-                            sbridges, "salt-bridges", self.pdb_id, self.input_updated_cif
-                        )
-                        covbond_dict = get_bond_dict(
-                            covbonds, "cov-bonds", self.pdb_id, self.input_updated_cif
-                        )
-                        ssbond_dict = get_bond_dict(
-                            ssbonds, "ss-bonds", self.pdb_id, self.input_updated_cif
-                        )
-                        othbond_dict = get_bond_dict(
-                            othbonds, "other-bond", self.pdb_id, self.input_updated_cif
-                        )
-                        molecules = interface.findall("molecule")
                         
+                        molecules = interface.iter('molecule')                            
                         (
                             molecules_dicts,
                             interface_residues_count,
                             is_ligand,
                         ) = get_molecules_dict(molecules)
-
+                        
+                        
                         if not is_ligand:
                             non_ligand_interface_count += 1
 
+                            # Reading bonds
+                            
+                            hbonds = interface.find("h-bonds")
+                            sbridges = interface.find("salt-bridges")
+                            covbonds = interface.find("cov-bonds")
+                            ssbonds = interface.find("ss-bonds")
+                            othbonds = interface.find("other-bonds")
+                            
+                            # Writing bonds dictionaries
+
+                            #for hbond in hbonds:
+                            hbond_dict = get_bond_dict(
+                                hbonds, "H-bond", self.pdb_id, self.input_updated_cif
+                            )
+                                
+                            
+                            #for sbridge in sbridges:
+                            sbridge_dict = get_bond_dict(
+                                sbridges, "salt-bridges", self.pdb_id, self.input_updated_cif
+                            )
+                            #for covbond in covbonds:
+                            covbond_dict = get_bond_dict(
+                                covbonds, "cov-bonds", self.pdb_id, self.input_updated_cif
+                            )
+                            #for ssbond in ssbonds:
+                            ssbond_dict = get_bond_dict(
+                                ssbonds, "ss-bonds", self.pdb_id, self.input_updated_cif
+                            )
+                            #for othbond in othbonds:
+                            othbond_dict = get_bond_dict(
+                                othbonds, "other-bond", self.pdb_id, self.input_updated_cif
+                            )
+                        
                             interface_dict = {
                                 "interface_id": interface_id,
                                 "interface_area": interface_area,
@@ -191,13 +213,23 @@ class AnalysePisa:
                             result.setdefault("interface_dicts", []).append(interface_dict)
                             
                     result["non_ligand_interface_count"] = non_ligand_interface_count
-                    
+                
                 except Exception as e:
                     logging.error("something wrong creating dictionary: probably invalid interfaces.xml file")
                     logging.error(e)
 
         self.interfaces_results = result
 
+    
+        end = datetime.now()
+        logging.info("finished creating assembly dictionary")
+        print("finished creating assembly dictionary")
+        time_taken = end - start
+        time_taken_str = str(time_taken)
+        logging.info("time taken to create assembly dictionary {}".format(time_taken_str))
+        print("time taken to create assembly dictionary {}".format(time_taken_str))
+        
+                        
     def set_results(self):
         """
         Writes assembly dictionary
@@ -248,7 +280,10 @@ class AnalysePisa:
         Dump the data into a JSON file
         :return:
         """
-
+        start = datetime.now()
+        logging.info("Dumping data to JSON file")
+        print("Dumping data to JSON file")
+        
         if self.results:
             output_file = (
                 os.path.join(self.output_dir, self.result_json_file)
@@ -261,5 +296,15 @@ class AnalysePisa:
             with open(output_file, "w") as out_file:
                 json.dump(self.results, out_file)
                 logging.info("saving to JSON successful")
+
+            end = datetime.now()
+            logging.info("finished dumping JSON file")
+            print("finished dumping JSON file")
+            time_taken = end - start
+            time_taken_str = str(time_taken)
+            logging.info("time taken to dump JSON file {}".format(time_taken_str))
+            print("time taken to dump JSON file {}".format(time_taken_str))
+
+
         else:
             logging.warning("saving to JSON failed")
