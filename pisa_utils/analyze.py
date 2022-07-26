@@ -223,11 +223,11 @@ class AnalysePisa:
     
         end = datetime.now()
         logging.info("finished creating assembly dictionary")
-        print("finished creating assembly dictionary")
+        #print("finished creating assembly dictionary")
         time_taken = end - start
         time_taken_str = str(time_taken)
         logging.info("time taken to create assembly dictionary {}".format(time_taken_str))
-        print("time taken to create assembly dictionary {}".format(time_taken_str))
+        print("Finished creating assembly dictionary in {}".format(time_taken_str))
         
                         
     def set_results(self):
@@ -280,10 +280,7 @@ class AnalysePisa:
         Dump the data into a JSON file
         :return:
         """
-        start = datetime.now()
-        logging.info("Dumping data to JSON file")
-        print("Dumping data to JSON file")
-        
+                
         if self.results:
             output_file = (
                 os.path.join(self.output_dir, self.result_json_file)
@@ -296,15 +293,6 @@ class AnalysePisa:
             with open(output_file, "w") as out_file:
                 json.dump(self.results, out_file)
                 logging.info("saving to JSON successful")
-
-            end = datetime.now()
-            logging.info("finished dumping JSON file")
-            print("finished dumping JSON file")
-            time_taken = end - start
-            time_taken_str = str(time_taken)
-            logging.info("time taken to dump JSON file {}".format(time_taken_str))
-            print("time taken to dump JSON file {}".format(time_taken_str))
-
 
         else:
             logging.warning("saving to JSON failed")
