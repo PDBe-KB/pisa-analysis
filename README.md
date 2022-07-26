@@ -18,6 +18,10 @@ cd pisa-analysis
 ``` 
 Dependecies:
 
+The process runs PISA-Lite in a subprocess and needs a binary path to PISA. For more information on how to compile PISA-LITE visit our internal page: 
+
+https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies
+
 ```
 pip install -r requirements.txt
 
@@ -53,7 +57,7 @@ Other optional arguments are:
 ```
 **input_updated_cif**: updated cif file, by default process reads 'XXX_updated.cif' where XXX is the pdb_id entry
 
-**pisa_binary** : path to PISA binary, by default uses environmental 
+**pisa_binary** : path to PISA binary, by default uses environmental variable 'pisa'
 
 **result_json** : Select different name for the output json file. By default it writes '[pdb_id]-assembly[assembly_code].json
 
@@ -61,9 +65,6 @@ Other optional arguments are:
 
 **force**: always runs PISA and recalculates interfaces
 
-The process runs PISA-Lite in a subprocess and needs a binary path to PISA. For more information on how to compile PISA-LITE visit our internal page: 
-
-https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies
 
 The process is as follows:
 
@@ -93,7 +94,7 @@ https://pisalite.docs.apiary.io/#reference/0/pisaqualifierjson/interaction-inter
 
 ## Dependencies 
 
-See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/requirements.txt)
+See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/blob/main/requirements.txt)
 
 For development: 
 
@@ -115,5 +116,7 @@ Grisell Diaz Leines
 Mihaly Varadi 
 
 ## License
+
+See  [license.txt](https://github.com/PDBe-KB/pisa-analysis/blob/main/license.txt)
 
 ## Acknowledgements
