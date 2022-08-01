@@ -48,7 +48,7 @@ See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/blob/main/requi
 
 For development: 
 
-### pre-commit usage
+**pre-commit usage**
 
 ```
 pip install pre-commit
