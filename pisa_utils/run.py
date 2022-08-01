@@ -11,21 +11,16 @@ def main():
 
     parser.add_argument("-c", "--config", help="pisa config file", required=True)
     parser.add_argument(
-        "-i", "--input_dir", help="input directory with CIF directory/file"
+        "-i", "--input_cif", help="input directory with CIF directory/file"
     )
     parser.add_argument("--pdb_id", help="PDB ID", type=str, required=True)
     parser.add_argument("--assembly_id", help="Assembly ID", type=str, required=True)
     parser.add_argument(
-        "-o", "--output-dir", help="output directory for JSON and XMLs", required=True
+        "-o", "--output_json", help="output directory for JSON and XMLs", required=True
     )
     parser.add_argument("--input_updated_cif", help="updated cif file")
     parser.add_argument("--pisa_binary", help="pisa binary path", type=str)
-    parser.add_argument("--result_json", help="output json file name", type=str)
-    parser.add_argument(
-        "--input_cif_file",
-        help="assembly cif file with a seleceted name different from default",
-        type=str,
-    )
+    parser.add_argument("--output_xml", help="output for xml files", type=str)
     parser.add_argument(
         "--force", help="always recalculate with pisa-lite", action="store_true"
     )
@@ -34,35 +29,34 @@ def main():
 
     logging.getLogger()
 
-    input_cif_file = args.input_cif_file if args.input_cif_file else os.path.join(
+    input_cif_file = os.path.join(args.input_cif,
                      '{}-assembly{}.cif.gz'.format(args.pdb_id,args.assembly_id))
 
-    interfaces_xml_file = os.path.join(args.output_dir,'interfaces.xml')
-    assembly_xml_file = os.path.join(args.output_dir, 'assembly.xml')
+    interfaces_xml_file = os.path.join(args.output_xml,'interfaces.xml')
+    assembly_xml_file = os.path.join(args.output_xml, 'assembly.xml')
 
     if args.force or not os.path.exists(interfaces_xml_file) or not os.path.exists(assembly_xml_file):
         
         run_pisalite(
-            session_name=args.pdb_id,
             input_cif=input_cif_file,
-            cfg_input=args.config,
-            output_dir=args.output_dir,
-            pisa_binary=args.pisa_binary
+            output_xml=args.output_xml
         )
 
+
     
+        
     ap = AnalysePisa(
         pdb_id=args.pdb_id,
         assembly_id=args.assembly_id,
-        output_dir=args.output_dir,
-        result_json_file=args.result_json,
-        input_dir=args.input_dir,
+        output_json=args.output_json,
+        output_xml=args.output_xml,
+        input_cif=args.input_cif,
         input_updated_cif=args.input_updated_cif,
-        input_cif_file=args.input_cif_file,
     )
-    ap.process_pisa_xml()
-    ap.set_results()
-    ap.save_to_json()
+    
+    ap.create_assem_interfaces_dict()
+    ap.create_assembly_dict()
+
 
 
 if "__main__" in __name__:

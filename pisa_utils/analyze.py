@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import datetime
 
-from pisa_utils.dictionaries import get_bond_dict, get_molecules_dict
+from pisa_utils.dictionaries import get_bond_dict, get_molecules_dict, get_assembly_dict
 from pisa_utils.utils import parse_xml_file
 
 logger = logging.getLogger()
@@ -20,35 +20,33 @@ class AnalysePisa:
         self,
         pdb_id,
         assembly_id,
-        input_dir,
+        input_cif,
         input_updated_cif,
-        input_cif_file,
-        output_dir,
-        result_json_file,
+        output_json,
+        output_xml,
     ):
         self.pdb_id = pdb_id
-        self.assembly_id = assembly_id
-        self.input_dir = input_dir if input_dir else None
-        self.input_updated_cif = input_updated_cif if input_updated_cif else output_dir
-        self.input_cif_file = input_cif_file if input_cif_file else None
-        self.output_dir = output_dir if output_dir else None
-        self.result_json_file = result_json_file if result_json_file else None
+        self.assembly_code = assembly_id
+        self.input_dir = input_cif if input_cif else None
+        self.input_updated_cif = input_updated_cif if input_updated_cif else input_cif
+        self.output_json = output_json if output_json else None
+        self.output_xml = output_xml
         self.results = {}
         self.interfaces_results = None
 
-    def process_pisa_xml(self):
+    def create_assem_interfaces_dict(self):
         """
         Function writes assembly interfaces dictionaries
 
-        :return: type dict - interfaces dictionary
+        :return: type dict - assembly interfaces dictionary
         """
 
         start = datetime.now()
         logging.info("creating assembly dictionary")
         print("creating assembly dictionary")
 
-        interfaces_xml_file = os.path.join(self.output_dir, "interfaces.xml")
-        assembly_xml_file = os.path.join(self.output_dir, "assembly.xml")
+        interfaces_xml_file = os.path.join(self.output_xml, "interfaces.xml")
+        assembly_xml_file = os.path.join(self.output_xml, "assembly.xml")
         result = {}
 
         if os.path.exists(interfaces_xml_file) and os.path.exists(assembly_xml_file):
@@ -60,50 +58,14 @@ class AnalysePisa:
                 try:
                     assembly_status = asroot.find("status").text
                     assemblies = asroot.iter('asu_complex')
-                    
-                    # Assembly information
-                    for assem in assemblies:
-                        assem_mmsize = assem.find("assembly/mmsize").text
-                        assem_diss_energy = assem.find("assembly/diss_energy").text
-                        assem_asa = assem.find("assembly/asa").text
-                        assem_bsa = assem.find("assembly/bsa").text
-                        assem_entropy = assem.find("assembly/entropy").text
-                        assem_diss_area = assem.find("assembly/diss_area").text
-                        assem_int_energy = assem.find("assembly/int_energy").text
-                        assem_formula = assem.find("assembly/formula").text
-                        assem_composition = assem.find("assembly/composition").text
 
-                    result["assembly_status"] = assembly_status
-
-                    # Round to two decimals some assembly properties
-                    assembly_mmsize = assem_mmsize
-                    assembly_diss_energy = round(float(assem_diss_energy), 2)
-                    assembly_asa = round(float(assem_asa), 2)
-                    assembly_bsa = round(float(assem_bsa), 2)
-                    assembly_entropy = round(float(assem_entropy), 2)
-                    assembly_diss_area = round(float(assem_diss_area), 2)
-                    assembly_int_energy = round(float(assem_int_energy), 2)
-                    assembly_formula = assem_formula
-                    assembly_composition = assem_composition
-
-                    # Assembly information added to dictionary                                              
-
-                    #result["non_ligand_interface_count"] = non_ligand_interface_count
-                    result["assembly_mmsize"] = assembly_mmsize
-                    result["assembly_diss_energy"] = assembly_diss_energy
-                    result["assembly_asa"] = assembly_asa
-                    result["assembly_bsa"] = assembly_bsa
-                    result["assembly_entropy"] = assembly_entropy
-                    result["assembly_diss_area"] = assembly_diss_area
-                    result["assembly_int_energy"] = assembly_int_energy
-                    result["assembly_formula"] = assembly_formula
-                    result["assembly_composition"] = assembly_composition
+                    assem_result=get_assembly_dict(assemblies)
                     
                 except Exception as e:
-                    logging.error("invalid assembly xml file: probably fields not found")
+                    logging.error("invalid assembly dictionary : probably fields not found in xml file")
                     logging.error(e)
 
-                
+            
                 # Create interfaces dictionaries
 
                 try:
@@ -218,80 +180,147 @@ class AnalysePisa:
                     logging.error("something wrong creating dictionary: probably invalid interfaces.xml file")
                     logging.error(e)
 
-        self.interfaces_results = result
 
-    
+        if result and assem_result:
+            
+            overall = len(result.get("id", []))
+            interface_dicts = result.get("interface_dicts", [])
+            assem_dict = {
+                "mmsize": assem_result.get("assembly_mmsize"),
+                "dissociation_energy": assem_result.get(
+                    "assembly_diss_energy"
+                ),
+                "accessible_surface_area": assem_result.get("assembly_asa"),
+                "buried_surface_area": assem_result.get("assembly_bsa"),
+                "entropy": assem_result.get("assembly_entropy"),
+                "dissociation_area": assem_result.get("assembly_diss_area"),
+                "solvation_energy_gain": assem_result.get(
+                    "assembly_int_energy"
+                ),
+                "formula": assem_result.get("assembly_formula"),
+                "composition": assem_result.get("assembly_composition"),
+                "interface_count": overall,
+                "interfaces": interface_dicts,
+            }
+            
+            assembly_dictionary = {
+                "pdb_id": self.pdb_id,
+                "assembly_id": self.assembly_code,
+                "pisa_version": "2.0",
+                "assembly": assem_dict,
+            }
+            
+            self.results.setdefault("PISA", assembly_dictionary)
+            #print(self.results)
+
+            interfaces_results = self.results
+            
         end = datetime.now()
         logging.info("finished creating assembly dictionary")
-        #print("finished creating assembly dictionary")
+        
         time_taken = end - start
         time_taken_str = str(time_taken)
         logging.info("time taken to create assembly dictionary {}".format(time_taken_str))
         print("Finished creating assembly dictionary in {}".format(time_taken_str))
+
+        #dump to json file
+        output_json=os.path.join(
+            self.output_json,"{}-assem{}_interfaces.json".format(
+            self.pdb_id,self.assembly_code))
+
+        self.save_to_json (interfaces_results, output_json)
+    
+
+        return interfaces_results
         
-                        
-    def set_results(self):
+        
+        
+    def create_assembly_dict(self):
+
+        """                                                                                              Function writes simplified assembly dictionary
+        
+        :return: type dict - assembly dictionary                                                                             
         """
-        Writes assembly dictionary
+        result={}
+        start = datetime.now()
+        logging.info("creating simplified assembly dictionary")
+        print("creating simplified assembly dictionary")
 
-        Args:
-        interfaces_results: interfaces dictionaries
-        entry_type: type sting - entry type 'assembly'
-        pdb_id : pdb entry
-        assembly_id: assembly code
+        assembly_xml_file = os.path.join(self.output_xml, "assembly.xml")
+        result = {}
 
-        Returns: None
+        if os.path.exists(assembly_xml_file):
+            asroot = parse_xml_file(xml_file=assembly_xml_file)
+            
+        if asroot:
 
-        """
-        if self.interfaces_results:
-            overall = len(self.interfaces_results.get("id", []))
+            try:
+                assembly_status = asroot.find("status").text
+                assemblies = asroot.iter('asu_complex')
+                
+                assem_result=get_assembly_dict(assemblies)
 
-            interface_dicts = self.interfaces_results.get("interface_dicts", [])
+            
+            except Exception as e:
+                logging.error("invalid assembly dictionary : probably fields not found in xml file")
+                logging.error(e)
 
             assem_dict = {
-                "mmsize": self.interfaces_results.get("assembly_mmsize"),
-                "dissociation_energy": self.interfaces_results.get(
+                "id" : assem_result.get("assembly_id"),
+                "size": assem_result.get("assembly_size"),
+                "macromolecular_size": assem_result.get("assembly_mmsize"),
+                "dissociation_energy": assem_result.get(
                     "assembly_diss_energy"
                 ),
-                "accessible_surface_area": self.interfaces_results.get("assembly_asa"),
-                "buried_surface_area": self.interfaces_results.get("assembly_bsa"),
-                "entropy": self.interfaces_results.get("assembly_entropy"),
-                "dissociation_area": self.interfaces_results.get("assembly_diss_area"),
-                "solvation_energy_gain": self.interfaces_results.get(
+                "accessible_surface_area": assem_result.get("assembly_asa"),
+                "buried_surface_area": assem_result.get("assembly_bsa"),
+                "entropy": assem_result.get("assembly_entropy"),
+                "dissociation_area": assem_result.get("assembly_diss_area"),
+                "solvation_energy_gain": assem_result.get(
                     "assembly_int_energy"
                 ),
-                "formula": self.interfaces_results.get("assembly_formula"),
-                "composition": self.interfaces_results.get("assembly_composition"),
-                "interface_count": overall,
-                "interfaces": interface_dicts,
+                "number_of_uc" : assem_result.get("assembly_n_uc"),                                                      
+                "number_of_dissociated_elements" : assem_result.get("assembly_n_diss"),                                  
+                "symmetry_number": assem_result.get("assembly_sym_num"),
+                "formula": assem_result.get("assembly_formula"),
+                "composition": assem_result.get("assembly_composition"),
             }
 
             assembly_dictionary = {
                 "pdb_id": self.pdb_id,
-                "assembly_id": self.assembly_id,
+                "assembly_id": self.assembly_code,
                 "pisa_version": "2.0",
                 "assembly": assem_dict,
             }
-            self.results.setdefault("PISA", assembly_dictionary)
-            #print(self.results)
 
-    def save_to_json(self):
+            result.setdefault("PISA", assembly_dictionary)
+            
+        end = datetime.now()
+        logging.info("finished creating assembly dictionary")
+        
+        time_taken = end - start
+        time_taken_str = str(time_taken)
+        logging.info("time taken to create simplified assembly dictionary {}".format(time_taken_str))
+        print("Finished creating assembly simplified dictionary in {}".format(time_taken_str))
+
+        output_json=os.path.join(
+            self.output_json,"{}-assembly{}.json".format(
+            self.pdb_id,self.assembly_code))
+
+        self.save_to_json (result, output_json)
+        
+        return result
+                
+
+    def save_to_json(self, result, output_file):
         """
         Dump the data into a JSON file
         :return:
         """
                 
-        if self.results:
-            output_file = (
-                os.path.join(self.output_dir, self.result_json_file)
-                if self.result_json_file
-                else os.path.join(
-                    self.output_dir,
-                    "{}-assembly{}.json".format(self.pdb_id, self.assembly_id),
-                )
-            )
+        if result:
             with open(output_file, "w") as out_file:
-                json.dump(self.results, out_file)
+                json.dump(result, out_file)
                 logging.info("saving to JSON successful")
 
         else:

@@ -233,3 +233,66 @@ def get_bond_dict(bondtag, bondtype, pdb_id, input_updated_cif):
     }
 
     return bond_dict
+
+def get_assembly_dict(assemblies):
+
+    """                                                                               
+    Function creates a simplified assembly dictionary from xml data which does not
+    contain interfaces information
+                                                                                      
+    :param assemblies: xml data for assembly                   
+    :return : assembly dictionary
+    """
+    result={}
+    
+    # Assembly information
+
+    for assem in assemblies:
+        assem_id = assem.find("assembly/id").text
+        assem_size = assem.find("assembly/size").text
+        assem_mmsize = assem.find("assembly/mmsize").text
+        assem_diss_energy = assem.find("assembly/diss_energy").text
+        assem_asa = assem.find("assembly/asa").text
+        assem_bsa = assem.find("assembly/bsa").text
+        assem_entropy = assem.find("assembly/entropy").text
+        assem_diss_area = assem.find("assembly/diss_area").text
+        assem_int_energy = assem.find("assembly/int_energy").text
+        assem_n_uc = assem.find("assembly/n_uc").text
+        assem_n_diss = assem.find("assembly/n_diss").text
+        assem_sym_num = assem.find("assembly/symNumber").text
+        assem_formula = assem.find("assembly/formula").text
+        assem_composition = assem.find("assembly/composition").text
+
+        # Round to two decimals some assembly properties
+
+        assembly_mmsize = assem_mmsize
+        assembly_diss_energy = round(float(assem_diss_energy), 2)
+        assembly_asa = round(float(assem_asa), 2)
+        assembly_bsa = round(float(assem_bsa), 2)
+        assembly_entropy = round(float(assem_entropy), 2)
+        assembly_diss_area = round(float(assem_diss_area), 2)
+        assembly_int_energy = round(float(assem_int_energy), 2)
+        assembly_formula = assem_formula
+        assembly_composition = assem_composition
+
+        # Assembly information added to dictionary
+        
+        #result["non_ligand_interface_count"] = non_ligand_interface_count
+        result["assembly_id"] = assem_id
+        result["assembly_size"] = assem_size
+        result["assembly_mmsize"] = assembly_mmsize
+        result["assembly_diss_energy"] = assembly_diss_energy
+        result["assembly_asa"] = assembly_asa
+        result["assembly_bsa"] = assembly_bsa
+        result["assembly_entropy"] = assembly_entropy
+        result["assembly_diss_area"] = assembly_diss_area
+        result["assembly_int_energy"] = assembly_int_energy
+        result["assembly_formula"] = assembly_formula
+        result["assembly_composition"] = assembly_composition
+        result["assem_id"] = assem_id
+        result["assembly_size"] = assem_size
+        result["assembly_n_uc"] = assem_n_uc
+        result["assembly_n_diss"] = assem_n_diss
+        result["assembly_sym_num"] = assem_sym_num
+
+    return result
