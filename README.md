@@ -18,7 +18,7 @@ cd pisa-analysis
 
 The process runs PISA-Lite as a subprocess and requires apriori compilation of PISA. For more information on how to compile PISA-LITE visit our internal page: 
 
-https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies
+[PISA-Lite documentation](https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies)
 
 The process requires to set two path environment variables to PISA:
 
@@ -60,11 +60,11 @@ pre-commit install
 ## Usage
 
 ```
-pisa-analysis/run/run.py [-h] -i INPUT_CIF_DIR --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
+pisa-analysis/pisa_utils/run.py [-h] -i INPUT_CIF_DIR --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
 ```
 OR
 ```
-pisa-analysis/run/run.py --input_cif INPUT_CIF_DIR  --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE --output_json OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
+pisa-analysis/pisa_utils/run.py --input_cif INPUT_CIF_DIR  --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE --output_json OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
 ```
 OR install module **pisa_analysis**:
 
