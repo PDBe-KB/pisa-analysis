@@ -27,7 +27,6 @@ class AnalysePisa:
     ):
         self.pdb_id = pdb_id
         self.assembly_code = assembly_id
-        self.input_dir = input_cif if input_cif else None
         self.input_updated_cif = input_updated_cif if input_updated_cif else input_cif
         self.output_json = output_json if output_json else None
         self.output_xml = output_xml
