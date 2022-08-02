@@ -20,7 +20,7 @@ The process runs PISA-Lite as a subprocess and requires apriori compilation of P
 
 [PISA-Lite documentation](https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies)
 
-The process requires to set two path environment variables to PISA:
+The process requires to set two path environment variables for PISA:
 
 An evironment variable to the binary 'pisa':
 
@@ -36,6 +36,9 @@ export PISA_SETUP_DIR="/your_path_to_pisa/pisa-lite/setup"
 
 Additionally, it is required that PISA setup directory contains a pisa configuration template named [pisa_cfg_tmp](https://github.com/PDBe-KB/pisa-analysis/blob/main/pisa_cfg_tmp)
 
+```
+cp pisa_cfg_tmp your_path_to_pisa/pisa-lite/setup
+```
 
 Other dependencies can be installed with:
 
