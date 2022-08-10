@@ -43,7 +43,6 @@ Other dependencies can be installed with:
 
 ```
 pip install -r requirements.txt
-
 ```
 See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/blob/main/requirements.txt)
 
@@ -80,7 +79,6 @@ usage:
 
 ```
 pisa_analysis [-h] -i INPUT_CIF_DIR --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_PATH_JSON --output_xml OUTPUT_DIR_XML
-
 ```
 
 Other optional arguments are:
@@ -123,8 +121,29 @@ https://pisalite.docs.apiary.io/#reference/0/pisaqualifierjson/interaction-inter
 
 The simplified assembly json output looks as follows:
 ```
-{"PISA": {"pdb_id": "1d2s", "assembly_id": "1", "pisa_version": "2.0", "assembly": {"id": "1", "size": "8", "macromolecular_size": "2", "dissociation_energy": -3.96, "accessible_surface_area": 15146.45, "buried_surface_area": 3156.79, "entropy": 12.09, "dissociation_area": 733.07, "solvation_energy_gain": -41.09, "number_of_uc": "0", "number_of_dissociated_elements": "2", "symmetry_number": "2", "formula": "A(2)a(4)b(2)", "composition": "A-2A[CA](4)[DHT](2)"}}}
-
+{
+   "PISA": {
+      "pdb_id": "1d2s", 
+      "assembly_id": "1", 
+      "pisa_version": "2.0", 
+      "assembly": {
+         "id": "1", 
+         "size": "8", 
+         "macromolecular_size": "2", 
+         "dissociation_energy": -3.96, 
+         "accessible_surface_area": 15146.45, 
+         "buried_surface_area": 3156.79, 
+         "entropy": 12.09, 
+         "dissociation_area": 733.07, 
+         "solvation_energy_gain": -41.09, 
+         "number_of_uc": "0", 
+         "number_of_dissociated_elements": "2", 
+         "symmetry_number": "2", 
+         "formula": "A(2)a(4)b(2)", 
+         "composition": "A-2A[CA](4)[DHT](2)"
+      }
+   }
+}
 ```
 
 
@@ -133,9 +152,10 @@ The simplified assembly json output looks as follows:
 We use [SemVer](https://semver.org) for versioning.
 
 ## Authors
-Grisell Diaz Leines
+* [Grisell Diaz Leines](https://github.com/grisell) - Lead developer
+* [Mihaly Varadi](https://github.com/mvaradi) - Review and management 
 
-Mihaly Varadi 
+See all contributors [here](https://github.com/PDBe-KB/pisa-analysis/graphs/contributors).
 
 ## License
 
