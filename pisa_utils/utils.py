@@ -21,6 +21,23 @@ def parse_xml_file(xml_file):
         logging.error(e)
     return root
 
+def create_pisa_config(dataroot,setup_dir):
+    """
+    Function creates a configuration file to run pisa
+
+    :param dataroot : path to output pisa data and session
+    :param setup_dir : path to setup directory of pisa-lite
+    :return : None
+
+    """
+    infile=open(os.path.join(setup_dir,"pisa_cfg_tmp"))
+    outputname=os.path.join(dataroot,"pisa.cfg")
+    outfile=open(outputname,"w")
+    for line in infile:
+        line=line.replace("path_dataroot",dataroot).replace("path_to_setup",setup_dir)
+        outfile.write(line)
+    infile.close()
+    outfile.close()
 
 def read_uniprot_info(
     int_lab_seqnum, int_seqnum, int_atname, int_resname, pdb_id, input_updated_cif

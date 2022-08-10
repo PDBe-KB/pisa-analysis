@@ -10,20 +10,21 @@ def get_molecules_dict(molecules):
     :return: interface_residues_count : type int - residue count
     :return: is_invalid: type bool - is molecule class a 'Ligand'?
     """
-
+    
     is_invalid = False
     molecules_dicts = []
-
     for molecule in molecules:
         interface_residues_count = 0
         molecule_id = molecule.find("id").text
         molecule_class = molecule.find("class").text
         chain_id = molecule.find("chain_id").text
         residues_dicts = []
-
         if molecule_class in ["Ligand"]:
             is_invalid = True
-        interface_residues = molecule.findall("residues/residue")
+        
+        
+        #interface_residues = molecule.findall("residues/residue")
+        interface_residues = molecule.iter("residue")
         residue_label_ids = []
         residue_sequence_numbers = []
         residue_label_sequence_numbers = []
@@ -33,8 +34,16 @@ def get_molecules_dict(molecules):
         solvation_energy_effects = []
         residue_bonds = []
 
-        # Creating residues dictionaries
+        n_residues=0
+        #for res in interface_residues:
+        #    n_residues=n_residues+1
+        
+        #if n_residues == 1:
+        #    is_invalid = True
+            
+            # Creating residues dictionaries            
         for residue in interface_residues:
+                #n_residues=n_residues+1
             residue_sernum = residue.find("ser_no").text
             residue_name = residue.find("name").text
             residue_seqnum = residue.find("seq_num").text
@@ -44,7 +53,7 @@ def get_molecules_dict(molecules):
             residue_solv_en = round(float(residue.find("solv_en").text), 2)
             residue_ins_code = residue.find("ins_code").text
             residue_bond = residue.find("bonds").text
-
+            
             # Writing interface residues dictionary
             residue_dict = {
                 "residue_sernum": residue_sernum,
@@ -83,16 +92,18 @@ def get_molecules_dict(molecules):
             "buried_surface_areas": buried_surface_areas,
         }
         molecules_dicts.append(molecule_dict)
-
+            
+        
         # if there is only one inteface residues,
         # discard interface as valid interface
-        if len(interface_residues) == 1:
+        #if len(interface_residues) == 1:
+        if interface_residues_count == 1:
             is_invalid = True
 
     return molecules_dicts, interface_residues_count, is_invalid
 
 
-def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
+def get_bond_dict(bondtag, bondtype, pdb_id, input_updated_cif):
     """
     Creates bond dictionary
 
@@ -100,7 +111,7 @@ def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
     :param bondtype: type str - bond interaction type
     :return: type dict - bonds dictionary
     """
-
+    bonds=bondtag.iter('bond')
     atom_site1_chains = []
     atom_site1_residues = []
     atom_site1_label_asym_ids = []
@@ -222,3 +233,66 @@ def get_bond_dict(bonds, bondtype, pdb_id, input_updated_cif):
     }
 
     return bond_dict
+
+def get_assembly_dict(assemblies):
+
+    """                                                                               
+    Function creates a simplified assembly dictionary from xml data which does not
+    contain interfaces information
+                                                                                      
+    :param assemblies: xml data for assembly                   
+    :return : assembly dictionary
+    """
+    result={}
+    
+    # Assembly information
+
+    for assem in assemblies:
+        assem_id = assem.find("assembly/id").text
+        assem_size = assem.find("assembly/size").text
+        assem_mmsize = assem.find("assembly/mmsize").text
+        assem_diss_energy = assem.find("assembly/diss_energy").text
+        assem_asa = assem.find("assembly/asa").text
+        assem_bsa = assem.find("assembly/bsa").text
+        assem_entropy = assem.find("assembly/entropy").text
+        assem_diss_area = assem.find("assembly/diss_area").text
+        assem_int_energy = assem.find("assembly/int_energy").text
+        assem_n_uc = assem.find("assembly/n_uc").text
+        assem_n_diss = assem.find("assembly/n_diss").text
+        assem_sym_num = assem.find("assembly/symNumber").text
+        assem_formula = assem.find("assembly/formula").text
+        assem_composition = assem.find("assembly/composition").text
+
+        # Round to two decimals some assembly properties
+
+        assembly_mmsize = assem_mmsize
+        assembly_diss_energy = round(float(assem_diss_energy), 2)
+        assembly_asa = round(float(assem_asa), 2)
+        assembly_bsa = round(float(assem_bsa), 2)
+        assembly_entropy = round(float(assem_entropy), 2)
+        assembly_diss_area = round(float(assem_diss_area), 2)
+        assembly_int_energy = round(float(assem_int_energy), 2)
+        assembly_formula = assem_formula
+        assembly_composition = assem_composition
+
+        # Assembly information added to dictionary
+        
+        #result["non_ligand_interface_count"] = non_ligand_interface_count
+        result["assembly_id"] = assem_id
+        result["assembly_size"] = assem_size
+        result["assembly_mmsize"] = assembly_mmsize
+        result["assembly_diss_energy"] = assembly_diss_energy
+        result["assembly_asa"] = assembly_asa
+        result["assembly_bsa"] = assembly_bsa
+        result["assembly_entropy"] = assembly_entropy
+        result["assembly_diss_area"] = assembly_diss_area
+        result["assembly_int_energy"] = assembly_int_energy
+        result["assembly_formula"] = assembly_formula
+        result["assembly_composition"] = assembly_composition
+        result["assem_id"] = assem_id
+        result["assembly_size"] = assem_size
+        result["assembly_n_uc"] = assem_n_uc
+        result["assembly_n_diss"] = assem_n_diss
+        result["assembly_sym_num"] = assem_sym_num
+
+    return result

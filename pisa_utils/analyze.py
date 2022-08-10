@@ -1,8 +1,9 @@
 import json
 import logging
 import os
+from datetime import datetime
 
-from pisa_utils.dictionaries import get_bond_dict, get_molecules_dict
+from pisa_utils.dictionaries import get_bond_dict, get_molecules_dict, get_assembly_dict
 from pisa_utils.utils import parse_xml_file
 
 logger = logging.getLogger()
@@ -19,232 +20,307 @@ class AnalysePisa:
         self,
         pdb_id,
         assembly_id,
-        input_dir,
+        input_cif,
         input_updated_cif,
-        input_cif_file,
-        output_dir,
-        result_json_file,
+        output_json,
+        output_xml,
     ):
         self.pdb_id = pdb_id
-        self.assembly_id = assembly_id
-        self.input_dir = input_dir if input_dir else None
-        self.input_updated_cif = input_updated_cif if input_updated_cif else output_dir
-        self.input_cif_file = input_cif_file if input_cif_file else None
-        self.output_dir = output_dir if output_dir else None
-        self.result_json_file = result_json_file if result_json_file else None
+        self.assembly_code = assembly_id
+        self.input_updated_cif = input_updated_cif if input_updated_cif else input_cif
+        self.output_json = output_json if output_json else None
+        self.output_xml = output_xml
         self.results = {}
         self.interfaces_results = None
 
-    def process_pisa_xml(self):
+    def create_assem_interfaces_dict(self):
         """
         Function writes assembly interfaces dictionaries
 
-        :return: type dict - interfaces dictionary
+        :return: type dict - assembly interfaces dictionary
         """
 
-        interfaces_xml_file = os.path.join(self.output_dir, "molecules.xml")
-        assembly_xml_file = os.path.join(self.output_dir, "assembly.xml")
+        start = datetime.now()
+        logging.info("creating assembly dictionary")
+        print("creating assembly dictionary")
+
+        interfaces_xml_file = os.path.join(self.output_xml, "interfaces.xml")
+        assembly_xml_file = os.path.join(self.output_xml, "assembly.xml")
         result = {}
 
         if os.path.exists(interfaces_xml_file) and os.path.exists(assembly_xml_file):
             asroot = parse_xml_file(xml_file=assembly_xml_file)
             root = parse_xml_file(xml_file=interfaces_xml_file)
+            
             if root and asroot:
-                assembly_status = asroot.find("status").text
-                assemblies = asroot.findall("asu_complex")
 
-                # Assembly information
-                for assem in assemblies:
-                    assem_mmsize = assem.find("assembly/mmsize").text
-                    assem_diss_energy = assem.find("assembly/diss_energy").text
-                    assem_asa = assem.find("assembly/asa").text
-                    assem_bsa = assem.find("assembly/bsa").text
-                    assem_entropy = assem.find("assembly/entropy").text
-                    assem_diss_area = assem.find("assembly/diss_area").text
-                    assem_int_energy = assem.find("assembly/int_energy").text
-                    assem_formula = assem.find("assembly/formula").text
-                    assem_composition = assem.find("assembly/composition").text
+                try:
+                    assembly_status = asroot.find("status").text
+                    assemblies = asroot.iter('asu_complex')
 
-                result["assembly_status"] = assembly_status
+                    assem_result=get_assembly_dict(assemblies)
+                    
+                except Exception as e:
+                    logging.error("invalid assembly dictionary : probably fields not found in xml file")
+                    logging.error(e)
 
-                # Round to two decimals some assembly properties
-                assembly_mmsize = assem_mmsize
-                assembly_diss_energy = round(float(assem_diss_energy), 2)
-                assembly_asa = round(float(assem_asa), 2)
-                assembly_bsa = round(float(assem_bsa), 2)
-                assembly_entropy = round(float(assem_entropy), 2)
-                assembly_diss_area = round(float(assem_diss_area), 2)
-                assembly_int_energy = round(float(assem_int_energy), 2)
-                assembly_formula = assem_formula
-                assembly_composition = assem_composition
-
+            
                 # Create interfaces dictionaries
-                status = root.find("status").text
-                num_interfaces = root.find("n_interfaces").text
-                interfaces = root.findall("interface")
-                logging.debug("number of interfaces: {}".format(len(interfaces)))
 
-                result["status"] = status
-                result["num_interfaces"] = num_interfaces
+                try:
+                    
+                    status = root.find("status").text
+                    num_interfaces = root.find("n_interfaces").text
+                    #interfaces = root.findall("interface")
+                    
+                    #logging.debug("number of interfaces: {}".format(len(interfaces)))
 
-                non_ligand_interface_count = 0
-                for interface in interfaces:
+                    result["status"] = status
+                    result["num_interfaces"] = num_interfaces
 
-                    # Interface General information
-                    interface_id = interface.find("id").text
-                    interface_area = round(float(interface.find("int_area").text), 2)
-                    interface_solvation_energy = round(
-                        float(interface.find("int_solv_en").text), 2
-                    )
-                    interface_stabilization_energy = round(
-                        float(interface.find("stab_en").text), 2
-                    )
-                    p_value = round(float(interface.find("pvalue").text), 3)
+                    non_ligand_interface_count = 0
 
-                    # No. of bonds counted
+                    interfaces = root.iter('interface')
+                    
+                    for interface in interfaces:
 
-                    n_h_bonds = int(interface.find("h-bonds/n_bonds").text)
-                    n_ss_bonds = int(interface.find("ss-bonds/n_bonds").text)
-                    n_covalent_bonds = int(interface.find("cov-bonds/n_bonds").text)
-                    n_salt_bridges = int(interface.find("salt-bridges/n_bonds").text)
-                    other_contacts = int(interface.find("other-bonds/n_bonds").text)
+                        # Interface General information
+                        interface_id = interface.find("id").text
+                        interface_area = round(float(interface.find("int_area").text), 2)
+                        interface_solvation_energy = round(
+                            float(interface.find("int_solv_en").text), 2
+                        )
+                        interface_stabilization_energy = round(
+                            float(interface.find("stab_en").text), 2
+                        )
+                        p_value = round(float(interface.find("pvalue").text), 3)
+                        
+                        # No. of bonds counted
 
-                    # Reading bonds
-                    hbonds = interface.findall("h-bonds/bond")
-                    sbridges = interface.findall("salt-bridges/bond")
-                    covbonds = interface.findall("cov-bonds/bond")
-                    ssbonds = interface.findall("ss-bonds/bond")
-                    othbonds = interface.findall("other-bonds/bond")
+                        n_h_bonds = int(interface.find("h-bonds/n_bonds").text)
+                        n_ss_bonds = int(interface.find("ss-bonds/n_bonds").text)
+                        n_covalent_bonds = int(interface.find("cov-bonds/n_bonds").text)
+                        n_salt_bridges = int(interface.find("salt-bridges/n_bonds").text)
+                        other_contacts = int(interface.find("other-bonds/n_bonds").text)
+                        
+                        molecules = interface.iter('molecule')                            
+                        (
+                            molecules_dicts,
+                            interface_residues_count,
+                            is_ligand,
+                        ) = get_molecules_dict(molecules)
+                        
+                        
+                        if not is_ligand:
+                            non_ligand_interface_count += 1
 
-                    # Writing bonds dictionaries
-                    hbond_dict = get_bond_dict(
-                        hbonds, "H-bond", self.pdb_id, self.input_updated_cif
-                    )
-                    sbridge_dict = get_bond_dict(
-                        sbridges, "salt-bridges", self.pdb_id, self.input_updated_cif
-                    )
-                    covbond_dict = get_bond_dict(
-                        covbonds, "cov-bonds", self.pdb_id, self.input_updated_cif
-                    )
-                    ssbond_dict = get_bond_dict(
-                        ssbonds, "ss-bonds", self.pdb_id, self.input_updated_cif
-                    )
-                    othbond_dict = get_bond_dict(
-                        othbonds, "other-bond", self.pdb_id, self.input_updated_cif
-                    )
-                    molecules = interface.findall("molecule")
+                            # Reading bonds
+                            
+                            hbonds = interface.find("h-bonds")
+                            sbridges = interface.find("salt-bridges")
+                            covbonds = interface.find("cov-bonds")
+                            ssbonds = interface.find("ss-bonds")
+                            othbonds = interface.find("other-bonds")
+                            
+                            # Writing bonds dictionaries
 
-                    (
-                        molecules_dicts,
-                        interface_residues_count,
-                        is_ligand,
-                    ) = get_molecules_dict(molecules)
+                            #for hbond in hbonds:
+                            hbond_dict = get_bond_dict(
+                                hbonds, "H-bond", self.pdb_id, self.input_updated_cif
+                            )
+                                
+                            
+                            #for sbridge in sbridges:
+                            sbridge_dict = get_bond_dict(
+                                sbridges, "salt-bridges", self.pdb_id, self.input_updated_cif
+                            )
+                            #for covbond in covbonds:
+                            covbond_dict = get_bond_dict(
+                                covbonds, "cov-bonds", self.pdb_id, self.input_updated_cif
+                            )
+                            #for ssbond in ssbonds:
+                            ssbond_dict = get_bond_dict(
+                                ssbonds, "ss-bonds", self.pdb_id, self.input_updated_cif
+                            )
+                            #for othbond in othbonds:
+                            othbond_dict = get_bond_dict(
+                                othbonds, "other-bond", self.pdb_id, self.input_updated_cif
+                            )
+                        
+                            interface_dict = {
+                                "interface_id": interface_id,
+                                "interface_area": interface_area,
+                                "solvation_energy": interface_solvation_energy,
+                                "stabilization_energy": interface_stabilization_energy,
+                                "p_value": p_value,
+                                "number_interface_residues": interface_residues_count,
+                                "number_hydrogen_bonds": n_h_bonds,
+                                "number_covalent_bonds": n_covalent_bonds,
+                                "number_disulfide_bonds": n_ss_bonds,
+                                "number_salt_bridges": n_salt_bridges,
+                                "number_other_bonds": other_contacts,
+                                "hydrogen_bonds": hbond_dict,
+                                "salt_bridges": sbridge_dict,
+                                "disulfide_bonds": ssbond_dict,
+                                "covalent_bonds": covbond_dict,
+                                "other_bonds": othbond_dict,
+                                "molecules": molecules_dicts,
+                            }
 
-                    if not is_ligand:
-                        non_ligand_interface_count += 1
+                            # Append all dictionaries in 'result'
 
-                        interface_dict = {
-                            "interface_id": interface_id,
-                            "interface_area": interface_area,
-                            "solvation_energy": interface_solvation_energy,
-                            "stabilization_energy": interface_stabilization_energy,
-                            "p_value": p_value,
-                            "number_interface_residues": interface_residues_count,
-                            "number_hydrogen_bonds": n_h_bonds,
-                            "number_covalent_bonds": n_covalent_bonds,
-                            "number_disulfide_bonds": n_ss_bonds,
-                            "number_salt_bridges": n_salt_bridges,
-                            "number_other_bonds": other_contacts,
-                            "hydrogen_bonds": hbond_dict,
-                            "salt_bridges": sbridge_dict,
-                            "disulfide_bonds": ssbond_dict,
-                            "covalent_bonds": covbond_dict,
-                            "other_bonds": othbond_dict,
-                            "molecules": molecules_dicts,
-                        }
+                            result.setdefault("id", []).append(interface_id)
+                            result.setdefault("int_area", []).append(interface_area)
+                            result.setdefault("interface_dicts", []).append(interface_dict)
+                            
+                    result["non_ligand_interface_count"] = non_ligand_interface_count
+                
+                except Exception as e:
+                    logging.error("something wrong creating dictionary: probably invalid interfaces.xml file")
+                    logging.error(e)
 
-                        # Append all dictionaries in 'result'
 
-                        result.setdefault("id", []).append(interface_id)
-                        result.setdefault("int_area", []).append(interface_area)
-                        result.setdefault("interface_dicts", []).append(interface_dict)
-
-                # Assembly information added to dictionary
-
-                result["non_ligand_interface_count"] = non_ligand_interface_count
-                result["assembly_mmsize"] = assembly_mmsize
-                result["assembly_diss_energy"] = assembly_diss_energy
-                result["assembly_asa"] = assembly_asa
-                result["assembly_bsa"] = assembly_bsa
-                result["assembly_entry"] = assembly_entropy
-                result["assembly_diss_area"] = assembly_diss_area
-                result["assembly_int_energy"] = assembly_int_energy
-                result["assembly_formula"] = assembly_formula
-                result["assembly_composition"] = assembly_composition
-
-        self.interfaces_results = result
-
-    def set_results(self):
-        """
-        Writes assembly dictionary
-
-        Args:
-        interfaces_results: interfaces dictionaries
-        entry_type: type sting - entry type 'assembly'
-        pdb_id : pdb entry
-        assembly_id: assembly code
-
-        Returns: None
-
-        """
-        if self.interfaces_results:
-            overall = len(self.interfaces_results.get("id", []))
-
-            interface_dicts = self.interfaces_results.get("interface_dicts", [])
-
+        if result and assem_result:
+            
+            overall = len(result.get("id", []))
+            interface_dicts = result.get("interface_dicts", [])
             assem_dict = {
-                "mmsize": self.interfaces_results.get("assembly_mmsize"),
-                "dissociation_energy": self.interfaces_results.get(
+                "mmsize": assem_result.get("assembly_mmsize"),
+                "dissociation_energy": assem_result.get(
                     "assembly_diss_energy"
                 ),
-                "accessible_surface_area": self.interfaces_results.get("assembly_asa"),
-                "buried_surface_area": self.interfaces_results.get("assembly_bsa"),
-                "entropy": self.interfaces_results.get("assembly_entropy"),
-                "dissociation_area": self.interfaces_results.get("assembly_diss_area"),
-                "solvation_energy_gain": self.interfaces_results.get(
+                "accessible_surface_area": assem_result.get("assembly_asa"),
+                "buried_surface_area": assem_result.get("assembly_bsa"),
+                "entropy": assem_result.get("assembly_entropy"),
+                "dissociation_area": assem_result.get("assembly_diss_area"),
+                "solvation_energy_gain": assem_result.get(
                     "assembly_int_energy"
                 ),
-                "formula": self.interfaces_results.get("assembly_formula"),
-                "composition": self.interfaces_results.get("assembly_composition"),
+                "formula": assem_result.get("assembly_formula"),
+                "composition": assem_result.get("assembly_composition"),
                 "interface_count": overall,
                 "interfaces": interface_dicts,
+            }
+            
+            assembly_dictionary = {
+                "pdb_id": self.pdb_id,
+                "assembly_id": self.assembly_code,
+                "pisa_version": "2.0",
+                "assembly": assem_dict,
+            }
+            
+            self.results.setdefault("PISA", assembly_dictionary)
+            #print(self.results)
+
+            interfaces_results = self.results
+            
+        end = datetime.now()
+        logging.info("finished creating assembly dictionary")
+        
+        time_taken = end - start
+        time_taken_str = str(time_taken)
+        logging.info("time taken to create assembly dictionary {}".format(time_taken_str))
+        print("Finished creating assembly dictionary in {}".format(time_taken_str))
+
+        #dump to json file
+        output_json=os.path.join(
+            self.output_json,"{}-assem{}_interfaces.json".format(
+            self.pdb_id,self.assembly_code))
+
+        self.save_to_json (interfaces_results, output_json)
+    
+
+        return interfaces_results
+        
+        
+        
+    def create_assembly_dict(self):
+
+        """                                                                                              Function writes simplified assembly dictionary
+        
+        :return: type dict - assembly dictionary                                                                             
+        """
+        result={}
+        start = datetime.now()
+        logging.info("creating simplified assembly dictionary")
+        print("creating simplified assembly dictionary")
+
+        assembly_xml_file = os.path.join(self.output_xml, "assembly.xml")
+        result = {}
+
+        if os.path.exists(assembly_xml_file):
+            asroot = parse_xml_file(xml_file=assembly_xml_file)
+            
+        if asroot:
+
+            try:
+                assembly_status = asroot.find("status").text
+                assemblies = asroot.iter('asu_complex')
+                
+                assem_result=get_assembly_dict(assemblies)
+
+            
+            except Exception as e:
+                logging.error("invalid assembly dictionary : probably fields not found in xml file")
+                logging.error(e)
+
+            assem_dict = {
+                "id" : assem_result.get("assembly_id"),
+                "size": assem_result.get("assembly_size"),
+                "macromolecular_size": assem_result.get("assembly_mmsize"),
+                "dissociation_energy": assem_result.get(
+                    "assembly_diss_energy"
+                ),
+                "accessible_surface_area": assem_result.get("assembly_asa"),
+                "buried_surface_area": assem_result.get("assembly_bsa"),
+                "entropy": assem_result.get("assembly_entropy"),
+                "dissociation_area": assem_result.get("assembly_diss_area"),
+                "solvation_energy_gain": assem_result.get(
+                    "assembly_int_energy"
+                ),
+                "number_of_uc" : assem_result.get("assembly_n_uc"),                                                      
+                "number_of_dissociated_elements" : assem_result.get("assembly_n_diss"),                                  
+                "symmetry_number": assem_result.get("assembly_sym_num"),
+                "formula": assem_result.get("assembly_formula"),
+                "composition": assem_result.get("assembly_composition"),
             }
 
             assembly_dictionary = {
                 "pdb_id": self.pdb_id,
-                "assembly_id": self.assembly_id,
+                "assembly_id": self.assembly_code,
                 "pisa_version": "2.0",
                 "assembly": assem_dict,
             }
-            self.results.setdefault("PISA", assembly_dictionary)
-            print(self.results)
 
-    def save_to_json(self):
+            result.setdefault("PISA", assembly_dictionary)
+            
+        end = datetime.now()
+        logging.info("finished creating assembly dictionary")
+        
+        time_taken = end - start
+        time_taken_str = str(time_taken)
+        logging.info("time taken to create simplified assembly dictionary {}".format(time_taken_str))
+        print("Finished creating assembly simplified dictionary in {}".format(time_taken_str))
+
+        output_json=os.path.join(
+            self.output_json,"{}-assembly{}.json".format(
+            self.pdb_id,self.assembly_code))
+
+        self.save_to_json (result, output_json)
+        
+        return result
+                
+
+    def save_to_json(self, result, output_file):
         """
         Dump the data into a JSON file
         :return:
         """
-
-        if self.results:
-            output_file = (
-                os.path.join(self.output_dir, self.result_json_file)
-                if self.result_json_file
-                else os.path.join(
-                    self.output_dir,
-                    "{}-assembly{}.json".format(self.pdb_id, self.assembly_id),
-                )
-            )
+                
+        if result:
             with open(output_file, "w") as out_file:
-                json.dump(self.results, out_file)
+                json.dump(result, out_file)
                 logging.info("saving to JSON successful")
-        logging.warning("saving to JSON failed")
+
+        else:
+            logging.warning("saving to JSON failed")
