@@ -9,7 +9,7 @@ The code will:
 - Create Json dictionary with assembly interactions/interfaces information
 
 ```
-git clone  https://github.com/PDBe-KB/pisa-analysis
+git clone https://github.com/PDBe-KB/pisa-analysis
 
 cd pisa-analysis 
 ``` 
