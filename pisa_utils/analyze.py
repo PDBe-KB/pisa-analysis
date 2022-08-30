@@ -31,7 +31,6 @@ class AnalysePisa:
         self.output_json = output_json if output_json else None
         self.output_xml = output_xml
         self.results = {}
-        self.interfaces_results = None
 
     def create_assem_interfaces_dict(self):
         """
@@ -47,7 +46,8 @@ class AnalysePisa:
         interfaces_xml_file = os.path.join(self.output_xml, "interfaces.xml")
         assembly_xml_file = os.path.join(self.output_xml, "assembly.xml")
         result = {}
-
+        interfaces_results={}
+        
         if os.path.exists(interfaces_xml_file) and os.path.exists(assembly_xml_file):
             asroot = parse_xml_file(xml_file=assembly_xml_file)
             root = parse_xml_file(xml_file=interfaces_xml_file)
@@ -258,7 +258,7 @@ class AnalysePisa:
                 assemblies = asroot.iter('asu_complex')
                 
                 assem_result=get_assembly_dict(assemblies)
-
+                
             
             except Exception as e:
                 logging.error("invalid assembly dictionary : probably fields not found in xml file")
@@ -267,6 +267,7 @@ class AnalysePisa:
             assem_dict = {
                 "id" : assem_result.get("assembly_id"),
                 "size": assem_result.get("assembly_size"),
+                "score": assem_result.get("assembly_score"),
                 "macromolecular_size": assem_result.get("assembly_mmsize"),
                 "dissociation_energy": assem_result.get(
                     "assembly_diss_energy"
@@ -283,6 +284,7 @@ class AnalysePisa:
                 "symmetry_number": assem_result.get("assembly_sym_num"),
                 "formula": assem_result.get("assembly_formula"),
                 "composition": assem_result.get("assembly_composition"),
+                "R350": assem_result.get("assembly_R350"),
             }
 
             assembly_dictionary = {

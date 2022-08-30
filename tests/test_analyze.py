@@ -9,6 +9,7 @@ from pisa_utils.analyze import AnalysePisa
 class TestAnalyzePisa(TestCase):
     @patch("pisa_utils.analyze.get_bond_dict", side_effect=[1, 2, 3, 4, 5])
     @patch("pisa_utils.analyze.get_molecules_dict")
+    @patch("pisa_utils.analyze.get_assembly_dict")
     @patch(
         "pisa_utils.analyze.parse_xml_file",
         side_effect=[
@@ -16,7 +17,7 @@ class TestAnalyzePisa(TestCase):
             ET.parse(os.path.join(".", "tests", "data", "interfaces.xml")).getroot(),
         ],
     )
-    def test_process_pisa_xml(self, bonds, molecules, xmls):
+    def test_create_interfaces_dict(self, bonds, molecules,assem_result, xmls):
         """
         Test if the correct JSON is generated
         :param bonds: mocked bonds data
@@ -42,19 +43,36 @@ class TestAnalyzePisa(TestCase):
             2,
             False,
         ]
+
+        assem_result.return_value = {
+                 'assembly_id': '1',
+                 'assembly_size': '6',
+                 'assembly_score': '',
+                 'assembly_mmsize': '2',
+                 'assembly_diss_energy': 15.61,
+                 'assembly_asa': 19395.3,
+                 'assembly_bsa': 3514.17,
+                 'assembly_entropy': 12.98,
+                 'assembly_diss_area': 1427.5,
+                 'assembly_int_energy': -35.28,
+                 'assembly_formula': 'A(2)a(2)b(2)',
+                 'assembly_composition': 'A-2A[NA](2)[GOL](2)',
+                 'assem_id': '1',
+                 'assembly_n_uc': '0',
+                 'assembly_n_diss': '2',
+                 'assembly_sym_num': '2',
+                 'assembly_R350': '',
+        }
+        
         ap = AnalysePisa(
             pdb_id="6nxr",
             assembly_id="1",
-            output_dir=os.path.join("tests", "data"),
-            result_json_file=".",
-            input_dir=".",
-            input_updated_cif=".",
-            input_cif_file=".",
+            output_json=os.path.join("tests", "data"),
+            output_xml=os.path.join("tests", "data"),
+            input_cif=".",
+            input_updated_cif="."
         )
         expected = {
-            "assembly_status": "Ok",
-            "status": "Ok",
-            "num_interfaces": "5",
             "id": ["1"],
             "int_area": [1427.5],
             "interface_dicts": [
@@ -103,23 +121,20 @@ class TestAnalyzePisa(TestCase):
             "assembly_formula": "A(2)a(2)b(2)",
             "assembly_composition": "A-2A[NA](2)[GOL](2)",
         }
-        ap.process_pisa_xml()
-        self.assertEqual(ap.interfaces_results, expected)
-
-    def test_set_results(self):
+        ap.create_assem_interfaces_dict()
+        self.assertEqual(ap.results, expected)
+    
+    def test_create_assem_interfaces_dict(self):
         ap = AnalysePisa(
             pdb_id="6nxr",
             assembly_id="1",
-            output_dir=os.path.join("tests", "data"),
-            result_json_file=".",
-            input_dir=".",
-            input_updated_cif=".",
-            input_cif_file=".",
+            output_json=os.path.join("tests", "data"),
+            output_xml=os.path.join("tests", "data"),
+            input_cif=".",
+            input_updated_cif="."
         )
+        
         ap.interfaces_results = {
-            "assembly_status": "Ok",
-            "status": "Ok",
-            "num_interfaces": "5",
             "id": ["1"],
             "int_area": [1427.5],
             "interface_dicts": [
@@ -168,7 +183,9 @@ class TestAnalyzePisa(TestCase):
             "assembly_formula": "A(2)a(2)b(2)",
             "assembly_composition": "A-2A[NA](2)[GOL](2)",
         }
-        ap.set_results()
+
+        ap.create_assem_interfaces_dict()
+
         expected = {
             "PISA": {
                 "pdb_id": "6nxr",
@@ -224,3 +241,4 @@ class TestAnalyzePisa(TestCase):
             }
         }
         self.assertEqual(ap.results, expected)
+    

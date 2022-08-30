@@ -99,7 +99,7 @@ def get_molecules_dict(molecules):
         #if len(interface_residues) == 1:
         if interface_residues_count == 1:
             is_invalid = True
-
+            
     return molecules_dicts, interface_residues_count, is_invalid
 
 
@@ -262,7 +262,7 @@ def get_assembly_dict(assemblies):
         assem_sym_num = assem.find("assembly/symNumber").text
         assem_formula = assem.find("assembly/formula").text
         assem_composition = assem.find("assembly/composition").text
-
+        
         # Round to two decimals some assembly properties
 
         assembly_mmsize = assem_mmsize
@@ -274,12 +274,19 @@ def get_assembly_dict(assemblies):
         assembly_int_energy = round(float(assem_int_energy), 2)
         assembly_formula = assem_formula
         assembly_composition = assem_composition
+        assembly_R350=''
+        
+        if assem.find("assembly/score"):
+            assembly_score=assem.find("assembly/score").text
+        else:
+            assembly_score=""
 
         # Assembly information added to dictionary
         
         #result["non_ligand_interface_count"] = non_ligand_interface_count
         result["assembly_id"] = assem_id
         result["assembly_size"] = assem_size
+        result["assembly_score"] = assembly_score
         result["assembly_mmsize"] = assembly_mmsize
         result["assembly_diss_energy"] = assembly_diss_energy
         result["assembly_asa"] = assembly_asa
@@ -294,5 +301,6 @@ def get_assembly_dict(assemblies):
         result["assembly_n_uc"] = assem_n_uc
         result["assembly_n_diss"] = assem_n_diss
         result["assembly_sym_num"] = assem_sym_num
+        result["assembly_R350"] = assembly_R350
 
     return result
