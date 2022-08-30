@@ -12,16 +12,15 @@ def parse_xml_file(xml_file):
     :return: parsed XML object
     """
     root = None
-    try:
-        logging.debug("parsing: {}".format(xml_file))
-        tree = ET.parse(xml_file)
-        root = tree.getroot()
-    except Exception as e:
-        logging.error("invalid xml file: {}".format(xml_file))
-        logging.error(e)
+
+    logging.debug("parsing: {}".format(xml_file))
+    tree = ET.parse(xml_file)
+    root = tree.getroot()
+
     return root
 
-def create_pisa_config(dataroot,setup_dir):
+
+def create_pisa_config(dataroot, setup_dir):
     """
     Function creates a configuration file to run pisa
 
@@ -30,14 +29,17 @@ def create_pisa_config(dataroot,setup_dir):
     :return : None
 
     """
-    infile=open(os.path.join(setup_dir,"pisa_cfg_tmp"))
-    outputname=os.path.join(dataroot,"pisa.cfg")
-    outfile=open(outputname,"w")
+    infile = open(os.path.join(setup_dir, "pisa_cfg_tmp"))
+    outputname = os.path.join(dataroot, "pisa.cfg")
+    outfile = open(outputname, "w")
     for line in infile:
-        line=line.replace("path_dataroot",dataroot).replace("path_to_setup",setup_dir)
+        line = line.replace("path_dataroot", dataroot).replace(
+            "path_to_setup", setup_dir
+        )
         outfile.write(line)
     infile.close()
     outfile.close()
+
 
 def read_uniprot_info(
     int_lab_seqnum, int_seqnum, int_atname, int_resname, pdb_id, input_updated_cif
@@ -56,6 +58,10 @@ def read_uniprot_info(
     """
     unp_acc = None
     unp_num = None
+
+    if not os.path.isfile(input_updated_cif):
+        logging.info(f"Updated CIF [{input_updated_cif}] is not provided or is invalid")
+        return unp_acc, unp_num
 
     # updated cif file path
     path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))

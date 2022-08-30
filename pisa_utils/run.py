@@ -26,22 +26,21 @@ def main():
 
     logging.getLogger()
 
-    input_cif_file = os.path.join(args.input_cif,
-                     '{}-assembly{}.cif.gz'.format(args.pdb_id,args.assembly_id))
+    input_cif_file = args.input_cif
 
-    interfaces_xml_file = os.path.join(args.output_xml,'interfaces.xml')
-    assembly_xml_file = os.path.join(args.output_xml, 'assembly.xml')
+    interfaces_xml_file = os.path.join(args.output_xml, "interfaces.xml")
+    assembly_xml_file = os.path.join(args.output_xml, "assembly.xml")
 
-    if args.force or not os.path.exists(interfaces_xml_file) or not os.path.exists(assembly_xml_file):
-        
-        run_pisalite(
-            input_cif=input_cif_file,
-            output_xml=args.output_xml
-        )
+    if (
+        args.force
+        or not os.path.exists(interfaces_xml_file)
+        or not os.path.exists(assembly_xml_file)
+    ):
 
+        run_pisalite(input_cif=input_cif_file, output_xml=args.output_xml)
 
-    
-        
+    os.makedirs(args.output_xml, exist_ok=True)
+
     ap = AnalysePisa(
         pdb_id=args.pdb_id,
         assembly_id=args.assembly_id,
@@ -50,10 +49,9 @@ def main():
         input_cif=args.input_cif,
         input_updated_cif=args.input_updated_cif,
     )
-    
+
     ap.create_assem_interfaces_dict()
     ap.create_assembly_dict()
-
 
 
 if "__main__" in __name__:
