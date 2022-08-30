@@ -8,15 +8,15 @@ from pisa_utils.run_pisa import run_pisalite
 
 def main():
     parser = argparse.ArgumentParser()
-
-    parser.add_argument("-i", "--input_cif", help="input CIF file")
+    parser.add_argument(
+        "-i", "--input_cif", help="input directory with CIF directory/file"
+    )
     parser.add_argument("--pdb_id", help="PDB ID", type=str, required=True)
     parser.add_argument("--assembly_id", help="Assembly ID", type=str, required=True)
     parser.add_argument(
         "-o", "--output_json", help="output directory for JSON and XMLs", required=True
     )
     parser.add_argument("--input_updated_cif", help="updated cif file")
-    parser.add_argument("--pisa_binary", help="pisa binary path", type=str)
     parser.add_argument("--output_xml", help="output for xml files", type=str)
     parser.add_argument(
         "--force", help="always recalculate with pisa-lite", action="store_true"

@@ -31,7 +31,6 @@ class AnalysePisa:
         self.output_json = output_json if output_json else None
         self.output_xml = output_xml
         self.results = {}
-        self.interfaces_results = None
 
     def create_assem_interfaces_dict(self):
         """
@@ -253,9 +252,11 @@ class AnalysePisa:
 
             try:
                 assembly_status = asroot.find("status").text
+
                 assemblies = asroot.iter("asu_complex")
 
                 assem_result = get_assembly_dict(assemblies)
+
 
             except Exception as e:
                 logging.error(
@@ -266,6 +267,7 @@ class AnalysePisa:
             assem_dict = {
                 "id": assem_result.get("assembly_id"),
                 "size": assem_result.get("assembly_size"),
+                "score": assem_result.get("assembly_score"),
                 "macromolecular_size": assem_result.get("assembly_mmsize"),
                 "dissociation_energy": assem_result.get("assembly_diss_energy"),
                 "accessible_surface_area": assem_result.get("assembly_asa"),
@@ -278,6 +280,7 @@ class AnalysePisa:
                 "symmetry_number": assem_result.get("assembly_sym_num"),
                 "formula": assem_result.get("assembly_formula"),
                 "composition": assem_result.get("assembly_composition"),
+                "R350": assem_result.get("assembly_R350"),
             }
 
             assembly_dictionary = {

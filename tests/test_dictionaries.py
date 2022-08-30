@@ -13,8 +13,8 @@ class TestDictionaries(TestCase):
     def test_get_bond_dict(self, mock):
         mock.return_value = ("P48491", "2")
         bond = ET.parse(os.path.join(".", "tests", "data", "bonds.xml")).getroot()
-        bonds = [bond]
-        result = get_bond_dict(bonds, "H-bond", "pdbid", "cifpath")
+        #bonds = [bond]
+        result = get_bond_dict(bond, "H-bond", "pdbid", "cifpath")
         expected = {
             "bond_distances": [2.99],
             "atom_site_1_chains": ["A-2"],
@@ -41,6 +41,23 @@ class TestDictionaries(TestCase):
 
         self.assertEqual(result, expected)
 
+    """
+    def test_get_assembly_dict(self):
+        
+        assembly=ET.parse(
+            os.path.join(".", "tests", "data", "assembly.xml")
+        ).getroot()
+        assem=[asu_complex]
+        expected_dictionary = {
+            'assembly_id': '1',
+            'assembly_size': '8',
+            'assembly_score': '',
+            'assembly_mmsize': '2',
+            'assembly_diss_energy': -3.96,
+            'assembly_asa': 15146.45,
+            'assembly_bsa': 3156.79, 'assembly_entropy': 12.09, 'assembly_diss_area': 733.07, 'assembly_int_energy': -41.09, 'assembly_formula': 'A(2)a(4)b(2)', 'assembly_composition': 'A-2A[CA](4)[DHT](2)', 'assem_id': '1', 'assembly_n_uc': '0', 'assembly_n_diss': '2', 'assembly_sym_num': '2', 'assembly_R350': ''}
+        
+    """            
     def test_get_molecules_dict(self):
         """
         Test that the function returns a correct dictionary
