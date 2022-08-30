@@ -46,7 +46,7 @@ class AnalysePisa:
         interfaces_xml_file = os.path.join(self.output_xml, "interfaces.xml")
         assembly_xml_file = os.path.join(self.output_xml, "assembly.xml")
         result = {}
-        interfaces_results={}
+        interfaces_results = {}
         
         if os.path.exists(interfaces_xml_file) and os.path.exists(assembly_xml_file):
             asroot = parse_xml_file(xml_file=assembly_xml_file)
