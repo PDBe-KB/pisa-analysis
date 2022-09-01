@@ -20,14 +20,13 @@ class AnalysePisa:
         self,
         pdb_id,
         assembly_id,
-        input_cif,
         input_updated_cif,
         output_json,
         output_xml,
     ):
         self.pdb_id = pdb_id
         self.assembly_code = assembly_id
-        self.input_updated_cif = input_updated_cif if input_updated_cif else input_cif
+        self.input_updated_cif = input_updated_cif if input_updated_cif else None
         self.output_json = output_json if output_json else None
         self.output_xml = output_xml
         self.results = {}

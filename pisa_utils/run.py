@@ -47,7 +47,6 @@ def main():
         assembly_id=args.assembly_id,
         output_json=args.output_json,
         output_xml=args.output_xml,
-        input_cif=args.input_cif,
         input_updated_cif=args.input_updated_cif,
     )
 

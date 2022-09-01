@@ -64,10 +64,10 @@ def read_uniprot_info(
         return unp_acc, unp_num
 
     # updated cif file path
-    path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
+    #path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
 
     # Reading UniProt acc and seq numbers in updated cif file:
-    doc = cif.read_file(path)
+    doc = cif.read_file(input_updated_cif)
     block = doc.sole_block()
     label_seq_id = block.find_loop("_atom_site.label_seq_id")
     atom_name = block.find_loop("_atom_site.label_atom_id")
