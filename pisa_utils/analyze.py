@@ -47,11 +47,7 @@ class AnalysePisa:
         assembly_xml_file = os.path.join(self.output_xml, "assembly.xml")
         result = {}
         interfaces_results = {}
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> c6ee2762210960478ec5d4078a0e1d5e0982adb2
         if os.path.exists(interfaces_xml_file) and os.path.exists(assembly_xml_file):
             asroot = parse_xml_file(xml_file=assembly_xml_file)
             root = parse_xml_file(xml_file=interfaces_xml_file)
@@ -256,18 +252,10 @@ class AnalysePisa:
 
             try:
                 assembly_status = asroot.find("status").text
-<<<<<<< HEAD
+
                 assemblies = asroot.iter('asu_complex')
-                
                 assem_result=get_assembly_dict(assemblies)
                 
-            
-=======
-                assemblies = asroot.iter("asu_complex")
-
-                assem_result = get_assembly_dict(assemblies)
-
->>>>>>> c6ee2762210960478ec5d4078a0e1d5e0982adb2
             except Exception as e:
                 logging.error(
                     "invalid assembly dictionary : probably fields not found in xml file"

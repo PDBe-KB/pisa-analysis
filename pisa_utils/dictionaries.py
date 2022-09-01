@@ -260,13 +260,8 @@ def get_assembly_dict(assemblies):
         assem_n_diss = assem.find("assembly/n_diss").text
         assem_sym_num = assem.find("assembly/symNumber").text
         assem_formula = assem.find("assembly/formula").text
-<<<<<<< HEAD
-        assem_composition = assem.find("assembly/composition").text
-        
-=======
         assem_composition = assem.find("assembly/composition").text.strip()
 
->>>>>>> c6ee2762210960478ec5d4078a0e1d5e0982adb2
         # Round to two decimals some assembly properties
 
         assembly_mmsize = assem_mmsize

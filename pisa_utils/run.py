@@ -9,6 +9,7 @@ from pisa_utils.run_pisa import run_pisalite
 def main():
     parser = argparse.ArgumentParser()
 <<<<<<< HEAD
+<<<<<<< HEAD
     parser.add_argument(
         "-i", "--input_cif", help="input directory with CIF directory/file"
     )
@@ -16,6 +17,11 @@ def main():
 
     parser.add_argument("-i", "--input_cif", help="input CIF file")
 >>>>>>> c6ee2762210960478ec5d4078a0e1d5e0982adb2
+=======
+    parser.add_argument(
+        "-i", "--input_cif", help="input directory with CIF directory/file"
+    )
+>>>>>>> 2ca720cbbb49504c286cde51b76f42e826de22d5
     parser.add_argument("--pdb_id", help="PDB ID", type=str, required=True)
     parser.add_argument("--assembly_id", help="Assembly ID", type=str, required=True)
     parser.add_argument(
