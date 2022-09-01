@@ -20,13 +20,14 @@ class AnalysePisa:
         self,
         pdb_id,
         assembly_id,
+        input_cif,
         input_updated_cif,
         output_json,
         output_xml,
     ):
         self.pdb_id = pdb_id
         self.assembly_code = assembly_id
-        self.input_updated_cif = input_updated_cif if input_updated_cif else None
+        self.input_updated_cif = input_updated_cif
         self.output_json = output_json if output_json else None
         self.output_xml = output_xml
         self.results = {}
@@ -252,9 +253,11 @@ class AnalysePisa:
             try:
                 assembly_status = asroot.find("status").text
 
-                assemblies = asroot.iter('asu_complex')
-                assem_result=get_assembly_dict(assemblies)
-                
+                assemblies = asroot.iter("asu_complex")
+
+                assem_result = get_assembly_dict(assemblies)
+
+
             except Exception as e:
                 logging.error(
                     "invalid assembly dictionary : probably fields not found in xml file"

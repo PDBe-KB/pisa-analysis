@@ -59,15 +59,15 @@ def read_uniprot_info(
     unp_acc = None
     unp_num = None
 
-    if not os.path.isfile(input_updated_cif):
+    if not (input_updated_cif and os.path.exists(input_updated_cif)):
         logging.info(f"Updated CIF [{input_updated_cif}] is not provided or is invalid")
         return unp_acc, unp_num
 
     # updated cif file path
-    #path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
+    path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
 
     # Reading UniProt acc and seq numbers in updated cif file:
-    doc = cif.read_file(input_updated_cif)
+    doc = cif.read_file(path)
     block = doc.sole_block()
     label_seq_id = block.find_loop("_atom_site.label_seq_id")
     atom_name = block.find_loop("_atom_site.label_atom_id")
