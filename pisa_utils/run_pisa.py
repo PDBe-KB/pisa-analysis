@@ -10,7 +10,7 @@ from pisa_utils.utils import create_pisa_config
 logger = logging.getLogger()
 
 
-def run_pisalite(input_cif, output_xml, pisa_binary="pisa"):
+def run_pisalite(input_cif, output_xml, pisa_binary):
     """
     Runs pisa-lite to analyse interfaces in assembly file and obtain xml files
 

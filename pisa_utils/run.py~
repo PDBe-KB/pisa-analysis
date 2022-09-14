@@ -17,7 +17,7 @@ def main():
         "-o", "--output_json", help="output directory for JSON and XMLs", required=True
     )
     parser.add_argument("--input_updated_cif", help="updated cif path/file")
-    parser.add_argument("--output_xml", help="output for xml files", type=str, required=True)
+    parser.add_argument("--output_xml", help="output for xml files", type=str)
     parser.add_argument("--pisa_binary", help="path to pisa binary", type=str)
     parser.add_argument(
         "--force", help="always recalculate with pisa-lite", action="store_true"
