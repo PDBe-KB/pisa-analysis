@@ -227,7 +227,7 @@ class AnalysePisa:
         )
 
         self.save_to_json(interfaces_results, output_json)
-
+        print (interfaces_results)
         return interfaces_results
 
     def create_assembly_dict(self):

@@ -1,5 +1,6 @@
 import logging
 import os
+import os.path
 import xml.etree.ElementTree as ET
 
 from gemmi import cif
@@ -13,9 +14,13 @@ def parse_xml_file(xml_file):
     """
     root = None
 
-    logging.debug("parsing: {}".format(xml_file))
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+    xml_exists=os.path.exists(xml_file)
+    
+    if xml_exists:
+        
+        logging.debug("parsing: {}".format(xml_file))
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
 
     return root
 
@@ -64,8 +69,9 @@ def read_uniprot_info(
         return unp_acc, unp_num
 
     # updated cif file path
-    path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
-
+    #path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
+    path = input_updated_cif
+    
     # Reading UniProt acc and seq numbers in updated cif file:
     doc = cif.read_file(path)
     block = doc.sole_block()

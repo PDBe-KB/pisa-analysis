@@ -34,7 +34,7 @@ def run_pisalite(input_cif, output_xml, pisa_binary):
     # binary and session name
 
     binary = os.path.join(pisa_binary, "pisa") if pisa_binary else "pisa"
-
+    print(binary)
     session_name = "XXX"
 
     xml_interfaces_file = open(os.path.join(output_xml, "interfaces.xml"), "w")
