@@ -35,8 +35,8 @@ def create_pisa_config(dataroot, setup_dir):
 
     """
     outputname = os.path.join(dataroot, "pisa.cfg")
-    with os.path.join(setup_dir, "pisa_cfg_tmp") as infile:
-        with (outputname, "w") as outfile:
+    with open(os.path.join(setup_dir, "pisa_cfg_tmp")) as infile:
+        with open(outputname, "w") as outfile:
             for line in infile:
                 line = line.replace("path_dataroot", dataroot).replace(
                     "path_to_setup", setup_dir
@@ -73,7 +73,7 @@ def read_uniprot_info(
     path = input_updated_cif
 
     # Reading UniProt acc and seq numbers in updated cif file:
-    doc = cif.read_file(path)
+    doc = cif.read(path)
     block = doc.sole_block()
     label_seq_id = block.find_loop("_atom_site.label_seq_id")
     atom_name = block.find_loop("_atom_site.label_atom_id")

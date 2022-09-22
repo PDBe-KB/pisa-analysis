@@ -70,7 +70,7 @@ class AnalysePisa:
                 status = root.find("status").text
                 num_interfaces = root.find("n_interfaces").text
 
-                logging.debug("Number of interfaces: {}".format(len(interfaces)))
+                logging.debug("Number of interfaces: {}".format(num_interfaces))
 
                 result["status"] = status
                 result["num_interfaces"] = num_interfaces
@@ -218,7 +218,7 @@ class AnalysePisa:
             "{}-assembly{}-interfaces.json".format(self.pdb_id, self.assembly_code),
         )
 
-        self.save_to_json(interfaces_results, output_json)
+        self._save_to_json(interfaces_results, output_json)
 
         return interfaces_results
 
