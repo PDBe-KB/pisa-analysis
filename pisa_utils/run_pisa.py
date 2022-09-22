@@ -1,67 +1,64 @@
 import logging
 import os
-import shutil
-import subprocess as sub
+import subprocess
 import tempfile
-from datetime import datetime
+from typing import Tuple
 
 from pisa_utils.utils import create_pisa_config
 
-logger = logging.getLogger()
 
+def run_pisalite(
+    input_cif, xml_output_dir, pisa_binary, pisa_setup_dir
+) -> Tuple[str, str]:
+    """Runs PISA Lite to determine interfaces, and returns XML files describing the assembly and interfaces.
 
-def run_pisalite(input_cif, output_xml, pisa_binary):
+    Expects PISA_
+
+    Args:
+        input_cif (str): Path to input CIF file.
+        xml_output_dir (str): Path to output directory for XML files.
+        pisa_binary (str, optional): Path to PISA binary. Defaults to "pisa".
+        pisa_setup_dir (str, optional): Path to PISA setup directory.
+            Checks PISA_SETUP_DIR environment variable if not provided. Defaults to None.
+
+    Returns:
+        Tuple[str, str]: Paths to XML files describing the assembly and interfaces.
     """
-    Runs pisa-lite to analyse interfaces in assembly file and obtain xml files
+    with tempfile.TemporaryDirectory() as temp_dir:
 
-    :param input_cif: type str - path to input cif file
-    :param output_dir: type str - path to output folder
+        os.makedirs(xml_output_dir, exist_ok=True)
+        cfg_file = create_pisa_config(temp_dir, pisa_setup_dir)
 
-    :return: None
-    """
+        session_name = "XXX"
 
-    # Create pisa configuration file:
+        xml_interfaces_file = os.path.join(xml_output_dir, "interfaces.xml")
+        xml_assembly_file = os.path.join(xml_output_dir, "assembly.xml")
 
-    pisa_set_up = os.environ["PISA_SETUP_DIR"]
-    create_pisa_config(output_xml, pisa_set_up)
+        logging.info(f"Running {pisa_binary} on {input_cif}")
+        subprocess.run(
+            [pisa_binary, session_name, "-analyse", input_cif, cfg_file],
+            check=True,
+        )
+        with open(xml_interfaces_file, "w") as f:
+            subprocess.run(
+                [pisa_binary, session_name, "-xml", "interfaces", cfg_file],
+                stdout=f,
+                check=True,
+            )
 
-    cfg_input = os.path.join(output_xml, "pisa.cfg")
-    pisa_output = os.path.join(output_xml, "pisa_XXX")
+        with open(xml_assembly_file, "w") as f:
+            subprocess.run(
+                [pisa_binary, session_name, "-xml", "assemblies", cfg_file],
+                stdout=f,
+                check=True,
+            )
+        if not (
+            os.path.getsize(xml_interfaces_file) > 0
+            and os.path.getsize(xml_assembly_file) > 0
+        ):
+            raise Exception(
+                f"One or both XML files are empty: {xml_interfaces_file}, {xml_assembly_file}"
+            )
+        logging.info(f"XML files: {xml_assembly_file}, {xml_interfaces_file}")
 
-    start = datetime.now()
-    logging.info("starting Pisa on {}".format(input_cif))
-
-    # binary and session name
-
-    binary = os.path.join(pisa_binary, "pisa") if pisa_binary else "pisa"
-    print(binary)
-    session_name = "XXX"
-
-    xml_interfaces_file = open(os.path.join(output_xml, "interfaces.xml"), "w")
-    xml_assembly_file = open(os.path.join(output_xml, "assembly.xml"), "w")
-
-    sub.run([binary, session_name, "-analyse", input_cif, cfg_input])
-    sub.run(
-        [binary, session_name, "-xml", "interfaces", cfg_input],
-        stdout=xml_interfaces_file,
-    )
-    sub.run(
-        [binary, session_name, "-xml", "assemblies", cfg_input],
-        stdout=xml_assembly_file,
-    )
-
-    xml_interfaces_file.close()
-    xml_assembly_file.close()
-
-    os.remove(cfg_input)
-    shutil.rmtree(pisa_output)
-
-    end = datetime.now()
-    logging.info("finished Pisa analysis")
-
-    time_taken = end - start
-    time_taken_str = str(time_taken)
-    logging.info("time taken {}".format(time_taken_str))
-
-    # TODO: RETURN TRUE IF THERE WAS REASONABLE TIME BETWEEN START AND END
-    # TODO: OTHERWISE RETURN FALSE AND LOG A WARNING
+    return xml_assembly_file, xml_interfaces_file

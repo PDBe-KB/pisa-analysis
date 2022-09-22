@@ -14,10 +14,10 @@ def parse_xml_file(xml_file):
     """
     root = None
 
-    xml_exists=os.path.exists(xml_file)
-    
+    xml_exists = os.path.exists(xml_file)
+
     if xml_exists:
-        
+
         logging.debug("parsing: {}".format(xml_file))
         tree = ET.parse(xml_file)
         root = tree.getroot()
@@ -34,16 +34,16 @@ def create_pisa_config(dataroot, setup_dir):
     :return : None
 
     """
-    infile = open(os.path.join(setup_dir, "pisa_cfg_tmp"))
     outputname = os.path.join(dataroot, "pisa.cfg")
-    outfile = open(outputname, "w")
-    for line in infile:
-        line = line.replace("path_dataroot", dataroot).replace(
-            "path_to_setup", setup_dir
-        )
-        outfile.write(line)
-    infile.close()
-    outfile.close()
+    with open(os.path.join(setup_dir, "pisa_cfg_tmp")) as infile:
+        with open(outputname, "w") as outfile:
+            for line in infile:
+                line = line.replace("path_dataroot", dataroot).replace(
+                    "path_to_setup", setup_dir
+                )
+                outfile.write(line)
+
+    return outputname
 
 
 def read_uniprot_info(
@@ -69,11 +69,11 @@ def read_uniprot_info(
         return unp_acc, unp_num
 
     # updated cif file path
-    #path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
+    # path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
     path = input_updated_cif
-    
+
     # Reading UniProt acc and seq numbers in updated cif file:
-    doc = cif.read_file(path)
+    doc = cif.read(path)
     block = doc.sole_block()
     label_seq_id = block.find_loop("_atom_site.label_seq_id")
     atom_name = block.find_loop("_atom_site.label_atom_id")
