@@ -208,8 +208,8 @@ class AnalysePisa:
 
             interfaces_results = self.results
 
-        logging.debug(
-            f"Finished creating assembly dictionary in {time() - start} seconds"
+        logging.info(
+            f"Finished creating assembly-interfaces dictionary in {time() - start} seconds"
         )
 
         # dump to json file

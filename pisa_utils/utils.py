@@ -1,7 +1,9 @@
 import logging
 import os
 import os.path
+#from lxml import etree 
 import xml.etree.ElementTree as ET
+
 
 from gemmi import cif
 
@@ -19,6 +21,7 @@ def parse_xml_file(xml_file):
     if xml_exists:
 
         logging.debug("parsing: {}".format(xml_file))
+        #tree = etree.parse(xml_file)
         tree = ET.parse(xml_file)
         root = tree.getroot()
 
@@ -65,7 +68,7 @@ def read_uniprot_info(
     unp_num = None
 
     if not (input_updated_cif and os.path.exists(input_updated_cif)):
-        logging.info(f"Updated CIF [{input_updated_cif}] is not provided or is invalid")
+        #logging.info(f"Updated CIF [{input_updated_cif}] is not provided or is invalid")
         return unp_acc, unp_num
 
     # updated cif file path
@@ -75,13 +78,17 @@ def read_uniprot_info(
     # Reading UniProt acc and seq numbers in updated cif file:
     doc = cif.read(path)
     block = doc.sole_block()
-    label_seq_id = block.find_loop("_atom_site.label_seq_id")
-    atom_name = block.find_loop("_atom_site.label_atom_id")
-    auth_seq_id = block.find_loop("_atom_site.auth_seq_id")
-    db_name = block.find_loop("_atom_site.pdbx_sifts_xref_db_name")
-    db_acc = block.find_loop("_atom_site.pdbx_sifts_xref_db_acc")
-    db_num = block.find_loop("_atom_site.pdbx_sifts_xref_db_num")
-    res_name = block.find_loop("_atom_site.label_comp_id")
+    db_seq_id = block.find_loop("_pdbx_sifts_xref_db.seq_id")
+    db_acc = block.find_loop("_pdbx_sifts_xref_db.unp_acc")
+    db_num = block.find_loop("_pdbx_sifts_xref_db.unp_num")
+    res_name = block.find_loop("_pdbx_sifts_xref_db.mon_id")
+    #label_seq_id = block.find_loop("_atom_site.label_seq_id")
+    #atom_name = block.find_loop("_atom_site.label_atom_id")
+    #auth_seq_id = block.find_loop("_atom_site.auth_seq_id")
+    #db_name = block.find_loop("_atom_site.pdbx_sifts_xref_db_name")
+    #db_acc = block.find_loop("_atom_site.pdbx_sifts_xref_db_acc")
+    #db_num = block.find_loop("_atom_site.pdbx_sifts_xref_db_num")
+    #res_name = block.find_loop("_atom_site.label_comp_id")
 
     # counts if atom is not found in updated cif file
     n = 0
@@ -92,6 +99,34 @@ def read_uniprot_info(
         int_lab_seqnum = "."
 
     # Search atom in updated cif file and read uniprot numbers
+
+    for (labseqid, resname, dbacc, dbnum) in zip(
+        db_seq_id, res_name, db_acc, db_num
+    ):
+        #print(labseqid, dbacc)
+        
+        if (
+            labseqid == int_lab_seqnum.strip()
+            and resname == int_resname.strip()
+        ):
+            n += 1
+            if labseqid != ".":
+                unp_acc = dbacc
+                unp_num = dbnum
+            
+                return unp_acc, unp_num
+        
+            else:
+                logging.debug("No UNP numbers found for atom:")
+                logging.debug(
+                    "name {},label_seq_id {},seq_num {}, residue {}".format(
+                        int_atname, int_lab_seqnum, int_seqnum, int_resname
+                    )
+                )
+                unp_acc = None
+                unp_num = None
+                return unp_acc, unp_num
+    """
     for (labseqnum, seqnum, name, resname, dbname, dbacc, dbnum) in zip(
         label_seq_id, auth_seq_id, atom_name, res_name, db_name, db_acc, db_num
     ):
@@ -125,3 +160,4 @@ def read_uniprot_info(
             )
         )
         return unp_acc, unp_num
+    """

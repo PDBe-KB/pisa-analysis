@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 from typing import Tuple
+from time import time
 
 from pisa_utils.utils import create_pisa_config
 
@@ -25,7 +26,7 @@ def run_pisalite(
         Tuple[str, str]: Paths to XML files describing the assembly and interfaces.
     """
     with tempfile.TemporaryDirectory() as temp_dir:
-
+        start = time()
         os.makedirs(xml_output_dir, exist_ok=True)
         cfg_file = create_pisa_config(temp_dir, pisa_setup_dir)
 
@@ -60,5 +61,7 @@ def run_pisalite(
                 f"One or both XML files are empty: {xml_interfaces_file}, {xml_assembly_file}"
             )
         logging.info(f"XML files: {xml_assembly_file}, {xml_interfaces_file}")
-
+        totaltime=time()-start
+        print("Finished analysis of interfaces in %s seconds",totaltime)
+        logging.info(f"Finished analysis of interfaces in {totaltime} seconds")
     return xml_assembly_file, xml_interfaces_file
