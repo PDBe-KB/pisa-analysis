@@ -1,7 +1,10 @@
 import os
-import xml.etree.ElementTree as ET
+from lxml import etree
+#import xml.etree.ElementTree as ET
 from unittest import TestCase
 from unittest.mock import patch
+
+from gemmi import cif
 
 from pisa_utils.analyze import AnalysePisa
 
@@ -13,8 +16,8 @@ class TestAnalyzePisa(TestCase):
     @patch(
         "pisa_utils.analyze.parse_xml_file",
         side_effect=[
-            ET.parse(os.path.join(".", "tests", "data", "assembly.xml")).getroot(),
-            ET.parse(os.path.join(".", "tests", "data", "interfaces.xml")).getroot(),
+            etree.parse(os.path.join(".", "tests", "data", "assembly.xml")).getroot(),
+            etree.parse(os.path.join(".", "tests", "data", "interfaces.xml")).getroot(),
         ],
     )
     def test_create_interfaces_dict(self, bonds, molecules,assem_result, xmls):
@@ -68,8 +71,7 @@ class TestAnalyzePisa(TestCase):
             pdb_id="6nxr",
             assembly_id="1",
             output_json=os.path.join("tests", "data"),
-            output_xml=os.path.join("tests", "data"),
-            input_cif=".",
+            xmls_dir=os.path.join("tests", "data"),
             input_updated_cif="."
         )
         expected = {
@@ -129,8 +131,7 @@ class TestAnalyzePisa(TestCase):
             pdb_id="6nxr",
             assembly_id="1",
             output_json=os.path.join("tests", "data"),
-            output_xml=os.path.join("tests", "data"),
-            input_cif=".",
+            xmls_dir=os.path.join("tests", "data"),
             input_updated_cif="."
         )
         
