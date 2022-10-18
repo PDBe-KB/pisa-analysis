@@ -101,7 +101,7 @@ def get_molecules_dict(molecules):
     return molecules_dicts, interface_residues_count, is_invalid
 
 
-def get_bond_dict(bondtag, bondtype, pdb_id, input_updated_cif):
+def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
     """
     Creates bond dictionary
 
@@ -165,7 +165,7 @@ def get_bond_dict(bondtag, bondtype, pdb_id, input_updated_cif):
             atname_1,
             res_1,
             pdb_id,
-            input_updated_cif,
+            updated_cif_block
         )
         unp_acc_1 = uniprot_info_1[0]
         unp_num_1 = uniprot_info_1[1]
@@ -176,7 +176,7 @@ def get_bond_dict(bondtag, bondtype, pdb_id, input_updated_cif):
             atname_2,
             res_2,
             pdb_id,
-            input_updated_cif,
+            updated_cif_block
         )
         unp_acc_2 = uniprot_info_2[0]
         unp_num_2 = uniprot_info_2[1]

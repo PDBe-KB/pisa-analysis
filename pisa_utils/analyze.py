@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from time import time
+from gemmi import cif
 
 from pisa_utils.dictionaries import get_assembly_dict, get_bond_dict, get_molecules_dict
 from pisa_utils.utils import parse_xml_file
@@ -79,6 +80,18 @@ class AnalysePisa:
 
                 interfaces = root.iter("interface")
 
+                # updated cif file path                                                                                                
+                # path = os.path.join(input_updated_cif, "{}_updated.cif".format(pdb_id))
+                updated_cif_path = self.input_updated_cif
+
+                #parsing updated cif file 
+                if (self.input_updated_cif and os.path.exists(self.input_updated_cif)):
+                     doc = cif.read(updated_cif_path)
+                     updated_cif_block = doc.sole_block()
+                else:
+                    logging.info(f"Updated CIF [{self.input_updated_cif}] is not provided or is invalid")
+                    updated_cif_block = None
+                
                 for interface in interfaces:
 
                     # Interface General information
@@ -122,7 +135,8 @@ class AnalysePisa:
 
                         # for hbond in hbonds:
                         hbond_dict = get_bond_dict(
-                            hbonds, "H-bond", self.pdb_id, self.input_updated_cif
+                            hbonds, "H-bond", self.pdb_id,
+                            updated_cif_block
                         )
 
                         # for sbridge in sbridges:
@@ -130,25 +144,26 @@ class AnalysePisa:
                             sbridges,
                             "salt-bridges",
                             self.pdb_id,
-                            self.input_updated_cif,
+                            updated_cif_block
                         )
                         # for covbond in covbonds:
                         covbond_dict = get_bond_dict(
                             covbonds,
                             "cov-bonds",
                             self.pdb_id,
-                            self.input_updated_cif,
+                            updated_cif_block
                         )
                         # for ssbond in ssbonds:
                         ssbond_dict = get_bond_dict(
-                            ssbonds, "ss-bonds", self.pdb_id, self.input_updated_cif
+                            ssbonds, "ss-bonds", self.pdb_id, 
+                            updated_cif_block
                         )
                         # for othbond in othbonds:
                         othbond_dict = get_bond_dict(
                             othbonds,
                             "other-bond",
                             self.pdb_id,
-                            self.input_updated_cif,
+                            updated_cif_block
                         )
 
                         interface_dict = {
