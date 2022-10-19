@@ -77,57 +77,68 @@ class TestAnalyzePisa(TestCase):
             xmls_dir=os.path.join("tests", "data"),
             input_updated_cif=path_to_updated_cif
         )
+
+
         expected = {
-            "id": ["1"],
-            "int_area": [1427.5],
-            "interface_dicts": [
-                {
-                    "interface_id": "1",
-                    "interface_area": 1427.5,
-                    "solvation_energy": -18.22,
-                    "stabilization_energy": -28.59,
-                    "p_value": 0.095,
-                    "number_interface_residues": 2,
-                    "number_hydrogen_bonds": 20,
-                    "number_covalent_bonds": 0,
-                    "number_disulfide_bonds": 0,
-                    "number_salt_bridges": 4,
-                    "number_other_bonds": 0,
-                    "hydrogen_bonds": 1,
-                    "salt_bridges": 2,
-                    "disulfide_bonds": 4,
-                    "covalent_bonds": 3,
-                    "other_bonds": 5,
-                    "molecules": [
+            'PISA':{
+                'pdb_id': '6nxr',
+                'assembly_id': '1',
+                'pisa_version': '2.0',
+                'assembly': {
+                    'mmsize': '2',
+                    'dissociation_energy': 15.61,
+                    'accessible_surface_area': 19395.3,
+                    'buried_surface_area': 3514.17,
+                    'entropy': 12.98,
+                    'dissociation_area': 1427.5,
+                    'solvation_energy_gain': -35.28,
+                    'formula': 'A(2)a(2)b(2)',
+                    'composition': 'A-2A[NA](2)[GOL](2)',
+                    'interface_count': 1,
+                    'interfaces':[
                         {
-                            "molecule_id": "1",
-                            "molecule_class": "Protein",
-                            "chain_id": "A-2",
-                            "residue_label_comp_ids": ["ALA"],
-                            "residue_seq_ids": ["2"],
-                            "residue_label_seq_ids": ["5"],
-                            "residue_ins_codes": [None],
-                            "residue_bonds": [None],
-                            "solvation_energies": [0],
-                            "accessible_surface_areas": [158.39],
-                            "buried_surface_areas": [0],
+                            'interface_id':'1',
+                            'interface_area': 1427.5,
+                            'solvation_energy': -18.22,
+                            'stabilization_energy': -28.59,
+                            'p_value': 0.095,
+                            'number_interface_residues': 2,
+                            'number_hydrogen_bonds': 20,
+                            'number_covalent_bonds': 0,
+                            'number_disulfide_bonds': 0,
+                            'number_salt_bridges': 4,
+                            'number_other_bonds': 0,
+                            'hydrogen_bonds': 1,
+                            'salt_bridges': 2,
+                            'disulfide_bonds': 4,
+                            'covalent_bonds': 3,
+                            'other_bonds': 5,
+                            'molecules': [
+                                {
+                                    'molecule_id': '1',
+                                    'molecule_class': 'Protein',
+                                    'chain_id': 'A-2',
+                                    'residue_label_comp_ids': ['ALA'],
+                                    'residue_seq_ids': ['2'],
+                                    'residue_label_seq_ids': ['5'],
+                                    'residue_ins_codes': [None],
+                                    'residue_bonds': [None],
+                                    'solvation_energies': [0],
+                                    'accessible_surface_areas': [158.39],
+                                    'buried_surface_areas': [0]
+                                }
+                            ]
                         }
-                    ],
+                    ]
                 }
-            ],
-            "non_ligand_interface_count": 1,
-            "assembly_mmsize": "2",
-            "assembly_diss_energy": 15.61,
-            "assembly_asa": 19395.3,
-            "assembly_bsa": 3514.17,
-            "assembly_entry": 12.98,
-            "assembly_diss_area": 1427.5,
-            "assembly_int_energy": -35.28,
-            "assembly_formula": "A(2)a(2)b(2)",
-            "assembly_composition": "A-2A[NA](2)[GOL](2)",
+            }
         }
+
         ap.create_assem_interfaces_dict()
         self.assertEqual(ap.results, expected)
+
+
+            
     """   
     def test_create_assem_interfaces_dict(self):
 
