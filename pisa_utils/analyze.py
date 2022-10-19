@@ -91,6 +91,7 @@ class AnalysePisa:
                 else:
                     logging.info(f"Updated CIF [{self.input_updated_cif}] is not provided or is invalid")
                     updated_cif_block = None
+
                 
                 for interface in interfaces:
 

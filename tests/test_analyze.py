@@ -12,7 +12,7 @@ from pisa_utils.analyze import AnalysePisa
 class TestAnalyzePisa(TestCase):
     @patch("pisa_utils.analyze.get_bond_dict", side_effect=[1, 2, 3, 4, 5])
     @patch("pisa_utils.analyze.get_molecules_dict")
-    @patch("pisa_utils.analyze.get_assembly_dict")
+    #@patch("pisa_utils.analyze.get_assembly_dict")
     @patch(
         "pisa_utils.analyze.parse_xml_file",
         side_effect=[
@@ -20,7 +20,7 @@ class TestAnalyzePisa(TestCase):
             etree.parse(os.path.join(".", "tests", "data", "interfaces.xml")).getroot(),
         ],
     )
-    def test_create_interfaces_dict(self, bonds, molecules,assem_result, xmls):
+    def test_create_interfaces_dict(self, bonds, molecules, xmls):
         """
         Test if the correct JSON is generated
         :param bonds: mocked bonds data
@@ -46,7 +46,7 @@ class TestAnalyzePisa(TestCase):
             2,
             False,
         ]
-
+        """
         assem_result.return_value = {
                  'assembly_id': '1',
                  'assembly_size': '6',
@@ -66,13 +66,16 @@ class TestAnalyzePisa(TestCase):
                  'assembly_sym_num': '2',
                  'assembly_R350': '',
         }
+        """
         
+        path_to_updated_cif = os.path.join(".", "tests", "data","6nxr_updated.cif")
+
         ap = AnalysePisa(
             pdb_id="6nxr",
             assembly_id="1",
             output_json=os.path.join("tests", "data"),
             xmls_dir=os.path.join("tests", "data"),
-            input_updated_cif="."
+            input_updated_cif=path_to_updated_cif
         )
         expected = {
             "id": ["1"],
@@ -125,14 +128,16 @@ class TestAnalyzePisa(TestCase):
         }
         ap.create_assem_interfaces_dict()
         self.assertEqual(ap.results, expected)
-    
+    """   
     def test_create_assem_interfaces_dict(self):
+
+        path_to_updated_cif = os.path.join(".", "tests", "data","6nxr_updated.cif")
         ap = AnalysePisa(
             pdb_id="6nxr",
             assembly_id="1",
             output_json=os.path.join("tests", "data"),
             xmls_dir=os.path.join("tests", "data"),
-            input_updated_cif="."
+            input_updated_cif=path_to_updated_cif
         )
         
         ap.interfaces_results = {
@@ -243,3 +248,4 @@ class TestAnalyzePisa(TestCase):
         }
         self.assertEqual(ap.results, expected)
     
+    """

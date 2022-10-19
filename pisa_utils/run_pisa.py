@@ -25,13 +25,15 @@ def run_pisalite(
     Returns:
         Tuple[str, str]: Paths to XML files describing the assembly and interfaces.
     """
+    
+    
     with tempfile.TemporaryDirectory() as temp_dir:
         start = time()
         os.makedirs(xml_output_dir, exist_ok=True)
         cfg_file = create_pisa_config(temp_dir, pisa_setup_dir)
-
+        print(cfg_file)
         session_name = "XXX"
-
+        
         xml_interfaces_file = os.path.join(xml_output_dir, "interfaces.xml")
         xml_assembly_file = os.path.join(xml_output_dir, "assembly.xml")
 
@@ -62,6 +64,6 @@ def run_pisalite(
             )
         logging.info(f"XML files: {xml_assembly_file}, {xml_interfaces_file}")
         totaltime=time()-start
-        print("Finished analysis of interfaces in %s seconds",totaltime)
+        #print("Finished analysis of interfaces in %s seconds",totaltime)
         logging.info(f"Finished analysis of interfaces in {totaltime} seconds")
     return xml_assembly_file, xml_interfaces_file

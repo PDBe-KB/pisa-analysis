@@ -1,8 +1,8 @@
 import logging
 import os
 import os.path
-from lxml import etree 
-#import xml.etree.ElementTree as ET
+#from lxml import etree 
+import xml.etree.ElementTree as ET
 
 
 from gemmi import cif
@@ -21,7 +21,7 @@ def parse_xml_file(xml_file):
     if xml_exists:
 
         logging.debug("parsing: {}".format(xml_file))
-        tree = etree.parse(xml_file)
+        tree = ET.parse(xml_file)
         root = tree.getroot()
 
     return root
@@ -44,7 +44,6 @@ def create_pisa_config(dataroot, setup_dir):
                     "path_to_setup", setup_dir
                 )
                 outfile.write(line)
-
     return outputname
 
 
