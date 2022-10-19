@@ -52,7 +52,7 @@ class AnalysePisa:
             asroot = parse_xml_file(xml_file=assembly_xml_file)
             root = parse_xml_file(xml_file=interfaces_xml_file)
 
-            if root and asroot:
+            if (root is not None) and (asroot is not None):
 
                 try:
 
