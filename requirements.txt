@@ -6,3 +6,4 @@ jsonschema
 pytest-cov
 coverage
 pre-commit
+lxml

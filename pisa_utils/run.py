@@ -42,10 +42,10 @@ def main():
         raise Exception(
             "PISA_SETUP_DIR not set in environment and --pisa_setup_dir not specified"
         )
-
-    if not os.path.isfile(args.pisa_binary):
+    
+    if not "pisa" and not os.path.isfile(args.pisa_binary):
         raise Exception(f"pisa binary not found or is not a file: {args.pisa_binary}")
-
+    
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
     input_cif_file = args.input_cif
