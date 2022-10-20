@@ -118,10 +118,15 @@ class AnalysePisa:
                     (
                         molecules_dicts,
                         interface_residues_count,
-                        is_ligand,
+                        is_invalid,
                     ) = get_molecules_dict(molecules)
+                    
+                    if (n_h_bonds==0 and n_ss_bonds==0 and n_covalent_bonds==0 and
+                        n_salt_bridges==0 and other_contacts == 0 ):
 
-                    if not is_ligand:
+                        is_invalid = True
+                    
+                    if not is_invalid:
                         non_ligand_interface_count += 1
 
                         # Reading bonds
