@@ -19,7 +19,7 @@ The process runs PISA-Lite as a subprocess and requires apriori compilation of P
 
 [PISA-Lite documentation](https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies)
 
-The process requires to set two path environment variables for PISA:
+To make your life easier when running the process, you can set two path environment variables for PISA:
 
 An evironment variable to the binary 'pisa':
 
@@ -86,10 +86,17 @@ Other optional arguments are:
 ```
 --input_updated_cif  
 --force  
+--pisa_setup_dir
+--pisa_binary
 ```
-**input_updated_cif**: path to updated cif file, by default process reads 'XXX_updated.cif' (where XXX is the pdb_id entry) in the input directory defined with -i or --input_cif
+**input_updated_cif**: updated cif for pdbid entry 
 
 **force** : Always runs PISA-Lite calculation
+
+**pisa_setup_dir** : Path to the 'setup' directory in PISA-lite
+
+**pisa_binary** : Binary file for PISA-lite 
+
 
 The process is as follows:
 
