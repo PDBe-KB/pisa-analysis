@@ -31,7 +31,7 @@ def run_pisalite(
         start = time()
         os.makedirs(xml_output_dir, exist_ok=True)
         cfg_file = create_pisa_config(temp_dir, pisa_setup_dir)
-        print(cfg_file)
+        
         session_name = "XXX"
         
         xml_interfaces_file = os.path.join(xml_output_dir, "interfaces.xml")
@@ -64,6 +64,6 @@ def run_pisalite(
             )
         logging.info(f"XML files: {xml_assembly_file}, {xml_interfaces_file}")
         totaltime=time()-start
-        #print("Finished analysis of interfaces in %s seconds",totaltime)
+        
         logging.info(f"Finished analysis of interfaces in {totaltime} seconds")
     return xml_assembly_file, xml_interfaces_file
