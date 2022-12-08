@@ -28,6 +28,7 @@ def run_pisalite(
     
     
     with tempfile.TemporaryDirectory() as temp_dir:
+        
         start = time()
         os.makedirs(xml_output_dir, exist_ok=True)
         cfg_file = create_pisa_config(temp_dir, pisa_setup_dir)
@@ -63,6 +64,7 @@ def run_pisalite(
                 f"One or both XML files are empty: {xml_interfaces_file}, {xml_assembly_file}"
             )
         logging.info(f"XML files: {xml_assembly_file}, {xml_interfaces_file}")
+        
         totaltime=time()-start
         
         logging.info(f"Finished analysis of interfaces in {totaltime} seconds")

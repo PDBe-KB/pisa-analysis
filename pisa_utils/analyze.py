@@ -4,6 +4,8 @@ import os
 from time import time
 from gemmi import cif
 
+import pandas as pd
+
 from pisa_utils.dictionaries import get_assembly_dict, get_bond_dict, get_molecules_dict
 from pisa_utils.utils import parse_xml_file
 
@@ -91,8 +93,7 @@ class AnalysePisa:
                 else:
                     logging.info(f"Updated CIF [{self.input_updated_cif}] is not provided or is invalid")
                     updated_cif_block = None
-
-                
+                    
                 for interface in interfaces:
 
                     # Interface General information

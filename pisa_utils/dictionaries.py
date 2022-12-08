@@ -34,12 +34,7 @@ def get_molecules_dict(molecules):
         residue_bonds = []
 
         n_residues = 0
-        # for res in interface_residues:
-        #    n_residues=n_residues+1
-
-        # if n_residues == 1:
-        #    is_invalid = True
-
+        
         # Creating residues dictionaries
         for residue in interface_residues:
             # n_residues=n_residues+1
@@ -161,8 +156,6 @@ def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
 
         uniprot_info_1 = read_uniprot_info(
             label_seqnum_1,
-            seqnum_1,
-            atname_1,
             res_1,
             pdb_id,
             updated_cif_block
@@ -172,15 +165,14 @@ def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
 
         uniprot_info_2 = read_uniprot_info(
             label_seqnum_2,
-            seqnum_2,
-            atname_2,
             res_2,
             pdb_id,
             updated_cif_block
         )
         unp_acc_2 = uniprot_info_2[0]
         unp_num_2 = uniprot_info_2[1]
-
+    
+        
         atom_site1_chains.append(chain_1)
         atom_site1_residues.append(res_1)
         atom_site1_label_asym_ids.append(label_asym_id_1)
@@ -206,6 +198,7 @@ def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
         bonds_distances.append(dist)
         bond_types.append(bond_type)
 
+        
     bond_dict = {
         "bond_distances": bonds_distances,
         "atom_site_1_chains": atom_site1_chains,
