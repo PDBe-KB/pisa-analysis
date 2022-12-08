@@ -11,6 +11,10 @@ class TestDictionaries(TestCase):
     # Note that the mocked function is imported in dictionaries
     @patch("pisa_utils.dictionaries.read_uniprot_info")
     def test_get_bond_dict(self, mock):
+        """
+        Test that the function works with valid data
+        :param mock: mock for UniProt numbering
+        """
         mock.return_value = ("P48491", "2")
         bond = ET.parse(os.path.join(".", "tests", "data", "bonds.xml")).getroot()
         #bonds = [bond]
