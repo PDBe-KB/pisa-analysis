@@ -1,6 +1,7 @@
 import os
 import os.path
 from unittest import TestCase
+import tempfile
 
 from pisa_utils.utils import parse_xml_file, read_uniprot_info, create_pisa_config
 from gemmi import cif
@@ -17,12 +18,13 @@ class TestUtils(TestCase):
 
     def test_create_pisa_config(self):
         # test if function creates pisa configuration file 
-        dataroot = os.path.join(".", "tests", "data")
+        #dataroot = os.path.join(".", "tests", "data")
         setup_dir = os.path.join(".", "tests", "data")
-        result = create_pisa_config(dataroot, setup_dir)
-        pisa_cfg_exists= os.path.exists(result)
+        with tempfile.TemporaryDirectory() as tempdir:
+            result = create_pisa_config(tempdir, setup_dir)
+            pisa_cfg_exists= os.path.exists(result)
         
-        self.assertTrue(pisa_cfg_exists)
+            self.assertTrue(pisa_cfg_exists)
         
     def test_read_uniprot_info_valid(self):
         """
@@ -33,9 +35,9 @@ class TestUtils(TestCase):
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
         
-        result = read_uniprot_info("5", "2", "N", "ALA", "6nxr", updated_cif_block)
+        result = read_uniprot_info("5", "ALA", "6nxr", updated_cif_block)
         self.assertEqual(result, (("P48491", "2")))
-        result = read_uniprot_info("6", "3", "CA", "ARG", "6nxr",updated_cif_block)
+        result = read_uniprot_info("6", "ARG", "6nxr",updated_cif_block)
         self.assertEqual(result, (("P48491", "3")))
     
     def test_read_uniprot_info_valid_with_negative_number(self):
@@ -46,17 +48,17 @@ class TestUtils(TestCase):
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
 
-        result = read_uniprot_info("-1", "3", "O", "ARG", "6nxr", updated_cif_block)
+        result = read_uniprot_info("-1", "ARG", "6nxr", updated_cif_block)
         self.assertEqual(result, (None, None))
     
-    def test_read_uniprot_info_no_atom(self):
+    def test_read_uniprot_info_no_residue(self):
         """
         Test that the function returns None when it can't find the atom
         """
         path_to_updated_cif = os.path.join(".", "tests", "data","6nxr_updated.cif")
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
-        result = read_uniprot_info("6", "3", "CA", "GLY", "6nxr", updated_cif_block)
+        result = read_uniprot_info("6", "GLY", "6nxr", updated_cif_block)
         self.assertEqual(result, ((None, None)))
 
     def test_read_uniprot_info_no_mapping(self):
@@ -66,5 +68,5 @@ class TestUtils(TestCase):
         path_to_updated_cif = os.path.join(".", "tests", "data","6nxr_updated.cif")
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
-        result = read_uniprot_info("4", "3", "CB", "ARG", "6nxr", updated_cif_block)
+        result = read_uniprot_info("4", "ARG", "6nxr", updated_cif_block)
         self.assertEqual(result, ((None, None)))

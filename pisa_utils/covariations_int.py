@@ -7,8 +7,9 @@ from gemmi import cif
 import csv
 
 import pandas as pd
+from pandas import DataFrame
 
-from pisa_utils.utils import read_cov_info
+#from pisa_utils.utils import read_cov_info
 
 
 def get_cov_interfaces(input_json, input_cov):
@@ -73,20 +74,21 @@ def get_cov_interfaces(input_json, input_cov):
                      if (unp_num_1 is not None) and (unp_num_2 is not None):
 
                         cov_probability, cov_score = read_cov_info(unp_num_1,unp_num_2,covs)
-
-                        covariation_pairs.append(
-                            [
-                                unp_num_1,unp_acc_1,residue_1,
-                                unp_num_2,unp_acc_2,residue_2,
-                                key,interface_id,cov_score,
-                                cov_probability
-                            ]
-                        )
+                        
+                        if (cov_probability is not None) and (cov_score is not None):
+                            covariation_pairs.append(
+                                [
+                                    unp_num_1,unp_acc_1,residue_1,
+                                    unp_num_2,unp_acc_2,residue_2,
+                                    key,interface_id,cov_score,
+                                    cov_probability
+                                ]
+                            )
                         
      
     return covariation_pairs, pdb_id
 
-def save_covariation_info(covariation_pairs, pdb_id, output):
+def save_covariation_data(covariation_pairs,pdb_id,output_dir):
     """
     Creates output csv file with interfaces contacts with covariation signal
 
@@ -96,20 +98,91 @@ def save_covariation_info(covariation_pairs, pdb_id, output):
 
     pdb_id : Entry pdb id
 
-    output (str) : Path to output file containing interfaces contacts with covariation signal
+    output_dir (str) : Path to output directory to save file containing interfaces contacts with covariation signal
     
     """
-    df = pd.DataFrame(
-         covariation_pairs, columns=
-        [
-            "unp_num_1","unp_acc_1","residue_1",
-            "unp_num_2","unp_acc_2","residue_2",
-            "contact","interface", "Score", "Probability"
-        ]
-    )
+    if len(covariation_pairs) != 0 :
 
-    output_csv = os.path.join(output,"{}_interfaces_cov.csv".format(pdb_id))
-    df.to_csv(output_csv)
+        try:
+        
+            df = pd.DataFrame(
+                covariation_pairs, columns=
+                [
+                    "unp_num_1","unp_acc_1","residue_1",
+                    "unp_num_2","unp_acc_2","residue_2",
+                    "contact","interface", "Score", "Probability"
+                ]
+            )
+            
+            output_csv = os.path.join(output_dir,"{}_interfaces_cov.csv".format(pdb_id))
+            df.to_csv(output_csv)
+
+            return df 
+
+
+        except Exception as e:
+            logging.error(
+                "Invalid data frame for covariation pairs: probably wrong fields in the data "
+            )
+            logging.error(e)
+    else:
+        logging.info(f"No covariation data found to save ' contacts")
+
+        return None 
+
+
+def read_cov_info(r1,r2,df: DataFrame):
+
+    """
+    Outputs covariation data for residues r1 and r2
+    
+    Args:
+
+    r1 : uniprot sequence number for residue 1
+
+    r2 : uniprot sequence number for residue 2
+
+    df: DataFrame : data containing covariation information for residue pairs 
+    
+    """
+    
+    Probability=None
+    Score=None
+
+    if int(r1) <= int(r2) :
+        unp_res1=int(r1)
+        unp_res2=int(r2)
+    if int(r2) < int(r1) :
+        unp_res1=int(r2)
+        unp_res2=int(r1)
+
+    if df is not None:
+
+        n=0
+        index=None
+        for i,j in zip(df['unp_num A'],df['unp_num B']):
+            if i==unp_res1 and j==unp_res2:
+                index=n
+            n=n+1
+        if index is not None:
+            
+            Probability = df['Probability'][index]
+            Score = df['Score'][index]
+
+            
+        #r = df[
+        #     (df["Residue A"] == unp_res1)
+        #    & (df["Residue B"] == unp_res2)
+        #]
+
+
+        #row = r.iloc[0]
+        #print(row)
+        #Probability=list(r['Probability'])
+        #Score=list(r['Score'])
+    
+    return Probability,Score
+
 
 def main():
     """Application entry point"""
@@ -134,9 +207,9 @@ def main():
     
     covariation_pairs, pdb_id = get_cov_interfaces(args.input_json, args.input_cov)
 
-    save_covariation_info(covariation_pairs,pdb_id,args.output_csv)
+    save_covariation_data(covariation_pairs,pdb_id,args.output_csv)
 
-    
+
     logging.info("We are done here.")
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@ import xml.etree.ElementTree as ET
 
 
 from gemmi import cif
-from pandas import DataFrame
 
 def parse_xml_file(xml_file):
     """
@@ -146,26 +145,3 @@ def read_uniprot_info(
             return unp_acc, unp_num
 
 
-    
-def read_cov_info(r1,r2,df: DataFrame):
-
-    Probability=None
-    Score=None
-    
-    if int(r1) <= int(r2) :
-        unp_res1=r1
-        unp_res2=r2
-    if int(r2) < int(r1) :
-        unp_res1=r2
-        unp_res2=r1
-        
-    if df is not None:
-        r = df[
-            (df["Residue A"] == unp_res1)
-            & (df["Residue B"] == unp_res2)
-        ]
-
-        Probability=list(df['Probability'])[0]
-        Score=list(df['Score'])[0]
-
-    return Probability,Score
