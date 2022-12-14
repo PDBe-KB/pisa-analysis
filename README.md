@@ -4,9 +4,17 @@
 
 This python package works with PISA-Lite to analyse data for macromolecular interfaces and interactions in assemblies.
 
-The code will:
+The code consists of two separate modules : pisa_analysis and covariations_int .
+
+pisa_analysis will:
+
 - Analyse macromolecular interfaces with PISA
 - Create Json dictionary with assembly interactions/interfaces information
+
+covariations_int will :
+
+- Add covariation data to interface contacts 
+- Create CSV file with covariation data for assembly interfaces
 
 ```
 git clone https://github.com/PDBe-KB/pisa-analysis
@@ -15,7 +23,7 @@ cd pisa-analysis
 ``` 
 ## Dependencies 
 
-The process runs PISA-Lite as a subprocess and requires apriori compilation of PISA. For more information on how to compile PISA-LITE visit our internal page: 
+The pisa_analysis process runs PISA-Lite as a subprocess and requires apriori compilation of PISA. For more information on how to compile PISA-LITE visit our internal page: 
 
 [PISA-Lite documentation](https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies)
 
@@ -60,14 +68,7 @@ pre-commit install
 
 ## Usage
 
-```
-pisa-analysis/pisa_utils/run.py [-h] -i INPUT_CIF_DIR --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
-```
-OR
-```
-pisa-analysis/pisa_utils/run.py --input_cif INPUT_CIF_DIR  --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE --output_json OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
-```
-OR install module **pisa_analysis**:
+We can install the modules **pisa_analysis** and **covariations_int** :
 
 ```
 cd pisa-analysis/
@@ -75,30 +76,66 @@ cd pisa-analysis/
 python setup.py install
 
 ```
-usage:
+
+To run the modules in command line:
+
+Pisa_analysis: 
 
 ```
-pisa_analysis [-h] -i INPUT_CIF_DIR --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_PATH_JSON --output_xml OUTPUT_DIR_XML
+python pisa-analysis/pisa_utils/run.py [-h] -i INPUT_CIF_FILE --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
 ```
+OR 
+
+```
+pisa_analysis [-h] -i INPUT_CIF_FILE --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_PATH_JSON --output_xml OUTPUT_DIR_XML
+```
+
+Required arguments are :
+
+```
+--input_cif (-i)          :  Assembly CIF file (Code can also read PDB)
+--pdb_id                  :  Entry ID    
+--aseembly_id             :  Assembly code
+--output_json (-o)        :  Output directory for JSON fille
+--output_xml              :  Output directory for XML files
+```
+
 
 Other optional arguments are:
 
 ```
---input_updated_cif  
---force  
---pisa_setup_dir
---pisa_binary
+--input_updated_cif       : Updated cif for pdbid entry 
+--force                   : Always runs PISA-Lite calculation
+--pisa_setup_dir          : Path to the 'setup' directory in PISA-lite
+--pisa_binary             : Binary file for PISA-lite
 ```
-**input_updated_cif**: updated cif for pdbid entry 
 
-**force** : Always runs PISA-Lite calculation
+Covariations_int 
 
-**pisa_setup_dir** : Path to the 'setup' directory in PISA-lite
+usage:
 
-**pisa_binary** : Binary file for PISA-lite 
+```
+python pisa-analysis/pisa_utils/covariations_int.py [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR
+```
+
+OR
+
+```
+covariations_int [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR
+```
+
+Required arguments are :
+
+```
+--input_json              :  JSON file (output of pisa_analysis) with assembly interfaces information
+--input_cov               :  CSV file with covariation pairs for uniprot accession    
+--output_csv (-o)         :  Output CSV file with covariation information for interfaces contacts 
+```
 
 
 The process is as follows:
+
+For pisa_analysis module:
 
 1. The process first runs PISA-Lite in a subprocess and generates two xml files:
    - interfaces.xml
@@ -153,6 +190,38 @@ The simplified assembly json output looks as follows:
 }
 ```
 
+For the covariation_int module:
+
+1. The process first loads the json file with assembly interfaces dictionaries (output from pisa_analysis module). The file is provided as input with --input_json:
+   
+    *xxx-assemX_interfaces.json*  
+  
+    where xxx is the pdb id entry and X is the assembly code. This file is the output of pisa_analysis module.  
+    
+2. The process will read a CSV file with covariation pairs information (scores and probabilities), for the corresponding Uniprot accession. This file is an input --input_cov, and it is a file created with [covariation_pairs](https://github.com/PDBe-KB/covariation_pairs) module  :
+   
+    XXXX_cov.csv
+    
+    where XXXX is the uniprot accession
+3. The process will then read the interfaces dictionaries and make a list of uniprot sequence numbers and accessions as well as residues for assembly interfaces contacs.  
+
+4. Next, the process will identify if interfaces contacts are in the data frame of covariation pairs. 
+
+5. Finally, the process will create a data frame with a list of interfaces contacts and covariation information (for pairs with probability > 0.5). The data frame will be saved as a CSV file in the directory defined by --output_csv (-o):
+
+   PDBID_interfaces_cov.csv
+   
+   where PDBID is the entry or pdb ID for the assembly analysed. 
+
+The CSV file with covariation data for assembly interfaces looks as follows:
+
+```
+,unp_num_1,unp_acc_1,residue_1,unp_num_2,unp_acc_2,residue_2,contact,interface,Score,Probability
+0,111,F5HCH8,LEU,87,F5HCH8,ARG,hydrogen_bonds,1,-0.0045671,0.645476
+1,111,F5HCH8,LEU,87,F5HCH8,ARG,other_bonds,1,-0.0045671,0.645476
+2,44,F5HCH8,THR,182,F5HCH8,GLU,salt_bridges,1,-0.00250218,0.655191
+3,71,F5HCH8,VAL,192,F5HCH8,VAL,cov_bonds,1,-0.00456709,0.589904
+```   
 
 ## Versioning
 
