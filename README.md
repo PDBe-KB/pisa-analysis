@@ -215,12 +215,13 @@ For the covariation_int module:
 
 The CSV file with covariation data for assembly interfaces looks as follows:
 
+
 ```
-,unp_num_1,unp_acc_1,residue_1,unp_num_2,unp_acc_2,residue_2,contact,interface,Score,Probability
-0,111,F5HCH8,LEU,87,F5HCH8,ARG,hydrogen_bonds,1,-0.0045671,0.645476
-1,111,F5HCH8,LEU,87,F5HCH8,ARG,other_bonds,1,-0.0045671,0.645476
-2,44,F5HCH8,THR,182,F5HCH8,GLU,salt_bridges,1,-0.00250218,0.655191
-3,71,F5HCH8,VAL,192,F5HCH8,VAL,cov_bonds,1,-0.00456709,0.589904
+uniprot_accession_a,uniprot_residue_index_a,residue_label_a,uniprot_accession_b,uniprot_residue_index_b,residue_label_b,contact,interface,covariation_score,covariation_probability
+111,F5HCH8,LEU,87,F5HCH8,ARG,other_bonds,1,-0.0045671,0.645476
+111,F5HCH8,LEU,87,F5HCH8,ARG,other_bonds,1,-0.0045671,0.645476
+159,F5HCP3,CYS,100,F5HCP3,VAL,hydrogen_bonds,6,-0.00117549,0.576407
+44,F5HCH8,THR,182,F5HCH8,GLU,cov_bonds,1,-0.00250218,0.655191
 ```   
 
 ## Versioning
