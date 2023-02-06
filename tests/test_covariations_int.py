@@ -29,6 +29,9 @@ class TestCovariation(TestCase):
         else:
             covs = None
 
+        a,b = read_cov_info(r1,r2,covs)
+
+        print("GDL testing", a, b)
         self.assertEqual(read_cov_info(r1,r2,covs), expected_result)
    
 
@@ -100,9 +103,9 @@ class TestCovariation(TestCase):
             expected_result = pd.DataFrame(
                 covariation_pairs, columns=
                 [
-                    "unp_num_1","unp_acc_1","residue_1",
-                    "unp_num_2","unp_acc_2","residue_2",
-                    "contact","interface", "Score", "Probability"
+                    "uniprot_residue_index_a","uniprot_accession_a","residue_label_a",
+                    "uniprot_residue_index_b","uniprot_accession_b","residue_label_b",
+                    "contact","interface", "covariation_score", "covariation_probability"
                 ]
             )
         

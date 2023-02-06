@@ -108,14 +108,14 @@ def save_covariation_data(covariation_pairs,pdb_id,output_dir):
             df = pd.DataFrame(
                 covariation_pairs, columns=
                 [
-                    "unp_num_1","unp_acc_1","residue_1",
-                    "unp_num_2","unp_acc_2","residue_2",
-                    "contact","interface", "Score", "Probability"
+                    "uniprot_residue_index_a","uniprot_accession_a","residue_label_a",
+                    "uniprot_residue_index_b","uniprot_accession_b","residue_label_b",
+                    "contact","interface", "covariation_score", "covariation_probability"
                 ]
             )
             
             output_csv = os.path.join(output_dir,"{}_interfaces_cov.csv".format(pdb_id))
-            df.to_csv(output_csv)
+            df.to_csv(output_csv, index=False)
 
             return df 
 
@@ -160,26 +160,15 @@ def read_cov_info(r1,r2,df: DataFrame):
 
         n=0
         index=None
-        for i,j in zip(df['unp_num A'],df['unp_num B']):
+        for i,j in zip(df['uniprot_residue_index_a'],df['uniprot_residue_index_b']):
             if i==unp_res1 and j==unp_res2:
                 index=n
             n=n+1
         if index is not None:
             
-            Probability = df['Probability'][index]
-            Score = df['Score'][index]
+            Probability = df['covariation_probability'][index]
+            Score = df['covariation_score'][index]
 
-            
-        #r = df[
-        #     (df["Residue A"] == unp_res1)
-        #    & (df["Residue B"] == unp_res2)
-        #]
-
-
-        #row = r.iloc[0]
-        #print(row)
-        #Probability=list(r['Probability'])
-        #Score=list(r['Score'])
     
     return Probability,Score
 
