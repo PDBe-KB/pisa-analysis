@@ -15,9 +15,9 @@ def get_molecules_dict(molecules):
     molecules_dicts = []
     for molecule in molecules:
         interface_residues_count = 0
-        molecule_id = molecule.findtext("id")
-        molecule_class = molecule.findtext("class")
-        chain_id = molecule.findtext("chain_id")
+        molecule_id = molecule.find("id").text
+        molecule_class = molecule.find("class").text
+        chain_id = molecule.find("chain_id").text
         residues_dicts = []
         if molecule_class in ["Ligand"]:
             is_invalid = True
@@ -232,20 +232,20 @@ def get_assembly_dict(assemblies):
     # Assembly information
 
     for assem in assemblies:
-        assem_id = assem.findtext("assembly/id")
-        assem_size = assem.findtext("assembly/size")
-        assem_mmsize = assem.findtext("assembly/mmsize")
-        assem_diss_energy = assem.findtext("assembly/diss_energy")
-        assem_asa = assem.findtext("assembly/asa")
-        assem_bsa = assem.findtext("assembly/bsa")
-        assem_entropy = assem.findtext("assembly/entropy")
-        assem_diss_area = assem.findtext("assembly/diss_area")
-        assem_int_energy = assem.findtext("assembly/int_energy")
-        assem_n_uc = assem.findtext("assembly/n_uc")
-        assem_n_diss = assem.findtext("assembly/n_diss")
-        assem_sym_num = assem.findtext("assembly/symNumber")
-        assem_formula = assem.findtext("assembly/formula")
-        assem_composition = assem.findtext("assembly/composition").strip()
+        assem_id = assem.find("assembly/id").text
+        assem_size = assem.find("assembly/size").text
+        assem_mmsize = assem.find("assembly/mmsize").text
+        assem_diss_energy = assem.find("assembly/diss_energy").text
+        assem_asa = assem.find("assembly/asa").text
+        assem_bsa = assem.find("assembly/bsa").text
+        assem_entropy = assem.find("assembly/entropy").text
+        assem_diss_area = assem.find("assembly/diss_area").text
+        assem_int_energy = assem.find("assembly/int_energy").text
+        assem_n_uc = assem.find("assembly/n_uc").text
+        assem_n_diss = assem.find("assembly/n_diss").text
+        assem_sym_num = assem.find("assembly/symNumber").text
+        assem_formula = assem.find("assembly/formula").text
+        assem_composition = assem.find("assembly/composition").text.strip()
 
         # Round to two decimals some assembly properties
 
@@ -261,7 +261,7 @@ def get_assembly_dict(assemblies):
         assembly_R350 = ""
 
         if assem.find("assembly/score"):
-            assembly_score = assem.findtext("assembly/score")
+            assembly_score = assem.find("assembly/score").text
         else:
             assembly_score = ""
 

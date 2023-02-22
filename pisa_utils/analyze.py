@@ -68,7 +68,7 @@ class AnalysePisa:
 
         for interface in interfaces:
             # Interface General information
-            interface_id = interface.findtext("id")
+            interface_id = interface.find("id").text
             interface_area = round(float(interface.find("int_area").text), 2)
             interface_solvation_energy = round(
                 float(interface.find("int_solv_en").text), 2
