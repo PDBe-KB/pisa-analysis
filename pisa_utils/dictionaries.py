@@ -15,9 +15,9 @@ def get_molecules_dict(molecules):
     molecules_dicts = []
     for molecule in molecules:
         interface_residues_count = 0
-        molecule_id = molecule.find("id").text
-        molecule_class = molecule.find("class").text
-        chain_id = molecule.find("chain_id").text
+        molecule_id = molecule.findtext("id")
+        molecule_class = molecule.findtext("class")
+        chain_id = molecule.findtext("chain_id")
         residues_dicts = []
         if molecule_class in ["Ligand"]:
             is_invalid = True
@@ -33,13 +33,6 @@ def get_molecules_dict(molecules):
         solvation_energy_effects = []
         residue_bonds = []
 
-        n_residues = 0
-        # for res in interface_residues:
-        #    n_residues=n_residues+1
-
-        # if n_residues == 1:
-        #    is_invalid = True
-
         # Creating residues dictionaries
         for residue in interface_residues:
             # n_residues=n_residues+1
@@ -52,20 +45,23 @@ def get_molecules_dict(molecules):
             residue_solv_en = round(float(residue.find("solv_en").text), 2)
             residue_ins_code = residue.find("ins_code").text
             residue_bond = residue.find("bonds").text
+            print(residue_ins_code)
 
             # Writing interface residues dictionary
-            residue_dict = {
-                "residue_sernum": residue_sernum,
-                "residue_name": residue_name,
-                "residue_seqnum": residue_seqnum,
-                "residue_label_seq_num": residue_label_seq_num,
-                "residue_asa": residue_asa,
-                "residue_bsa": residue_bsa,
-                "residue_ins_code": residue_ins_code,
-                "residue_solv_en": residue_solv_en,
-                "residue_bond": residue_bond,
-            }
-            residues_dicts.append(residue_dict)
+
+            residues_dicts.append(
+                {
+                    "residue_sernum": residue_sernum,
+                    "residue_name": residue_name,
+                    "residue_seqnum": residue_seqnum,
+                    "residue_label_seq_num": residue_label_seq_num,
+                    "residue_asa": residue_asa,
+                    "residue_bsa": residue_bsa,
+                    "residue_ins_code": residue_ins_code,
+                    "residue_solv_en": residue_solv_en,
+                    "residue_bond": residue_bond,
+                }
+            )
             residue_label_ids.append(residue_name)
             residue_sequence_numbers.append(residue_seqnum)
             residue_label_sequence_numbers.append(residue_label_seq_num)
@@ -92,16 +88,15 @@ def get_molecules_dict(molecules):
         }
         molecules_dicts.append(molecule_dict)
 
-        # if there is only one inteface residues,
+        # if there is only one interface residues,
         # discard interface as valid interface
-        # if len(interface_residues) == 1:
         if interface_residues_count == 1:
             is_invalid = True
-            
+
     return molecules_dicts, interface_residues_count, is_invalid
 
 
-def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
+def get_bond_dict(bondtag, bondtype, updated_cif_block):
     """
     Creates bond dictionary
 
@@ -160,23 +155,13 @@ def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
         # atoms in bonds, from updated cif file
 
         uniprot_info_1 = read_uniprot_info(
-            label_seqnum_1,
-            seqnum_1,
-            atname_1,
-            res_1,
-            pdb_id,
-            updated_cif_block
+            label_seqnum_1, seqnum_1, atname_1, res_1, updated_cif_block
         )
         unp_acc_1 = uniprot_info_1[0]
         unp_num_1 = uniprot_info_1[1]
 
         uniprot_info_2 = read_uniprot_info(
-            label_seqnum_2,
-            seqnum_2,
-            atname_2,
-            res_2,
-            pdb_id,
-            updated_cif_block
+            label_seqnum_2, seqnum_2, atname_2, res_2, updated_cif_block
         )
         unp_acc_2 = uniprot_info_2[0]
         unp_num_2 = uniprot_info_2[1]
@@ -247,20 +232,20 @@ def get_assembly_dict(assemblies):
     # Assembly information
 
     for assem in assemblies:
-        assem_id = assem.find("assembly/id").text
-        assem_size = assem.find("assembly/size").text
-        assem_mmsize = assem.find("assembly/mmsize").text
-        assem_diss_energy = assem.find("assembly/diss_energy").text
-        assem_asa = assem.find("assembly/asa").text
-        assem_bsa = assem.find("assembly/bsa").text
-        assem_entropy = assem.find("assembly/entropy").text
-        assem_diss_area = assem.find("assembly/diss_area").text
-        assem_int_energy = assem.find("assembly/int_energy").text
-        assem_n_uc = assem.find("assembly/n_uc").text
-        assem_n_diss = assem.find("assembly/n_diss").text
-        assem_sym_num = assem.find("assembly/symNumber").text
-        assem_formula = assem.find("assembly/formula").text
-        assem_composition = assem.find("assembly/composition").text.strip()
+        assem_id = assem.findtext("assembly/id")
+        assem_size = assem.findtext("assembly/size")
+        assem_mmsize = assem.findtext("assembly/mmsize")
+        assem_diss_energy = assem.findtext("assembly/diss_energy")
+        assem_asa = assem.findtext("assembly/asa")
+        assem_bsa = assem.findtext("assembly/bsa")
+        assem_entropy = assem.findtext("assembly/entropy")
+        assem_diss_area = assem.findtext("assembly/diss_area")
+        assem_int_energy = assem.findtext("assembly/int_energy")
+        assem_n_uc = assem.findtext("assembly/n_uc")
+        assem_n_diss = assem.findtext("assembly/n_diss")
+        assem_sym_num = assem.findtext("assembly/symNumber")
+        assem_formula = assem.findtext("assembly/formula")
+        assem_composition = assem.findtext("assembly/composition").strip()
 
         # Round to two decimals some assembly properties
 
@@ -273,12 +258,12 @@ def get_assembly_dict(assemblies):
         assembly_int_energy = round(float(assem_int_energy), 2)
         assembly_formula = assem_formula
         assembly_composition = assem_composition
-        assembly_R350=''
-        
+        assembly_R350 = ""
+
         if assem.find("assembly/score"):
-            assembly_score=assem.find("assembly/score").text
+            assembly_score = assem.findtext("assembly/score")
         else:
-            assembly_score=""
+            assembly_score = ""
 
         # Assembly information added to dictionary
 
