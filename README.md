@@ -160,6 +160,7 @@ We use [SemVer](https://semver.org) for versioning.
 
 ## Authors
 * [Grisell Diaz Leines](https://github.com/grisell) - Lead developer
+* [Stephen Anyango](otienoanyango) - Review and productionising
 * [Mihaly Varadi](https://github.com/mvaradi) - Review and management 
 
 See all contributors [here](https://github.com/PDBe-KB/pisa-analysis/graphs/contributors).
