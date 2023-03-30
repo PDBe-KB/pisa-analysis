@@ -80,8 +80,7 @@ class TestAnalyzePisa(TestCase):
 
 
         expected = {
-            'PISA':{
-                'pdb_id': '6nxr',
+            '6nxr':{
                 'assembly_id': '1',
                 'pisa_version': '2.0',
                 'assembly': {
@@ -153,15 +152,14 @@ class TestAnalyzePisa(TestCase):
     
         result=ap.create_assembly_dict()
     
-
         expected = {
-            'PISA': {
-                'pdb_id': '6nxr',
+            '6nxr': {
                 'assembly_id': '1',
                 'pisa_version': '2.0',
                 'assembly': {
                     'id': '1',
                     'size': '6',
+                    "interface_count": 0,
                     'score': '',
                     'macromolecular_size': '2',
                     'dissociation_energy': 15.61,
@@ -182,5 +180,3 @@ class TestAnalyzePisa(TestCase):
         
         
         self.assertEqual(result, expected)
-    
-    

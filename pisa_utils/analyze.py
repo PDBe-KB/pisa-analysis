@@ -203,7 +203,7 @@ class AnalysePisa:
 
         if result and assem_result:
 
-            overall = len(result.get("id", []))
+            interface_count = len(result.get("id", []))
             interface_dicts = result.get("interface_dicts", [])
             assem_dict = {
                 "mmsize": assem_result.get("assembly_mmsize"),
@@ -215,18 +215,17 @@ class AnalysePisa:
                 "solvation_energy_gain": assem_result.get("assembly_int_energy"),
                 "formula": assem_result.get("assembly_formula"),
                 "composition": assem_result.get("assembly_composition"),
-                "interface_count": overall,
+                "interface_count": interface_count,
                 "interfaces": interface_dicts,
             }
 
             assembly_dictionary = {
-                "pdb_id": self.pdb_id,
                 "assembly_id": self.assembly_code,
                 "pisa_version": "2.0",
                 "assembly": assem_dict,
             }
 
-            self.results.setdefault("PISA", assembly_dictionary)
+            self.results.setdefault(self.pdb_id, assembly_dictionary)
 
             interfaces_results = self.results
 
@@ -242,7 +241,7 @@ class AnalysePisa:
 
         self._save_to_json(interfaces_results, output_json)
 
-        return interfaces_results
+        return interfaces_results, interface_count
 
     def create_assembly_dict(self):
 
@@ -252,9 +251,11 @@ class AnalysePisa:
         """
         result = {}
         start = time()
-
+        
         logging.debug("creating simplified assembly dictionary")
 
+        interface_count=self.create_assem_interfaces_dict()[1]
+        
         assembly_xml_file = os.path.join(self.xmls_dir, "assembly.xml")
         result = {}
 
@@ -277,6 +278,7 @@ class AnalysePisa:
             assem_dict = {
                 "id": assem_result.get("assembly_id"),
                 "size": assem_result.get("assembly_size"),
+                "interface_count": interface_count,
                 "score": assem_result.get("assembly_score"),
                 "macromolecular_size": assem_result.get("assembly_mmsize"),
                 "dissociation_energy": assem_result.get("assembly_diss_energy"),
@@ -294,13 +296,12 @@ class AnalysePisa:
             }
 
             assembly_dictionary = {
-                "pdb_id": self.pdb_id,
                 "assembly_id": self.assembly_code,
                 "pisa_version": "2.0",
                 "assembly": assem_dict,
             }
-
-            result.setdefault("PISA", assembly_dictionary)
+            
+            result.setdefault(self.pdb_id, assembly_dictionary)
 
         logging.debug(
             f"Finished creating assembly simplified dictionary in {time() - start} seconds"

@@ -38,6 +38,7 @@ def get_cov_interfaces(input_json, input_cov):
     assembly_id = data['assembly_id']
     assembly_data = data['assembly']
     
+
     interfaces = assembly_data['interfaces']
     
     #read covariation pairs for uniprot accession                                                            
@@ -70,7 +71,8 @@ def get_cov_interfaces(input_json, input_cov):
                       unp_acc_2,residue_1, residue_2 ) in zip(
                       unp_nums_1,unp_nums_2,unp_accs_1,
                       unp_accs_2,residues_1,residues_2):
-
+                     if (unp_num_1 == '?') : unp_num_1 = None
+                     if (unp_num_2 == '?') : unp_num_2 = None
                      if (unp_num_1 is not None) and (unp_num_2 is not None):
 
                         cov_probability, cov_score = read_cov_info(unp_num_1,unp_num_2,covs)
@@ -126,6 +128,7 @@ def save_covariation_data(covariation_pairs,pdb_id,output_dir):
             )
             logging.error(e)
     else:
+        print("No covariation data found to save ' contacts in {}".format(pdb_id))
         logging.info(f"No covariation data found to save ' contacts")
 
         return None 
