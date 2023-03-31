@@ -45,7 +45,7 @@ def get_molecules_dict(molecules):
             residue_solv_en = round(float(residue.find("solv_en").text), 2)
             residue_ins_code = residue.find("ins_code").text
             residue_bond = residue.find("bonds").text
-            print(residue_ins_code)
+            
 
             # Writing interface residues dictionary
 

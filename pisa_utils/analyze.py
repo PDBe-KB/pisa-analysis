@@ -39,7 +39,7 @@ class AnalysePisa:
 
         start = time()
 
-        logging.info("Parsing XML files...", assembly_xml, interfaces_xml)
+        logging.info("Parsing XML files {} and {}".format(assembly_xml,interfaces_xml))
 
         asroot = ET.parse(assembly_xml).getroot()
         root = ET.parse(interfaces_xml).getroot()
@@ -53,7 +53,7 @@ class AnalysePisa:
         result["num_interfaces"] = root.find("n_interfaces").text
         logging.info(f"Total no. of interfaces: {result['num_interfaces']}")
 
-        non_ligand_interface_count = 0
+        valid_interface_count = 0
 
         interfaces = root.iter("interface")
 
@@ -84,6 +84,7 @@ class AnalysePisa:
             n_covalent_bonds = int(interface.find("cov-bonds/n_bonds").text)
             n_salt_bridges = int(interface.find("salt-bridges/n_bonds").text)
             other_contacts = int(interface.find("other-bonds/n_bonds").text)
+            
 
             molecules = interface.iter("molecule")
             molecules_dicts, interface_residues_count, invalid = get_molecules_dict(
@@ -91,14 +92,15 @@ class AnalysePisa:
             )
             if invalid:
                 logging.info(f"Invalid interface: {interface_id}. Skipping...")
-
-            if not (
-                n_h_bonds,
-                n_ss_bonds,
-                n_covalent_bonds,
-                n_salt_bridges,
-                other_contacts,
+                continue
+            
+            if ( n_h_bonds == 0 and
+                 n_ss_bonds == 0 and
+                 n_covalent_bonds == 0 and
+                 n_salt_bridges == 0 and
+                 other_contacts == 0
             ):
+                
                 logging.info(
                     "Bonds: (n_h_bonds, n_ss_bonds, n_covalent_bonds, n_salt_bridges)"
                 )
@@ -108,7 +110,7 @@ class AnalysePisa:
                 logging.info(f"Invalid interface: {interface_id}. Skipping...")
                 continue
 
-            non_ligand_interface_count += 1
+            valid_interface_count += 1
 
             # Reading bonds
 
@@ -117,7 +119,7 @@ class AnalysePisa:
             covbonds = interface.find("cov-bonds")
             ssbonds = interface.find("ss-bonds")
             othbonds = interface.find("other-bonds")
-
+            
             # Writing bonds dictionaries
 
             # for hbond in hbonds:
@@ -157,10 +159,11 @@ class AnalysePisa:
             result.setdefault("int_area", []).append(interface_area)
             result.setdefault("interface_dicts", []).append(interface_dict)
 
-        result["non_ligand_interface_count"] = non_ligand_interface_count
-        logging.info(f"Non-ligand interface count: {non_ligand_interface_count}")
+        result["valid_interface_count"] = valid_interface_count
+        logging.info(f"valid interface count: {valid_interface_count}")
 
-        overall = len(result.get("id", []))
+        interface_count = valid_interface_count
+        
         interface_dicts = result.get("interface_dicts", [])
         assem_dict = {
             "mmsize": assem_result.get("assembly_mmsize"),
@@ -172,23 +175,23 @@ class AnalysePisa:
             "solvation_energy_gain": assem_result.get("assembly_int_energy"),
             "formula": assem_result.get("assembly_formula"),
             "composition": assem_result.get("assembly_composition"),
-            "interface_count": overall,
+            "interface_count": interface_count,
             "interfaces": interface_dicts,
         }
 
         assembly_dictionary = {
-            "pdb_id": self.pdb_id,
             "assembly_id": self.assembly_code,
             "pisa_version": "2.0",
             "assembly": assem_dict,
         }
 
-        self._save_to_json({"PISA": assembly_dictionary}, output_json)
+        self._save_to_json({self.pdb_id: assembly_dictionary}, output_json)
         logging.info(
             f"Finished creating assembly-interfaces dictionary in {time() - start} seconds"
         )
+        return interface_count
 
-    def assembly_xml_to_json(self, assembly_xml, output_json):
+    def assembly_xml_to_json(self, assembly_xml, output_json,interfaces):
 
         """Extracts assembly information from PISA xml file and saves it to json file
 
@@ -206,12 +209,13 @@ class AnalysePisa:
 
         asroot = ET.parse(assembly_xml).getroot()
         assemblies = asroot.iter("asu_complex")
-
         assem_result = get_assembly_dict(assemblies)
+        interface_count = interfaces
 
         assem_dict = {
             "id": assem_result.get("assembly_id"),
             "size": assem_result.get("assembly_size"),
+            "interface_count": interface_count,
             "score": assem_result.get("assembly_score"),
             "macromolecular_size": assem_result.get("assembly_mmsize"),
             "dissociation_energy": assem_result.get("assembly_diss_energy"),
@@ -229,13 +233,12 @@ class AnalysePisa:
         }
 
         assembly_dictionary = {
-            "pdb_id": self.pdb_id,
             "assembly_id": self.assembly_code,
             "pisa_version": "2.0",
             "assembly": assem_dict,
         }
 
-        result = {"PISA": assembly_dictionary}
+        result = {self.pdb_id: assembly_dictionary}
         self._save_to_json(result, output_json)
         logging.debug(
             f"Finished creating assembly simplified dictionary in {time() - start} seconds"

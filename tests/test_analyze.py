@@ -77,8 +77,7 @@ class TestAnalyzePisa(TestCase):
                 open(os.path.join("tests", "data", "6nxr-assembly1-interfaces.json"))
             )
             expected = {
-                "PISA": {
-                    "pdb_id": "6nxr",
+                "6nxr": {
                     "assembly_id": "1",
                     "pisa_version": "2.0",
                     "assembly": {
@@ -134,7 +133,6 @@ class TestAnalyzePisa(TestCase):
             molecules.assert_called()
             bonds.assert_called()
             result = json.load(open(f.name))
-            print(result)
             self.maxDiff = None
             self.assertEqual(result, expected)
 
@@ -146,13 +144,13 @@ class TestAnalyzePisa(TestCase):
         )
 
         expected = {
-            "PISA": {
-                "pdb_id": "6nxr",
+            "6nxr": {
                 "assembly_id": "1",
                 "pisa_version": "2.0",
                 "assembly": {
                     "id": "1",
                     "size": "6",
+                    "interface_count": 1,
                     "score": "",
                     "macromolecular_size": "2",
                     "dissociation_energy": 15.61,
@@ -171,6 +169,7 @@ class TestAnalyzePisa(TestCase):
             }
         }
         with tempfile.NamedTemporaryFile(mode="wt") as f:
+            interfaces = 1
             assembly_xml = os.path.join("tests", "data", "assembly.xml")
-            ap.assembly_xml_to_json(assembly_xml, f.name)
+            ap.assembly_xml_to_json(assembly_xml, f.name,interfaces)
             self.assertEqual(json.load(open(f.name, "r")), expected)

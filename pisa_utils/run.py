@@ -84,9 +84,9 @@ def main():
         input_updated_cif=args.input_updated_cif,
     )
 
-    ap.assembly_xml_to_json(assembly_xml_file, assembly_json)
-    ap.interfaces_xml_to_json(assembly_xml_file, interfaces_xml_file, interface_json)
-
+    
+    interfaces = ap.interfaces_xml_to_json(assembly_xml_file, interfaces_xml_file, interface_json)
+    ap.assembly_xml_to_json(assembly_xml_file, assembly_json,interfaces)
 
 if "__main__" in __name__:
     main()
