@@ -38,20 +38,30 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.pisa_setup_dir and not "PISA_SETUP_DIR" in os.environ:
+    if not (args.pisa_setup_dir or "PISA_SETUP_DIR" in os.environ):
         raise Exception(
             "PISA_SETUP_DIR not set in environment and --pisa_setup_dir not specified"
         )
-    
+
     if not "pisa" and not os.path.isfile(args.pisa_binary):
         raise Exception(f"pisa binary not found or is not a file: {args.pisa_binary}")
-    
+
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
     input_cif_file = args.input_cif
 
     interfaces_xml_file = os.path.join(args.output_xml, "interfaces.xml")
     assembly_xml_file = os.path.join(args.output_xml, "assembly.xml")
+    assembly_json = os.path.join(
+        args.output_json, f"{args.pdb_id}-assembly{args.assembly_id}.json"
+    )
+    interface_json = os.path.join(
+        args.output_json, f"{args.pdb_id}-assembly{args.assembly_id}-interfaces.json"
+    )
+
+    logging.info("input cif: {}".format(input_cif_file))
+    logging.info("output xml: {}".format(args.output_xml))
+    logging.info("output json: {}".format(args.output_json))
 
     if (
         args.force
@@ -71,14 +81,12 @@ def main():
     ap = AnalysePisa(
         pdb_id=args.pdb_id,
         assembly_id=args.assembly_id,
-        output_json=args.output_json,
-        xmls_dir=args.output_xml,
         input_updated_cif=args.input_updated_cif,
     )
 
-    ap.create_assem_interfaces_dict()
-    ap.create_assembly_dict()
-
+    
+    interfaces = ap.interfaces_xml_to_json(assembly_xml_file, interfaces_xml_file, interface_json)
+    ap.assembly_xml_to_json(assembly_xml_file, assembly_json,interfaces)
 
 if "__main__" in __name__:
     main()

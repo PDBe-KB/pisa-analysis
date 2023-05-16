@@ -33,8 +33,6 @@ def get_molecules_dict(molecules):
         solvation_energy_effects = []
         residue_bonds = []
 
-        n_residues = 0
-        
         # Creating residues dictionaries
         for residue in interface_residues:
             # n_residues=n_residues+1
@@ -47,20 +45,23 @@ def get_molecules_dict(molecules):
             residue_solv_en = round(float(residue.find("solv_en").text), 2)
             residue_ins_code = residue.find("ins_code").text
             residue_bond = residue.find("bonds").text
+            
 
             # Writing interface residues dictionary
-            residue_dict = {
-                "residue_sernum": residue_sernum,
-                "residue_name": residue_name,
-                "residue_seqnum": residue_seqnum,
-                "residue_label_seq_num": residue_label_seq_num,
-                "residue_asa": residue_asa,
-                "residue_bsa": residue_bsa,
-                "residue_ins_code": residue_ins_code,
-                "residue_solv_en": residue_solv_en,
-                "residue_bond": residue_bond,
-            }
-            residues_dicts.append(residue_dict)
+
+            residues_dicts.append(
+                {
+                    "residue_sernum": residue_sernum,
+                    "residue_name": residue_name,
+                    "residue_seqnum": residue_seqnum,
+                    "residue_label_seq_num": residue_label_seq_num,
+                    "residue_asa": residue_asa,
+                    "residue_bsa": residue_bsa,
+                    "residue_ins_code": residue_ins_code,
+                    "residue_solv_en": residue_solv_en,
+                    "residue_bond": residue_bond,
+                }
+            )
             residue_label_ids.append(residue_name)
             residue_sequence_numbers.append(residue_seqnum)
             residue_label_sequence_numbers.append(residue_label_seq_num)
@@ -87,16 +88,15 @@ def get_molecules_dict(molecules):
         }
         molecules_dicts.append(molecule_dict)
 
-        # if there is only one inteface residues,
+        # if there is only one interface residues,
         # discard interface as valid interface
-        # if len(interface_residues) == 1:
         if interface_residues_count == 1:
             is_invalid = True
-            
+
     return molecules_dicts, interface_residues_count, is_invalid
 
 
-def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
+def get_bond_dict(bondtag, bondtype, updated_cif_block):
     """
     Creates bond dictionary
 
@@ -155,19 +155,13 @@ def get_bond_dict(bondtag, bondtype, pdb_id, updated_cif_block):
         # atoms in bonds, from updated cif file
 
         uniprot_info_1 = read_uniprot_info(
-            label_seqnum_1,
-            res_1,
-            pdb_id,
-            updated_cif_block
+            label_seqnum_1, seqnum_1, atname_1, res_1, updated_cif_block
         )
         unp_acc_1 = uniprot_info_1[0]
         unp_num_1 = uniprot_info_1[1]
 
         uniprot_info_2 = read_uniprot_info(
-            label_seqnum_2,
-            res_2,
-            pdb_id,
-            updated_cif_block
+            label_seqnum_2, seqnum_2, atname_2, res_2, updated_cif_block
         )
         unp_acc_2 = uniprot_info_2[0]
         unp_num_2 = uniprot_info_2[1]
@@ -266,12 +260,12 @@ def get_assembly_dict(assemblies):
         assembly_int_energy = round(float(assem_int_energy), 2)
         assembly_formula = assem_formula
         assembly_composition = assem_composition
-        assembly_R350=''
-        
+        assembly_R350 = ""
+
         if assem.find("assembly/score"):
-            assembly_score=assem.find("assembly/score").text
+            assembly_score = assem.find("assembly/score").text
         else:
-            assembly_score=""
+            assembly_score = ""
 
         # Assembly information added to dictionary
 
