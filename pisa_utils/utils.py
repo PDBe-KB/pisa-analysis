@@ -1,7 +1,6 @@
 import logging
 import os
 import os.path
-
 import xml.etree.ElementTree as ET
 
 
@@ -38,17 +37,18 @@ def create_pisa_config(dataroot, setup_dir):
                 outfile.write(line)
     return outputname
 
-                
+
 def read_uniprot_info(
-        int_lab_seqnum, int_seqnum, int_atname, int_resname, pdb_id, updated_cif_block
+    int_lab_seqnum, int_seqnum, int_atname, int_resname, updated_cif_block
 ):
     """
     Function reads atom's UniProt accession numbers and sequence numbers
     from updated cif file
 
     :param int_lab_seqnum: type str - atom label sequence id
+    :param int_seqnum: type str - atom sequence number
+    :param int_atname: type str - atom name
     :param int_resname: type str - atom residue name
-    :param pdb_id: type str - PDB id
     :param parsed updated cif data: type str - path to updated cif file
     :return: (atom uniprot accession number, atom uniprot sequence number)
     """
@@ -80,8 +80,7 @@ def read_uniprot_info(
             if labseqid == int_lab_seqnum.strip() and resname == int_resname.strip():
 
                 n += 1
-                #if labseqid != ".":
-                if dbacc is not None and dbnum is not None:
+                if labseqid != ".":
                     unp_acc = dbacc
                     unp_num = dbnum
 
@@ -97,13 +96,12 @@ def read_uniprot_info(
                     unp_acc = None
                     unp_num = None
                     return unp_acc, unp_num
-        if n == 0:  # If residue was not found in updated cif file, return message                                              
-            logging.debug("residue not found in updated cif file:")                                                             
-            logging.debug(                                                                                                   
-                "name {},label_seq_id {},seq_num {}, residue {}".format(                                                     
-                    int_atname, int_lab_seqnum, int_seqnum, int_resname                                                      
-                )                                                                                                            
-            )                                                                                                                
+        # If residue was not found in updated cif file, return message
+        if not n:
+            logging.debug("residue not found in updated cif file:")
+            logging.debug(
+                "name {},label_seq_id {},seq_num {}, residue {}".format(
+                    int_atname, int_lab_seqnum, int_seqnum, int_resname
+                )
+            )
             return unp_acc, unp_num
-
-    

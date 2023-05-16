@@ -104,6 +104,8 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
     :param bondtype: type str - bond interaction type
     :return: type dict - bonds dictionary
     """
+
+    
     bonds = bondtag.iter("bond")
     atom_site1_chains = []
     atom_site1_residues = []
@@ -155,7 +157,7 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
         # atoms in bonds, from updated cif file
 
         uniprot_info_1 = read_uniprot_info(
-            label_seqnum_1, seqnum_1, atname_1, res_1, updated_cif_block
+            label_seqnum_1, seqnum_1, atname_1, res_1,updated_cif_block
         )
         unp_acc_1 = uniprot_info_1[0]
         unp_num_1 = uniprot_info_1[1]

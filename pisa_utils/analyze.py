@@ -3,7 +3,7 @@ import logging
 import os
 from time import time
 from xml.etree import ElementTree as ET
-
+import gemmi 
 from gemmi import cif
 
 import pandas as pd
