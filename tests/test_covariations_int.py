@@ -2,7 +2,7 @@ import os
 from unittest import TestCase
 from unittest.mock import patch
 
-from pisa_utils.covariations_int import get_cov_interfaces, save_covariation_data, read_cov_info
+from pisa_utils.covariations_int import get_cov_interfaces, save_covariation_data, read_cov_info, find_element
 
 import csv
 import pandas as pd
@@ -22,7 +22,7 @@ class TestCovariation(TestCase):
 
         expected_result=(0.516928,-0.0045682)
 
-        input_cov = os.path.join(".", "tests", "data", "cov_pairs.csv")
+        input_cov = os.path.join(".", "tests", "data", "F5HCH8_cov.csv")
         
         if input_cov is not None:
             covs = pd.read_csv(input_cov)
@@ -45,7 +45,7 @@ class TestCovariation(TestCase):
 
         expected_result=(None,None)
 
-        input_cov = os.path.join(".", "tests", "data", "cov_pairs.csv")
+        input_cov = os.path.join(".", "tests", "data", "F5HCH8_cov.csv")
 
         if input_cov is not None:
             covs = pd.read_csv(input_cov)
@@ -84,12 +84,13 @@ class TestCovariation(TestCase):
 
         mock.side_effect=[(0.539227,-0.0045671), (None,None), (None,None), (None,None)]
         
-        input_cov = os.path.join(".", "tests", "data", "cov_pairs.csv")
+        input_cov = [os.path.join(".","tests", "data", "F5HCH8_cov.csv")]
         input_json = os.path.join(".", "tests", "data", "input_json.json")
+        accs_nums_list = ['F5HCH8']
 
-        expected_result= ([['59', 'F5HCH8', 'CYS', '54', 'F5HCH8', 'CYS', 'hydrogen_bonds', '1', -0.0045671, 0.539227]],"7t4q")
+        expected_result= ([['59', 'F5HCH8', 'CYS', '54', 'F5HCH8', 'CYS', 'hydrogen_bonds', '1', -0.0045671, 0.539227]],"7t4q","1")
         
-        self.assertEqual(get_cov_interfaces(input_json, input_cov), expected_result)
+        self.assertEqual(get_cov_interfaces(input_json, input_cov,accs_nums_list), expected_result)
 
     def test_save_covariation_data(self):
         """
@@ -99,6 +100,7 @@ class TestCovariation(TestCase):
         
         covariation_pairs=[['59', 'F5HCH8', 'CYS', '54', 'F5HCH8', 'CYS', 'hydrogen_bonds', '1', -0.0045671, 0.539227]]
         pdb_id = "7t4q"
+        assembly_id ='1'
         with tempfile.TemporaryDirectory() as output:
             expected_result = pd.DataFrame(
                 covariation_pairs, columns=
@@ -110,7 +112,7 @@ class TestCovariation(TestCase):
             )
         
 
-            result=save_covariation_data(covariation_pairs,pdb_id,output)
+            result=save_covariation_data(covariation_pairs,pdb_id,assembly_id,output)
             pd.testing.assert_frame_equal(result,expected_result)
 
     def test_save_covariation_data_invalid_data(self):
@@ -122,6 +124,7 @@ class TestCovariation(TestCase):
         covariation_pairs=[['59', 'F5HCH8', 'CYS', '54', 'F5HCH8', 'CYS', 'hydrogen_bonds', -0.0045671, 0.539227]]
 
         pdb_id = "7t4q"
+        assembly_id='1'
 
         with tempfile.TemporaryDirectory() as output:
 
@@ -140,13 +143,22 @@ class TestCovariation(TestCase):
         covariation_pairs= []
 
         pdb_id = "7t4q"
+        assembly_id="1"
 
         expected_result = None
         
         with tempfile.TemporaryDirectory() as output:
             
-            result=save_covariation_data(covariation_pairs,pdb_id,output)
+            result=save_covariation_data(covariation_pairs,pdb_id,assembly_id,output)
 
             self.assertEqual(result,expected_result)
 
+    def test_find_element(self):
+
+        my_array = [10, 20, 30, 40, 50]
+        my_variable = 30
+        expected_result = 2
+
+        result = find_element(my_array,my_variable)
+        self.assertEqual(result,expected_result)
         

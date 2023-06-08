@@ -12,7 +12,7 @@ from pandas import DataFrame
 #from pisa_utils.utils import read_cov_info
 
 
-def get_cov_interfaces(input_json, input_cov):
+def get_cov_interfaces(input_json, input_cov,accs_nums_list):
 
     """
     Add covariation data to interface contacts
@@ -32,24 +32,27 @@ def get_cov_interfaces(input_json, input_cov):
     fp = open(input_json, "r")
     data = json.load(fp)
     fp.close()
-    pisa=list(data.keys())[0]
-    data = data[pisa]
-    pdb_id = data['pdb_id']
+    pdb_id=list(data.keys())[0]
+    data = data[pdb_id]
     assembly_id = data['assembly_id']
     assembly_data = data['assembly']
     
 
     interfaces = assembly_data['interfaces']
-    
-    #read covariation pairs for uniprot accession                                                            
+
+    #read covariation pairs for uniprot accession numbers
+
+    covs=[]
     if input_cov is not None:
-        covs = pd.read_csv(input_cov)
-    else:
-        covs = None
+        for input in input_cov:
+            cov_pairs = pd.read_csv(input)
+            covs.append(cov_pairs)
+
 
     covariation_pairs=[]
        
     for interface in interfaces:
+        
         interface_id=interface.get('interface_id')
         
         for key, prop in interface.items():
@@ -62,35 +65,54 @@ def get_cov_interfaces(input_json, input_cov):
             ]:
                 unp_nums_1=prop["atom_site_1_unp_nums"]
                 unp_nums_2=prop["atom_site_2_unp_nums"]
-                unp_accs_1=prop["atom_site_2_unp_accs"]
+                unp_accs_1=prop["atom_site_1_unp_accs"]
                 unp_accs_2=prop["atom_site_2_unp_accs"]
                 residues_1=prop["atom_site_1_residues"]
                 residues_2=prop["atom_site_2_residues"]
-                
+
+                #Calculate covariation pairs for homomeric complexes:
+
                 for ( unp_num_1, unp_num_2, unp_acc_1,
                       unp_acc_2,residue_1, residue_2 ) in zip(
                       unp_nums_1,unp_nums_2,unp_accs_1,
                       unp_accs_2,residues_1,residues_2):
-                     if (unp_num_1 == '?') : unp_num_1 = None
-                     if (unp_num_2 == '?') : unp_num_2 = None
-                     if (unp_num_1 is not None) and (unp_num_2 is not None):
+                    
+                    if (unp_num_1 == '?') : unp_num_1 = None
+                    if (unp_num_2 == '?') : unp_num_2 = None
 
-                        cov_probability, cov_score = read_cov_info(unp_num_1,unp_num_2,covs)
+                    if len(accs_nums_list)==1:
+                        if unp_accs_1 != unp_accs_2:
+                            logging.error("More than 1 accession number in complex, check if this is a homomeric complex ")
+
+                        if (unp_num_1 is not None) and (unp_num_2 is not None):
                         
-                        if (cov_probability is not None) and (cov_score is not None):
-                            covariation_pairs.append(
-                                [
-                                    unp_num_1,unp_acc_1,residue_1,
-                                    unp_num_2,unp_acc_2,residue_2,
-                                    key,interface_id,cov_score,
-                                    cov_probability
-                                ]
-                            )
+                            if (unp_acc_1 != accs_nums_list[0]) or (unp_acc_2 != accs_nums_list[0]):
+                                logging.error("accession number in interface contact does not match accession number in input file"
+                                              )
+                            
+                            cov_probability, cov_score = read_cov_info(unp_num_1,unp_num_2,covs[0])
+                        
+                            if (cov_probability is not None) and (cov_score is not None):
+                                covariation_pairs.append(
+                                    [
+                                        unp_num_1,unp_acc_1,residue_1,
+                                        unp_num_2,unp_acc_2,residue_2,
+                                        key,interface_id,cov_score,
+                                        cov_probability
+                                    ]
+                                )
+                     
+                    if len(accs_nums_list) > 1 :
+
+                        logging.info(f"Analysing covariation in Heteromeric complex")
+                        #index_covs_1 = find_element(accs_nums_list, unp_acc_1)
+                        #index_covs_2 = find_element(accs_nums_list, unp_acc_2)
+                        
                         
      
-    return covariation_pairs, pdb_id
+    return covariation_pairs, pdb_id, assembly_id
 
-def save_covariation_data(covariation_pairs,pdb_id,output_dir):
+def save_covariation_data(covariation_pairs,pdb_id,assembly_id,output_dir):
     """
     Creates output csv file with interfaces contacts with covariation signal
 
@@ -116,7 +138,7 @@ def save_covariation_data(covariation_pairs,pdb_id,output_dir):
                 ]
             )
             
-            output_csv = os.path.join(output_dir,"{}_interfaces_cov.csv".format(pdb_id))
+            output_csv = os.path.join(output_dir,"{}_assembly{}-interfaces_cov.csv".format(pdb_id,assembly_id))
             df.to_csv(output_csv, index=False)
 
             return df 
@@ -133,6 +155,11 @@ def save_covariation_data(covariation_pairs,pdb_id,output_dir):
 
         return None 
 
+def find_element(acc_nums_list, acc_num):
+    if acc_num in acc_nums_list:
+        return acc_nums_list.index(acc_num)
+    else:
+        return -1  # Return -1 if variable is not found in the array
 
 def read_cov_info(r1,r2,df: DataFrame):
 
@@ -188,18 +215,28 @@ def main():
     )
     parser.add_argument(
         "--input_cov",
+        nargs='+',
         help="Input covariation pairs file for uniprot accession",
         required=True,
     )
     parser.add_argument(
-        "-o", "--output_csv", help="output directory for csv file", required=True
+        "-o", "--output_csv",
+        help="output directory for csv file",
+        required=True
     )
 
     args = parser.parse_args()
     
-    covariation_pairs, pdb_id = get_cov_interfaces(args.input_json, args.input_cov)
+    accs_nums_list=[]
+    for file in args.input_cov:
+        accs_num = file.split('_')[0]
+        accs_nums_list.append(accs_num)
 
-    save_covariation_data(covariation_pairs,pdb_id,args.output_csv)
+    logging.info("List of accession numbers",accs_nums_list)
+    
+    covariation_pairs, pdb_id, assembly_id = get_cov_interfaces(args.input_json, args.input_cov,accs_nums_list)
+
+    save_covariation_data(covariation_pairs,pdb_id,assembly_id,args.output_csv)
 
 
     logging.info("We are done here.")

@@ -1,5 +1,5 @@
 uniprot_accession_a,uniprot_residue_index_a,residue_label_a,uniprot_accession_b,uniprot_residue_index_b,residue_label_b,covariation_score,covariation_probability
-F5HCP3,54,LEU,F5HCP3,59,PRO,-0.0045671,0.539227
-F5HCP3,24,LEU,F5HCP3,52,ALA,-0.0045682,0.516928
-F5HCP3,24,LEU,F5HCP3,56,TYR,-0.00456711,0.569487
+F5HCH8,54,LEU,F5HCH8,59,PRO,-0.0045671,0.539227
+F5HCH8,24,LEU,F5HCH8,52,ALA,-0.0045682,0.516928
+F5HCH8,24,LEU,F5HCH8,56,TYR,-0.00456711,0.569487
 
