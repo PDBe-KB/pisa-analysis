@@ -1,11 +1,6 @@
-pytest
 xmltodict
 gemmi
 xmlschema
 jsonschema
-pytest-cov
-coverage
-pre-commit
 lxml
 pandas
-csv
