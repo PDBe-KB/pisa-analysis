@@ -23,9 +23,7 @@ cd pisa-analysis
 ``` 
 ## Dependencies 
 
-The pisa_analysis process runs PISA-Lite as a subprocess and requires apriori compilation of PISA. For more information on how to compile PISA-Lite visit our internal page: 
-
-[PISA-Lite documentation](https://www.ebi.ac.uk/seqdb/confluence/pages/viewpage.action?spaceKey=PDBE&title=Interaction+and+interfaces+-+assemblies)
+The pisa_analysis process runs PISA-Lite as a subprocess and requires apriori compilation of PISA.
 
 To make your life easier when running the process, you can set two path environment variables for PISA:
 
@@ -73,7 +71,7 @@ Follow below steps to install the modules **pisa_analysis** and **covariations_i
 ```
 cd pisa-analysis/
 
-python setup.py install
+python install .
 
 ```
 
