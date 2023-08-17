@@ -163,13 +163,13 @@ https://pisalite.docs.apiary.io/#reference/0/pisaqualifierjson/interaction-inter
 The simplified assembly json output looks as follows:
 ```
 {
-   "PISA": {
-      "pdb_id": "1d2s", 
+   "1d2s": {
       "assembly_id": "1", 
       "pisa_version": "2.0", 
       "assembly": {
          "id": "1", 
-         "size": "8", 
+         "size": "8",
+         "interface_count": "1",
          "macromolecular_size": "2", 
          "dissociation_energy": -3.96, 
          "accessible_surface_area": 15146.45, 
