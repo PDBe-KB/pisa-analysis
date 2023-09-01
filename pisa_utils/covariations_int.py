@@ -79,20 +79,24 @@ def get_cov_interfaces(input_json, input_cov,accs_nums_list):
                     
                     if (unp_num_1 == '?') : unp_num_1 = None
                     if (unp_num_2 == '?') : unp_num_2 = None
-
+                    if (unp_acc_1 == "?") : unp_acc_1 = None
+                    if (unp_acc_2 == "?") : unp_acc_2 = None
+                    
                     if len(accs_nums_list)==1:
-                        if unp_accs_1 != unp_accs_2:
-                            logging.error("More than 1 accession number in complex, check if this is a homomeric complex ")
 
-                        if (unp_num_1 is not None) and (unp_num_2 is not None):
-                        
+                        if (unp_acc_1 is not None) and (unp_acc_2 is not None):
+                            if unp_acc_1 != unp_acc_2:
+                                logging.error("More than 1 accession number in complex {}, check if this is a homomeric complex".format(pdb_id))
                             if (unp_acc_1 != accs_nums_list[0]) or (unp_acc_2 != accs_nums_list[0]):
+                                print(unp_acc_1,accs_nums_list[0])
                                 logging.error("accession number in interface contact does not match accession number in input file"
                                               )
+                        if (unp_num_1 is not None) and (unp_num_2 is not None):
                             
                             cov_probability, cov_score = read_cov_info(unp_num_1,unp_num_2,covs[0])
                         
                             if (cov_probability is not None) and (cov_score is not None):
+                                #if(cov_probability >= 0.7) :
                                 covariation_pairs.append(
                                     [
                                         unp_num_1,unp_acc_1,residue_1,
@@ -101,7 +105,7 @@ def get_cov_interfaces(input_json, input_cov,accs_nums_list):
                                         cov_probability
                                     ]
                                 )
-                     
+                                    
                     if len(accs_nums_list) > 1 :
 
                         logging.info(f"Analysing covariation in Heteromeric complex")
@@ -220,6 +224,12 @@ def main():
         required=True,
     )
     parser.add_argument(
+        "--acc_unp_ids",
+        nargs='+',
+        help="Input uniprot accession numbers",
+        required=True,
+    )
+    parser.add_argument(
         "-o", "--output_csv",
         help="output directory for csv file",
         required=True
@@ -228,12 +238,12 @@ def main():
     args = parser.parse_args()
     
     accs_nums_list=[]
-    for file in args.input_cov:
-        accs_num = file.split('_')[0]
-        accs_nums_list.append(accs_num)
+    for item in args.acc_unp_ids:
+#        accs_num = file.split('_')[0]
+        accs_nums_list.append(item)
 
     logging.info("List of accession numbers",accs_nums_list)
-    
+    print("List of accession numbers",accs_nums_list)
     covariation_pairs, pdb_id, assembly_id = get_cov_interfaces(args.input_json, args.input_cov,accs_nums_list)
 
     save_covariation_data(covariation_pairs,pdb_id,assembly_id,args.output_csv)
