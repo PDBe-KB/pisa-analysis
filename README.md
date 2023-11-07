@@ -113,13 +113,13 @@ Other optional arguments are:
 usage:
 
 ```
-python pisa-analysis/pisa_utils/covariations_int.py [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR
+python pisa-analysis/pisa_utils/covariations_int.py [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR --acc_unp_ids UNP_acc_IDs
 ```
 
 OR
 
 ```
-covariations_int [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR
+covariations_int [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR --acc_unp_ids UNP_ACC_IDs
 ```
 
 Required arguments are :
@@ -127,7 +127,8 @@ Required arguments are :
 ```
 --input_json              :  JSON file (output of pisa_analysis) with assembly interfaces information
 --input_cov               :  CSV file with covariation pairs for UniProt accession    
---output_csv (-o)         :  Output CSV file with covariation information for interfaces contacts 
+--output_csv (-o)         :  Output CSV file with covariation information for interfaces contacts
+--acc_unp_ids             :  List of Uniprot accession ids
 ```
 
 
