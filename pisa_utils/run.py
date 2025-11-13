@@ -37,11 +37,18 @@ def main():
     )
 
     args = parser.parse_args()
+    
+    if not args.pisa_setup_dir:
+        args.pisa_setup_dir = os.environ.get("PISA_SETUP_DIR")
 
-    if not (args.pisa_setup_dir or "PISA_SETUP_DIR" in os.environ):
+    if not args.pisa_setup_dir:
         raise Exception(
             "PISA_SETUP_DIR not set in environment and --pisa_setup_dir not specified"
         )
+    #if not (args.pisa_setup_dir or "PISA_SETUP_DIR" in os.environ):
+    #    raise Exception(
+    #        "PISA_SETUP_DIR not set in environment and --pisa_setup_dir not specified"
+    #    )
 
     if not "pisa" and not os.path.isfile(args.pisa_binary):
         raise Exception(f"pisa binary not found or is not a file: {args.pisa_binary}")
