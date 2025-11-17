@@ -39,11 +39,7 @@ A path to the setup directory of PISA:
 export PISA_SETUP_DIR="/your_path_to_pisa/pisa/setup"
 ```
 
-Additionally, it is required that PISA setup directory contains a pisa configuration template named [pisa_cfg_tmp](https://github.com/PDBe-KB/pisa-analysis/blob/main/pisa_cfg_tmp)
-
-```
-cp pisa_cfg_tmp your_path_to_pisa/pisa/setup
-```
+Additionally, it is required that PISA setup directory contains a pisa configuration template named [pisa_cfg_tmp](https://github.com/PDBe-KB/pisa/tree/main/setup/pisa_cfg_tmp)
 
 Other dependencies can be installed with:
 
