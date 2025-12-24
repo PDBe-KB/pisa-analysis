@@ -1,0 +1,26 @@
+{
+    "pqs_data": [
+        {
+            "pqs_set_id": 1,
+            "complex_key": 1,
+            "complex_type": 1,
+            "mmsize": 2,
+            "asa": 20000.0,
+            "bsa": 3000.0,
+            "diss_energy": 20.0,
+            "chem_energy": 10.0,
+            "formula": "A(2)"
+        }
+    ],
+    "asu_data": [
+        {
+            "complex_type": 2,
+            "mmsize": 1,
+            "asa": 10000.0,
+            "bsa": 0.0,
+            "diss_energy": 0.0,
+            "chem_energy": 0.0,
+            "formula": "A"
+        }
+    ]
+}

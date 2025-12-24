@@ -1,7 +1,6 @@
 import os
 import os.path
 from unittest import TestCase
-import tempfile
 
 from gemmi import cif
 

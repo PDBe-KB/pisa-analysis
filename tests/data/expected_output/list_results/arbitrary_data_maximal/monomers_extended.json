@@ -1,0 +1,49 @@
+{
+    "components": [
+        {
+            "mol_id": 1,
+            "molecule_type_id": 1,
+            "auth_asym_id": "A",
+            "ccd_id": null,
+            "auth_seq_id_start": null,
+            "auth_seq_id_end": null,
+            "molecule_class": "Protein",
+            "total_atoms": 1846,
+            "total_residues": 248,
+            "n_surface_atoms": 1017,
+            "n_surface_residues": 223,
+            "asa": 11112.6,
+            "solv_energy": -220.0
+        },
+        {
+            "mol_id": 2,
+            "molecule_type_id": 2,
+            "auth_asym_id": "A",
+            "ccd_id": "NA",
+            "auth_seq_id_start": 301,
+            "auth_seq_id_end": 301,
+            "molecule_class": "Ligand",
+            "total_atoms": 1,
+            "total_residues": 1,
+            "n_surface_atoms": 1,
+            "n_surface_residues": 1,
+            "asa": 124.7,
+            "solv_energy": null
+        },
+        {
+            "mol_id": 3,
+            "molecule_type_id": 3,
+            "auth_asym_id": "A",
+            "ccd_id": "GOL",
+            "auth_seq_id_start": 302,
+            "auth_seq_id_end": 302,
+            "molecule_class": "Ligand",
+            "total_atoms": 6,
+            "total_residues": 1,
+            "n_surface_atoms": 6,
+            "n_surface_residues": 1,
+            "asa": 218.0,
+            "solv_energy": null
+        }
+    ]
+}

@@ -1,61 +1,32 @@
-import argparse
 import logging
 import os
 
 from pisa_utils.analyze import AnalysePisa
-from pisa_utils.run_pisa import run_pisalite
+from pisa_utils.constants import SUBDIR_EXTENDED_DATA
+from pisa_utils.models.models import LigandProcessingMode
+from pisa_utils.parsers import (
+    ConvertAssemblyListToJSON,
+    ConvertAssemblyXMLToJSON,
+    ConvertComponentsListToJSON,
+    ConvertInterfaceListToJSON,
+    ConvertInterfaceXMLToJSONs,
+)
+from pisa_utils.run_pisa import run_pisa_service, run_pisalite
+from pisa_utils.utils import collect_base_args, validate_args
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    """CLI entry point for running PISA analysis on a given assembly CIF file"""
 
-    parser.add_argument(
-        "-i",
-        "--input_cif",
-        help="Input CIF file",
-        required=True,
-    )
+    parser = collect_base_args()
     parser.add_argument("--pdb_id", help="PDB ID", required=True)
     parser.add_argument("--assembly_id", help="Assembly ID", required=True)
-    parser.add_argument(
-        "-o", "--output_json", help="output directory for JSON and XMLs", required=True
-    )
     parser.add_argument("--input_updated_cif", help="updated cif path/file")
-    parser.add_argument(
-        "--output_xml", help="output directory for xml files", required=True
-    )
-    parser.add_argument("--pisa_binary", help="path to pisa binary", default="pisa")
-    parser.add_argument(
-        "--pisa_setup_dir",
-        help="path to pisa-lite setup directory",
-    )
-    parser.add_argument(
-        "--force", help="always recalculate with pisa-lite", action="store_true"
-    )
-    parser.add_argument(
-        "-v", "--verbose", help="Add debug information to log", action="store_true"
-    )
 
     args = parser.parse_args()
-    
-    if not args.pisa_setup_dir:
-        args.pisa_setup_dir = os.environ.get("PISA_SETUP_DIR")
-
-    if not args.pisa_setup_dir:
-        raise Exception(
-            "PISA_SETUP_DIR not set in environment and --pisa_setup_dir not specified"
-        )
-    #if not (args.pisa_setup_dir or "PISA_SETUP_DIR" in os.environ):
-    #    raise Exception(
-    #        "PISA_SETUP_DIR not set in environment and --pisa_setup_dir not specified"
-    #    )
-
-    if not "pisa" and not os.path.isfile(args.pisa_binary):
-        raise Exception(f"pisa binary not found or is not a file: {args.pisa_binary}")
+    args = validate_args(args)
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
-
-    input_cif_file = args.input_cif
 
     interfaces_xml_file = os.path.join(args.output_xml, "interfaces.xml")
     assembly_xml_file = os.path.join(args.output_xml, "assembly.xml")
@@ -66,7 +37,7 @@ def main():
         args.output_json, f"{args.pdb_id}-assembly{args.assembly_id}-interfaces.json"
     )
 
-    logging.info("input cif: {}".format(input_cif_file))
+    logging.info("input cif: {}".format(args.input_cif))
     logging.info("output xml: {}".format(args.output_xml))
     logging.info("output json: {}".format(args.output_json))
 
@@ -77,7 +48,7 @@ def main():
     ):
 
         run_pisalite(
-            input_cif=input_cif_file,
+            input_cif=args.input_cif,
             xml_output_dir=args.output_xml,
             pisa_binary=args.pisa_binary,
             pisa_setup_dir=args.pisa_setup_dir,
@@ -91,9 +62,103 @@ def main():
         input_updated_cif=args.input_updated_cif,
     )
 
-    
-    interfaces = ap.interfaces_xml_to_json(assembly_xml_file, interfaces_xml_file, interface_json)
-    ap.assembly_xml_to_json(assembly_xml_file, assembly_json,interfaces)
+    interfaces = ap.interfaces_xml_to_json(
+        assembly_xml_file, interfaces_xml_file, interface_json
+    )
+    ap.assembly_xml_to_json(assembly_xml_file, assembly_json, interfaces)
 
-if "__main__" in __name__:
+
+def service():
+    """
+    CLI entry point for running PISA with additional options. Intended for internal
+    use at the PDBe.
+    """
+
+    parser = collect_base_args()
+    parser.add_argument(
+        "--as_is", help="run pisa in asis mode", action="store_true", default=False
+    )
+    parser.add_argument(
+        "--lig_proc_mode",
+        help="ligand processing mode for pisa",
+        default=LigandProcessingMode.AUTO.value,
+        choices=[mode.value for mode in LigandProcessingMode],
+    )
+    parser.add_argument(
+        "--exclude_ligands",
+        help="list of ligand CCD (three-letter codes) to exclude",
+        nargs="+",
+        default=None,
+    )
+    parser.add_argument(
+        "--run_all_pisa_commands",
+        help=(
+            "parse full results from pisa XMLs, including all assemblies, interfaces, "
+            "and monomers"
+        ),
+        action="store_true",
+        default=True,
+    )
+    args = parser.parse_args()
+    args = validate_args(args)
+
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
+
+    logging.info("input cif: {}".format(args.input_cif))
+    logging.info("output xml: {}".format(args.output_xml))
+    logging.info("output json: {}".format(args.output_json))
+
+    os.makedirs(args.output_xml, exist_ok=True)
+
+    (
+        assembly_xml_file,
+        interfaces_xml_file,
+        assemblies_extended_file,
+        interfaces_extended_file,
+        monomers_extended_file,
+    ) = run_pisa_service(
+        input_cif=args.input_cif,
+        xml_output_dir=args.output_xml,
+        pisa_binary=args.pisa_binary,
+        pisa_setup_dir=args.pisa_setup_dir,
+        asis=args.as_is,
+        lig_proc_mode=args.lig_proc_mode,
+        exclude_ligands=args.exclude_ligands,
+        extended_data=args.run_all_pisa_commands,
+    )
+
+    if args.run_all_pisa_commands:
+
+        data_parser = (
+            ConvertInterfaceXMLToJSONs(
+                path_xml=interfaces_xml_file,
+                path_jsons=os.path.join(args.output_json, "interfaces"),
+                path_structure_file=args.input_cif,
+            ),
+            ConvertAssemblyXMLToJSON(
+                path_xml=assembly_xml_file,
+                path_json=os.path.join(args.output_json, "assemblies.json"),
+                path_structure_file=args.input_cif,
+                path_interface_jsons=os.path.join(args.output_json, "interfaces"),
+            ),
+            ConvertAssemblyListToJSON(
+                path_txt=assemblies_extended_file,
+                path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
+            ),
+            ConvertInterfaceListToJSON(
+                path_txt=interfaces_extended_file,
+                path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
+            ),
+            ConvertComponentsListToJSON(
+                path_txt=monomers_extended_file,
+                path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
+            ),
+        )
+
+        for parser in data_parser:
+            logging.info(f"Parsing and converting: {parser}")
+            parser.parse()
+
+
+if __name__ == "__main__":
     main()

@@ -1,0 +1,23 @@
+{
+    "interfaces": [
+        {
+            "int_type": 1,
+            "interface_id": 1,
+            "auth_asym_id_1": "A",
+            "ccd_id_1": null,
+            "auth_seq_id_start_1": null,
+            "auth_seq_id_end_1": null,
+            "auth_asym_id_2": "B",
+            "ccd_id_2": null,
+            "auth_seq_id_start_2": null,
+            "auth_seq_id_end_2": null,
+            "symmetry_operation": "-X-1,Y,-Z+1/2",
+            "symmetry_id": "0_555",
+            "int_area": 2000.0,
+            "int_solv_energy": -50.0,
+            "nhb": 20,
+            "nsb": 10,
+            "nds": 10
+        }
+    ]
+}

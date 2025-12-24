@@ -1,0 +1,84 @@
+{
+    "session_name": "3hax",
+    "status": "Ok",
+    "status_description": null,
+    "status_note": null,
+    "n_pqs_sets": 0,
+    "n_interfaces": 1,
+    "assessment": "Stable",
+    "multimeric_state": 5,
+    "all_chains_at_identity": false,
+    "resolution": 2.11,
+    "pqs_sets": [],
+    "asu_complex": {
+        "complex": {
+            "complex_key": 0,
+            "complex_type": 1,
+            "size": 16,
+            "mmsize": 5,
+            "freesize": 5,
+            "stability_description": null,
+            "diss_energy": 27.891,
+            "diss_energy_0": 90.619,
+            "stable": true,
+            "asa": 30301.0,
+            "bsa": 14879.2,
+            "entropy": 11.7,
+            "entropy_0": 48.1,
+            "diss_area": 2404.5,
+            "int_energy": -78.5,
+            "n_uc": 0,
+            "n_diss": 2,
+            "symmetry_number": 1,
+            "formula": "ABCDEa(2)b(2)de(5)f",
+            "composition": "ACDEF[PGE](2)[EDO](2)[PG4][MG](5)[FHU]",
+            "interfaces": {
+                "n_interfaces": 1,
+                "interfaces": [
+                    {
+                        "interface_id": 1,
+                        "dissociates": false,
+                        "css": null
+                    }
+                ]
+            },
+            "molecules": [
+                {
+                    "auth_asym_id": "A",
+                    "label_asym_id": "A",
+                    "visual_id": null,
+                    "auth_seq_id_start": 11,
+                    "auth_seq_id_end": 339,
+                    "label_seq_id_start": 8,
+                    "label_seq_id_end": 336,
+                    "ccd_id": null,
+                    "rxx": 1.0,
+                    "rxy": 0.0,
+                    "rxz": 0.0,
+                    "tx": 0.0,
+                    "ryx": 0.0,
+                    "ryy": 1.0,
+                    "ryz": 0.0,
+                    "ty": 0.0,
+                    "rzx": 0.0,
+                    "rzy": 0.0,
+                    "rzz": 1.0,
+                    "tz": 0.0,
+                    "rxx_f": 0.0,
+                    "rxy_f": 0.0,
+                    "rxz_f": 0.0,
+                    "tx_f": 0.0,
+                    "ryx_f": 0.0,
+                    "ryy_f": 0.0,
+                    "ryz_f": 0.0,
+                    "ty_f": 0.0,
+                    "rzx_f": 0.0,
+                    "rzy_f": 0.0,
+                    "rzz_f": 0.0,
+                    "tz_f": 0.0,
+                    "symmetry_id": "0_555"
+                }
+            ]
+        }
+    }
+}

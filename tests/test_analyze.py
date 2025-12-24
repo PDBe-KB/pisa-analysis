@@ -1,12 +1,15 @@
 import json
+import logging
 import os
 import tempfile
-
-# import xml.etree.ElementTree as ET
 from unittest import TestCase
 from unittest.mock import patch
 
 from pisa_utils.analyze import AnalysePisa
+
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.DEBUG)
+
 
 mol_dict = (
     [
@@ -171,5 +174,5 @@ class TestAnalyzePisa(TestCase):
         with tempfile.NamedTemporaryFile(mode="wt") as f:
             interfaces = 1
             assembly_xml = os.path.join("tests", "data", "assembly.xml")
-            ap.assembly_xml_to_json(assembly_xml, f.name,interfaces)
+            ap.assembly_xml_to_json(assembly_xml, f.name, interfaces)
             self.assertEqual(json.load(open(f.name, "r")), expected)
