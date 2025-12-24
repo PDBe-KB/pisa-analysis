@@ -62,4 +62,3 @@ _pdbx_sifts_xref_db.xref_db_segment_id
 _pdbx_sifts_xref_db.xref_db_instance_id
 1 A 1 5 ALA A A 2 P48491 1 1 ? y 1 SCOP2 8061644 SCOP2B-SF 1 1
 1 A 1 6 ARG R R 3 P48491 1 1 ? y 1 SCOP2 8061644 SCOP2B-SF 1 1
-

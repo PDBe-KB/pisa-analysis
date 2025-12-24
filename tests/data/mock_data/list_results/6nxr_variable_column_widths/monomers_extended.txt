@@ -1,0 +1,15 @@
+
+ PISA v.2.2.0 built 15-03-2019   with SSM v.1.4.0, SRS v.1.0.0, MMDB v.2,0.24
+ Session XXX
+
+ LIST OF MONOMERS
+ -------.-------------.------------------------------------------------
+  ## Id |   Monomer   |  Class    Nat Nres   Sat Sres     Area   DeltaG
+ -------+-------------+------------------------------------------------
+1 1 | A | Protein 1846 248 1017 223 11112.6 -220.0
+           2         2          |          [NA]A:301          |             Ligand              1            1             1          1            124.7
+   3 3 |[GOL]A:302|Ligand 6 1 6 1 218.0
+ -------'-------------'------------------------------------------------
+ ##:     serial number     Nat:  total atoms    Nres: total residues
+ Id:     monomer type id   Sat:  surface atoms  Sres: surface residues
+ Monomer: selection range  Area: sq. angstrom   DeltaG: kcal/mol

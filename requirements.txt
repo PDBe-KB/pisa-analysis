@@ -1,6 +1,7 @@
-xmltodict
-gemmi
-xmlschema
-jsonschema
-lxml
-pandas
+gemmi==0.7.3
+jsonschema==4.25.1
+lxml==4.9.4
+pandas==2.3.3
+pydantic==2.12.4
+xmlschema==4.2.0
+xmltodict==1.0.2

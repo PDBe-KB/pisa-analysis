@@ -45,7 +45,6 @@ def get_molecules_dict(molecules):
             residue_solv_en = round(float(residue.find("solv_en").text), 2)
             residue_ins_code = residue.find("ins_code").text
             residue_bond = residue.find("bonds").text
-            
 
             # Writing interface residues dictionary
 
@@ -105,7 +104,6 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
     :return: type dict - bonds dictionary
     """
 
-    
     bonds = bondtag.iter("bond")
     atom_site1_chains = []
     atom_site1_residues = []
@@ -157,7 +155,7 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
         # atoms in bonds, from updated cif file
 
         uniprot_info_1 = read_uniprot_info(
-            label_seqnum_1, seqnum_1, atname_1, res_1,updated_cif_block
+            label_seqnum_1, seqnum_1, atname_1, res_1, updated_cif_block
         )
         unp_acc_1 = uniprot_info_1[0]
         unp_num_1 = uniprot_info_1[1]
@@ -167,8 +165,7 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
         )
         unp_acc_2 = uniprot_info_2[0]
         unp_num_2 = uniprot_info_2[1]
-    
-        
+
         atom_site1_chains.append(chain_1)
         atom_site1_residues.append(res_1)
         atom_site1_label_asym_ids.append(label_asym_id_1)
@@ -194,7 +191,6 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
         bonds_distances.append(dist)
         bond_types.append(bond_type)
 
-        
     bond_dict = {
         "bond_distances": bonds_distances,
         "atom_site_1_chains": atom_site1_chains,

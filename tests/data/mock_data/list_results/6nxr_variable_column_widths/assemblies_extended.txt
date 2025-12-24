@@ -1,0 +1,32 @@
+
+ PISA v.2.2.0 built 15-03-2019   with SSM v.1.4.0, SRS v.1.0.0, MMDB v.2,0.24
+ Session XXX
+
+ In the oligomeric state analysis, ligands
+       NA, GOL
+ were excluded.
+
+ Analysis of protein interfaces suggests that the following
+ quaternary structure is stable in solution
+ ----.-----.------------------------------------------------.---------------
+ Set |  No | Size  Id      ASA       BSA   DGdiss0    mG0   | Formula
+ ----+-----+------------------------------------------------+---------------
+1 | 1 | 2 1 19370.0 2855.3 15.6 7.8 | A(2)
+       1         |          1          |              2               1          19370.0             2855.3             15.6            7.8          |              A(2)
+   1 |   1 |   2    1   19370.0    2855.3     15.6      7.8|A(2)
+ ----'-----'------------------------------------------------'---------------
+
+ Analysis of complex, represented by ASU or bare content
+ of the coordinate file
+ -----------------------------------------------.---------------
+ Size  Id      ASA       BSA   DGdiss0    mG0   | Formula
+ -----------------------------------------------+---------------
+1 2 11112.6 0.0 0.0 0.0 | A
+           1               2            11112.6              0.0             0.0           0.0         |          A
+   1    2   11112.6       0.0      0.0      0.0|A
+ -----------------------------------------------'---------------
+ Set: PQS set number   Size: macromolecular oligomeric state
+ Id:  Assembly id      ASA:  accessible surface area, sq.A
+ BSA: buried SA, sq.A
+ DGdiss0: standard free energy of dissociation, kcal/mol
+ mG0:     standard chemical potential, kcal/mol

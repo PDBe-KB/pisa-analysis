@@ -1,0 +1,19 @@
+{
+    "components": [
+        {
+            "mol_id": 1,
+            "molecule_type_id": 1,
+            "auth_asym_id": "A",
+            "ccd_id": null,
+            "auth_seq_id_start": null,
+            "auth_seq_id_end": null,
+            "molecule_class": "Protein",
+            "total_atoms": 1000,
+            "total_residues": 200,
+            "n_surface_atoms": 1000,
+            "n_surface_residues": 200,
+            "asa": 10000.0,
+            "solv_energy": -200.0
+        }
+    ]
+}
