@@ -29,14 +29,6 @@ jobs:
     - name: Run Tests
       run: |
         make test
-    - name: Upload coverage to Codecov
-      if: github.ref == 'refs/heads/main'
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage/cobertura-coverage.xml
-        flags: unittests
-        name: codecov-${{ env.PACKAGE_NAME }}
-        fail_ci_if_error: true
     - name: Create distribution
       if: github.ref == 'refs/heads/main'
       run: |
