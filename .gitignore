@@ -130,5 +130,6 @@ dmypy.json
 TODO
 tmp/
 my_run.py
+tests/data/actual_output/
 tests/data/actual_output/*
 pisa_cfg_tmp
