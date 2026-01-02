@@ -555,11 +555,18 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
 
             for asm_set in asm_sets:
                 assembly = asm_set.get("assembly")
-                interfaces = assembly.get("interfaces", {}).get("interface", [])
-                if not isinstance(interfaces, list):
-                    interfaces = [interfaces]
-                for interface in interfaces:
-                    interface_ids.add(interface["id"])
+
+                if not isinstance(assembly, list):
+                    assembly = [assembly]
+
+                for asm in assembly:
+                    interfaces = asm.get("interfaces", {}).get("interface", [])
+
+                    if not isinstance(interfaces, list):
+                        interfaces = [interfaces]
+                    for interface in interfaces:
+                        interface_ids.add(interface["id"])
+
             total_interfaces = len(interface_ids)
 
         assembly_data["pisa_results"]["n_interfaces"] = total_interfaces
