@@ -167,84 +167,111 @@ class LigandPosition(Enum):
 
 
 class StrictModel(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
 
 class Bond(StrictModel):
     # First chain info
     auth_asym_id_1: str = Field(
-        ..., description=AUTH_ASYM_ID, examples=AUTH_ASYM_ID_EXAMPLES, alias="chain-1"
+        ...,
+        description=AUTH_ASYM_ID,
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="chain-1",
     )
     label_asym_id_1: Optional[str] = Field(
-        None, description=LABEL_ASYM_ID, examples=[], alias="label_asym_id-1"
+        None, description=LABEL_ASYM_ID, examples=[], validation_alias="label_asym_id-1"
     )
 
-    orig_label_asym_id_1: Optional[str] = Field(None, alias="orig_label_asym_id-1")
+    orig_label_asym_id_1: Optional[str] = Field(
+        None, validation_alias="orig_label_asym_id-1"
+    )
     pdbx_sifts_xref_db_num_1: Optional[str] = Field(
         None,
-        alias="pdbx_sifts_xref_db_num-1",
+        validation_alias="pdbx_sifts_xref_db_num-1",
         exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
     pdbx_sifts_xref_db_name_1: Optional[str] = Field(
         None,
-        alias="pdbx_sifts_xref_db_name-1",
+        validation_alias="pdbx_sifts_xref_db_name-1",
         exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
     pdbx_sifts_xref_db_acc_1: Optional[str] = Field(
         None,
-        alias="pdbx_sifts_xref_db_acc-1",
+        validation_alias="pdbx_sifts_xref_db_acc-1",
         exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
     auth_comp_id_1: str = Field(
         ...,
         description=RESIDUE_3_LETTER_CODE,
         examples=RESIDUE_3_LETTER_EXAMPLES,
-        alias="res-1",
+        validation_alias="res-1",
     )
     auth_seq_id_1: int = Field(
-        ..., description=RESIDUE_SEQ_ID, examples=["178"], alias="seqnum-1"
+        ..., description=RESIDUE_SEQ_ID, examples=["178"], validation_alias="seqnum-1"
     )
     label_seq_id_1: Optional[int] = Field(
-        None, description=LABEL_SEQ_ID, examples=[1, 2, 180], alias="label_seqnum-1"
+        None,
+        description=LABEL_SEQ_ID,
+        examples=[1, 2, 180],
+        validation_alias="label_seqnum-1",
     )
     # FIXME - find structures with insertion codes to check they're populated
     inscode_1: Optional[str] = Field(
-        None, description=INSERTION_CODE, alias="inscode-1"
+        None, description=INSERTION_CODE, validation_alias="inscode-1"
     )
     auth_atom_id_1: str = Field(
-        ..., description=ATOM_LABEL, examples=ATOM_LABEL_EXAMPLES, alias="atname-1"
+        ...,
+        description=ATOM_LABEL,
+        examples=ATOM_LABEL_EXAMPLES,
+        validation_alias="atname-1",
     )
 
     # Second chain info
     auth_asym_id_2: str = Field(
-        ..., description=AUTH_ASYM_ID, examples=AUTH_ASYM_ID_EXAMPLES, alias="chain-2"
+        ...,
+        description=AUTH_ASYM_ID,
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="chain-2",
     )
     label_asym_id_2: Optional[str] = Field(
-        None, description=LABEL_ASYM_ID, alias="label_asym_id-2"
+        None, description=LABEL_ASYM_ID, validation_alias="label_asym_id-2"
     )
-    orig_label_asym_id_2: Optional[str] = Field(None, alias="orig_label_asym_id-2")
+    orig_label_asym_id_2: Optional[str] = Field(
+        None, validation_alias="orig_label_asym_id-2"
+    )
     pdbx_sifts_xref_db_acc_2: Optional[str] = Field(
-        None, alias="pdbx_sifts_xref_db_acc-2", exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS
+        None,
+        validation_alias="pdbx_sifts_xref_db_acc-2",
+        exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
     pdbx_sifts_xref_db_num_2: Optional[str] = Field(
-        None, alias="pdbx_sifts_xref_db_num-2", exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS
+        None,
+        validation_alias="pdbx_sifts_xref_db_num-2",
+        exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
     pdbx_sifts_xref_db_name_2: Optional[str] = Field(
-        None, alias="pdbx_sifts_xref_db_name-2", exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS
+        None,
+        validation_alias="pdbx_sifts_xref_db_name-2",
+        exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
     auth_comp_id_2: str = Field(
         ...,
         description=RESIDUE_3_LETTER_CODE,
         examples=RESIDUE_3_LETTER_EXAMPLES,
-        alias="res-2",
+        validation_alias="res-2",
     )
-    auth_seq_id_2: int = Field(..., description=RESIDUE_SEQ_ID, alias="seqnum-2")
-    label_seq_id_2: Optional[int] = Field(None, alias="label_seqnum-2")
+    auth_seq_id_2: int = Field(
+        ..., description=RESIDUE_SEQ_ID, validation_alias="seqnum-2"
+    )
+    label_seq_id_2: Optional[int] = Field(None, validation_alias="label_seqnum-2")
     inscode_2: Optional[str] = Field(
-        None, description=INSERTION_CODE, alias="inscode-2"
+        None, description=INSERTION_CODE, validation_alias="inscode-2"
     )
     auth_atom_id_2: str = Field(
-        ..., description=ATOM_LABEL, examples=ATOM_LABEL_EXAMPLES, alias="atname-2"
+        ...,
+        description=ATOM_LABEL,
+        examples=ATOM_LABEL_EXAMPLES,
+        validation_alias="atname-2",
     )
     dist: float = Field(
         ...,
@@ -270,7 +297,7 @@ class BondsInfo(StrictModel):
     bonds: Optional[list[Bond]] = Field(
         [],
         description="List of extended bond information",
-        alias="bond",
+        validation_alias="bond",
         examples=[
             [
                 Bond(
@@ -302,14 +329,17 @@ class BondsInfo(StrictModel):
 
 class Residue(StrictModel):
     residue_serial_number: int = Field(
-        ..., description=RESIDUE_SERIAL_NUMBER, examples=[1, 2, 3, 100], alias="ser_no"
+        ...,
+        description=RESIDUE_SERIAL_NUMBER,
+        examples=[1, 2, 3, 100],
+        validation_alias="ser_no",
     )
-    auth_comp_id: str = Field(..., examples=["MET"], alias="name")
+    auth_comp_id: str = Field(..., examples=["MET"], validation_alias="name")
     auth_seq_id: int = Field(
-        ..., description=AUTH_SEQ_ID, examples=[1, 2, 5], alias="seq_num"
+        ..., description=AUTH_SEQ_ID, examples=[1, 2, 5], validation_alias="seq_num"
     )
     label_seq_id: Optional[int] = Field(
-        None, description=LABEL_SEQ_ID, alias="label_seq_num"
+        None, description=LABEL_SEQ_ID, validation_alias="label_seq_num"
     )
     ins_code: Optional[str] = Field(None, description=INSERTION_CODE)
     bonds: Optional[str] = Field(
@@ -320,7 +350,10 @@ class Residue(StrictModel):
     asa: float = Field(..., description=RESIDUE_ASA, examples=[158.7123629])
     bsa: float = Field(..., description=RESIDUE_BSA, examples=[123.567])
     solv_energy: float = Field(
-        ..., description=RESIDUE_SOLVATION_ENERGY, examples=[-1.23], alias="solv_en"
+        ...,
+        description=RESIDUE_SOLVATION_ENERGY,
+        examples=[-1.23],
+        validation_alias="solv_en",
     )
 
     @field_validator("asa", "bsa")
@@ -343,7 +376,9 @@ class Residue(StrictModel):
 
 class Residues(StrictModel):
     residues: list[Residue] = Field(
-        ..., description="List of residue information at interface", alias="residue"
+        ...,
+        description="List of residue information at interface",
+        validation_alias="residue",
     )
 
     @field_validator("residues", mode="before")
@@ -353,9 +388,12 @@ class Residues(StrictModel):
 
 
 class Molecule(StrictModel):
-    mol_id: int = Field(..., alias="id")
+    mol_id: int = Field(..., validation_alias="id")
     auth_asym_id: str = Field(
-        ..., description=AUTH_ASYM_ID, examples=AUTH_ASYM_ID_EXAMPLES, alias="chain_id"
+        ...,
+        description=AUTH_ASYM_ID,
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="chain_id",
     )
     label_asym_id: Optional[str] = Field(None, description=LABEL_ASYM_ID, examples=[])
     ccd_id: Optional[str] = Field(None)
@@ -367,7 +405,7 @@ class Molecule(StrictModel):
     label_seq_id_end: Optional[int] = Field(None)
 
     molecule_class: str = Field(
-        ..., description=MOLECULE_CLASS, examples=["Protein"], alias="class"
+        ..., description=MOLECULE_CLASS, examples=["Protein"], validation_alias="class"
     )
     symmetry_id: Optional[str] = Field(
         None, description=SYMMETRY_ID, examples=["0_555", "1_555"]
@@ -376,10 +414,13 @@ class Molecule(StrictModel):
         None,
         description=SYMMETRY_OPERATION_NUMBER,
         examples=[1, 2, 3],
-        alias="symop_no",
+        validation_alias="symop_no",
     )
     symmetry_operation: Optional[str] = Field(
-        None, description=SYMMETRY_OPERATION, examples=["x,y,z"], alias="symop"
+        None,
+        description=SYMMETRY_OPERATION,
+        examples=["x,y,z"],
+        validation_alias="symop",
     )
     cell_i: Optional[int] = Field(None, description=CELL_I, examples=[0, 1, 2])
     cell_j: Optional[int] = Field(None, description=CELL_J, examples=[0, 1, 2])
@@ -409,7 +450,7 @@ class Molecule(StrictModel):
         ...,
         description=INTERFACE_SOLVATION_ENERGY,
         examples=[-5.5, -10.0, -2.3],
-        alias="int_solv_en",
+        validation_alias="int_solv_en",
     )
     pvalue: float = Field(
         ..., description=INTERFACE_P_VALUE, examples=[0.01, 0.05, 0.1, 0.9]
@@ -511,7 +552,7 @@ class Molecule(StrictModel):
 
 
 class InterfaceInfo(StrictModel):
-    int_type: int = Field(..., description=INTERFACE_TYPE, alias="type")
+    int_type: int = Field(..., description=INTERFACE_TYPE, validation_alias="type")
     n_occ: int = Field(...)
     int_area: float = Field(
         ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
@@ -520,13 +561,13 @@ class InterfaceInfo(StrictModel):
         ...,
         description=INTERFACE_SOLVATION_ENERGY,
         examples=[-5.5, -10.0, -2.3],
-        alias="int_solv_en",
+        validation_alias="int_solv_en",
     )
     pvalue: float = Field(
         ..., description=INTERFACE_P_VALUE, examples=[0.01, 0.05, 0.1, 0.9]
     )
     stab_energy: float = Field(
-        ..., description=PISA_STABILISATION_ENERGY, alias="stab_en"
+        ..., description=PISA_STABILISATION_ENERGY, validation_alias="stab_en"
     )
 
     # Present when --as-is set to false
@@ -535,29 +576,38 @@ class InterfaceInfo(StrictModel):
     )
     overlap: Optional[str] = Field(None, description=None, examples=["No"])
     x_rel: Optional[bool] = Field(
-        None, description=XRAY_RELATED, examples=[True, False], alias="x-rel"
+        None, description=XRAY_RELATED, examples=[True, False], validation_alias="x-rel"
     )
     fixed: Optional[bool] = Field(
         None, description=FIXED_INTERFACE, examples=[True, False]
     )
 
     h_bonds: BondsInfo = Field(
-        ..., description=INTERFACE_H_BONDS, examples=[], alias="h-bonds"
+        ..., description=INTERFACE_H_BONDS, examples=[], validation_alias="h-bonds"
     )
     salt_bridges: BondsInfo = Field(
-        ..., description=INTERFACE_SALT_BRIDGES, examples=[], alias="salt-bridges"
+        ...,
+        description=INTERFACE_SALT_BRIDGES,
+        examples=[],
+        validation_alias="salt-bridges",
     )
     ss_bonds: BondsInfo = Field(
-        ..., description=INTERFACE_SS_BONDS, examples=[], alias="ss-bonds"
+        ..., description=INTERFACE_SS_BONDS, examples=[], validation_alias="ss-bonds"
     )
     cov_bonds: BondsInfo = Field(
-        ..., description=INTERFACE_COVALENT_BONDS, examples=[], alias="cov-bonds"
+        ...,
+        description=INTERFACE_COVALENT_BONDS,
+        examples=[],
+        validation_alias="cov-bonds",
     )
     other_bonds: Optional[BondsInfo] = Field(
-        None, description=INTERFACE_OTHER_BONDS, examples=[], alias="other-bonds"
+        None,
+        description=INTERFACE_OTHER_BONDS,
+        examples=[],
+        validation_alias="other-bonds",
     )
 
-    molecules: list[Molecule] = Field(..., alias="molecule")
+    molecules: list[Molecule] = Field(..., validation_alias="molecule")
 
     @field_validator("pvalue", "css")
     @classmethod
@@ -590,7 +640,10 @@ class Interface(StrictModel):
 
 class MoleculeLabels(StrictModel):
     auth_asym_id: str = Field(
-        ..., description=AUTH_ASYM_ID, examples=AUTH_ASYM_ID_EXAMPLES, alias="chain_id"
+        ...,
+        description=AUTH_ASYM_ID,
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="chain_id",
     )
     label_asym_id: Optional[str] = Field(None, description=LABEL_ASYM_ID, examples=[])
     visual_id: Optional[str] = Field(
@@ -616,20 +669,23 @@ class MoleculeLabels(StrictModel):
     rzz: float = Field(..., description=RZZ, examples=[1.0])
     tz: float = Field(..., description=TZ, examples=[0.0])
 
-    rxx_f: float = Field(..., alias="rxx-f", examples=[0.0])
-    rxy_f: float = Field(..., alias="rxy-f", examples=[0.0])
-    rxz_f: float = Field(..., alias="rxz-f", examples=[0.0])
-    tx_f: float = Field(..., alias="tx-f", examples=[0.0])
-    ryx_f: float = Field(..., alias="ryx-f", examples=[0.0])
-    ryy_f: float = Field(..., alias="ryy-f", examples=[0.0])
-    ryz_f: float = Field(..., alias="ryz-f", examples=[0.0])
-    ty_f: float = Field(..., alias="ty-f", examples=[0.0])
-    rzx_f: float = Field(..., alias="rzx-f", examples=[0.0])
-    rzy_f: float = Field(..., alias="rzy-f", examples=[0.0])
-    rzz_f: float = Field(..., alias="rzz-f", examples=[0.0])
-    tz_f: float = Field(..., alias="tz-f", examples=[0.0])
+    rxx_f: float = Field(..., validation_alias="rxx-f", examples=[0.0])
+    rxy_f: float = Field(..., validation_alias="rxy-f", examples=[0.0])
+    rxz_f: float = Field(..., validation_alias="rxz-f", examples=[0.0])
+    tx_f: float = Field(..., validation_alias="tx-f", examples=[0.0])
+    ryx_f: float = Field(..., validation_alias="ryx-f", examples=[0.0])
+    ryy_f: float = Field(..., validation_alias="ryy-f", examples=[0.0])
+    ryz_f: float = Field(..., validation_alias="ryz-f", examples=[0.0])
+    ty_f: float = Field(..., validation_alias="ty-f", examples=[0.0])
+    rzx_f: float = Field(..., validation_alias="rzx-f", examples=[0.0])
+    rzy_f: float = Field(..., validation_alias="rzy-f", examples=[0.0])
+    rzz_f: float = Field(..., validation_alias="rzz-f", examples=[0.0])
+    tz_f: float = Field(..., validation_alias="tz-f", examples=[0.0])
     symmetry_id: str = Field(
-        ..., description=SYMMETRY_ID, examples=["0_555", "1_555"], alias="symId"
+        ...,
+        description=SYMMETRY_ID,
+        examples=["0_555", "1_555"],
+        validation_alias="symId",
     )
 
     @model_validator(mode="after")
@@ -686,7 +742,7 @@ class MoleculeLabels(StrictModel):
 
 class InterfaceLabel(StrictModel):
     interface_id: int = Field(
-        ..., description=INTERFACE_NUMBER, examples=[1, 2, 60], alias="id"
+        ..., description=INTERFACE_NUMBER, examples=[1, 2, 60], validation_alias="id"
     )
     dissociates: bool = Field(..., description=None, examples=[True, False])
     css: Optional[float] = Field(
@@ -715,7 +771,7 @@ class InterfaceLabels(StrictModel):
                 InterfaceLabel(id=3, dissociates="No"),
             ]
         ],
-        alias="interface",
+        validation_alias="interface",
     )
 
     @field_validator("interfaces", mode="before")
@@ -728,13 +784,16 @@ class ComplexInfo(StrictModel):
     """Data for a given predicted complex"""
 
     complex_key: Optional[int] = Field(
-        None, description=COMPLEX_INSTANCE_ID, examples=[1, 2, 3], alias="serial_no"
+        None,
+        description=COMPLEX_INSTANCE_ID,
+        examples=[1, 2, 3],
+        validation_alias="serial_no",
     )
     complex_type: int = Field(
         ...,
         description=COMPLEX_TYPE,
         examples=[1, 2, 3],
-        alias="id",
+        validation_alias="id",
     )
     size: int = Field(..., description=NUM_COMPONENTS, examples=[24, 32, 48])
     mmsize: int = Field(..., description=NUM_MACROMOLECULES, examples=[2, 6, 24])
@@ -743,7 +802,7 @@ class ComplexInfo(StrictModel):
         None,
         description=STABILITY_DESCR,
         examples=["This assembly appears to be stable in solution."],
-        alias="score",
+        validation_alias="score",
     )
     diss_energy: float = Field(
         ...,
@@ -781,7 +840,7 @@ class ComplexInfo(StrictModel):
         examples=[0, 1, 2, 3],
     )
     symmetry_number: int = Field(
-        ..., description=SYMMETRY_NUMBER, examples=[4], alias="symNumber"
+        ..., description=SYMMETRY_NUMBER, examples=[4], validation_alias="symNumber"
     )
     formula: str = Field(..., description=FORMULA, examples=["A(8)B(4)C(4)a(8)"])
     composition: str = Field(
@@ -806,7 +865,7 @@ class ComplexInfo(StrictModel):
     molecules: list[MoleculeLabels] = Field(
         [],
         description="List of molecular components associated with the complex",
-        alias="molecule",
+        validation_alias="molecule",
         examples=[
             [
                 MoleculeLabels(
@@ -906,7 +965,7 @@ class ComplexInfo(StrictModel):
 
 class PQSSet(StrictModel):
     pqs_set_id: int = Field(
-        ..., description=PQS_SET_ID, examples=[1, 2, 3, 25], alias="ser_no"
+        ..., description=PQS_SET_ID, examples=[1, 2, 3, 25], validation_alias="ser_no"
     )
     all_chains_at_identity: bool = Field(..., description=None, examples=[True, False])
     stability: Optional[str] = Field(
@@ -915,7 +974,7 @@ class PQSSet(StrictModel):
     complexes: list[ComplexInfo] = Field(
         ...,
         description=COMPLEXES_IN_PQS_SET,
-        alias="assembly",
+        validation_alias="assembly",
         examples=[
             [
                 ComplexInfo(
@@ -964,7 +1023,7 @@ class AsymmetricUnit(StrictModel):
     complex: ComplexInfo = Field(
         ...,
         description=COMPLEXES_IN_ASU,
-        alias="assembly",
+        validation_alias="assembly",
         examples=[
             ComplexInfo(
                 serial_no=1,
@@ -997,7 +1056,7 @@ class Complex(StrictModel):
         None,
         description=SESSION_NAME,
         examples=["1cbs", "e9ec45011a9da871da1a2c9cdc229723"],
-        alias="name",
+        validation_alias="name",
     )
 
     status: str = Field(
@@ -1031,7 +1090,7 @@ class Complex(StrictModel):
 
     # Extant when --as-is not set
     n_pqs_sets: Optional[int] = Field(
-        None, description=N_PQS_SETS, examples=[1, 2, 3], alias="total_asm"
+        None, description=N_PQS_SETS, examples=[1, 2, 3], validation_alias="total_asm"
     )
     n_interfaces: Optional[int] = Field(
         None, description=INTERFACE_TOTAL, examples=[0, 1, 5, 58]
@@ -1052,7 +1111,7 @@ class Complex(StrictModel):
         [],
         description=PQS_SETS,
         examples=[[PQSSet(ser_no=1, all_chains_at_identity="Yes", assembly=[])]],
-        alias="asm_set",
+        validation_alias="asm_set",
     )
 
     # Always extant
@@ -1104,17 +1163,26 @@ class Complex(StrictModel):
 
 class InterfaceExtensionLabels(StrictModel):
     int_type: int = Field(
-        ..., description=INTERFACE_TYPE, examples=[1, 2, 5], alias="serial_number"
+        ...,
+        description=INTERFACE_TYPE,
+        examples=[1, 2, 5],
+        validation_alias="serial_number",
     )
     interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
     auth_asym_id_1: str = Field(
-        ..., description=AUTH_ASYM_ID, examples=AUTH_ASYM_ID_EXAMPLES, alias="monomer_1"
+        ...,
+        description=AUTH_ASYM_ID,
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="monomer_1",
     )
     ccd_id_1: Optional[str] = Field(None)
     auth_seq_id_start_1: Optional[int] = Field(None)
     auth_seq_id_end_1: Optional[int] = Field(None)
     auth_asym_id_2: str = Field(
-        ..., description=AUTH_ASYM_ID, examples=AUTH_ASYM_ID_EXAMPLES, alias="monomer_2"
+        ...,
+        description=AUTH_ASYM_ID,
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="monomer_2",
     )
     ccd_id_2: Optional[str] = Field(None)
     auth_seq_id_start_2: Optional[int] = Field(None)
@@ -1124,10 +1192,13 @@ class InterfaceExtensionLabels(StrictModel):
     )
     symmetry_id: str = Field(..., description=SYMMETRY_ID, examples=["3_455"])
     int_area: float = Field(
-        ..., description=INTERFACE_AREA, examples=[1427.7], alias="area"
+        ..., description=INTERFACE_AREA, examples=[1427.7], validation_alias="area"
     )
     int_solv_energy: float = Field(
-        ..., description=INTERFACE_SOLVATION_ENERGY, examples=[-18.2], alias="delta_g"
+        ...,
+        description=INTERFACE_SOLVATION_ENERGY,
+        examples=[-18.2],
+        validation_alias="delta_g",
     )
     nhb: int = Field(..., description=INTERFACE_N_H_BONDS, examples=[0, 1, 2, 20])
     nsb: int = Field(..., description=INTERFACE_N_SALT_BRIDGES, examples=[0, 1, 2, 4])
@@ -1226,23 +1297,34 @@ class InterfaceExtended(StrictModel):
 
 class PQSEntry(StrictModel):
     pqs_set_id: Optional[int] = Field(
-        None, description=PQS_SET_ID, examples=[1, 2, 3], alias="set"
+        None, description=PQS_SET_ID, examples=[1, 2, 3], validation_alias="set"
     )
     complex_key: Optional[int] = Field(
-        None, description=COMPLEX_INSTANCE_ID, examples=[1, 2, 3, 51], alias="number"
+        None,
+        description=COMPLEX_INSTANCE_ID,
+        examples=[1, 2, 3, 51],
+        validation_alias="number",
     )
     complex_type: int = Field(
-        ..., description=COMPLEX_TYPE, examples=[1, 2, 5], alias="id"
+        ..., description=COMPLEX_TYPE, examples=[1, 2, 5], validation_alias="id"
     )
     mmsize: int = Field(
-        ..., description=NUM_MACROMOLECULES, examples=[0, 1, 2, 25], alias="size"
+        ...,
+        description=NUM_MACROMOLECULES,
+        examples=[0, 1, 2, 25],
+        validation_alias="size",
     )
     asa: float = Field(..., description=COMPLEX_ASA, examples=[19370.0])
     bsa: float = Field(..., description=COMPLEX_BSA, examples=[2855.3])
     diss_energy: float = Field(
-        ..., description=COMPLEX_DISS_ENERGY, examples=[15.6], alias="dgdiss0"
+        ...,
+        description=COMPLEX_DISS_ENERGY,
+        examples=[15.6],
+        validation_alias="dgdiss0",
     )
-    chem_energy: float = Field(..., description=None, examples=[7.8], alias="mg0")
+    chem_energy: float = Field(
+        ..., description=None, examples=[7.8], validation_alias="mg0"
+    )
     formula: str = Field(..., description=FORMULA, examples=["A(2)", "A(2)a(2)b(2)"])
 
     @field_validator("asa", "bsa", "diss_energy", "chem_energy")
@@ -1253,18 +1335,21 @@ class PQSEntry(StrictModel):
 
 class ASUEntry(StrictModel):
     complex_type: int = Field(
-        ..., description=COMPLEX_TYPE, examples=[1, 2, 41], alias="id"
+        ..., description=COMPLEX_TYPE, examples=[1, 2, 41], validation_alias="id"
     )
     mmsize: int = Field(
-        ..., description=NUM_MACROMOLECULES, examples=[0, 1, 2, 25], alias="size"
+        ...,
+        description=NUM_MACROMOLECULES,
+        examples=[0, 1, 2, 25],
+        validation_alias="size",
     )
     asa: float = Field(..., description=COMPLEX_ASA, examples=[11112.6])
     bsa: float = Field(..., description=COMPLEX_BSA, examples=[0.0])
     diss_energy: float = Field(
-        ..., description=COMPLEX_DISS_ENERGY, examples=[0.0], alias="dgdiss0"
+        ..., description=COMPLEX_DISS_ENERGY, examples=[0.0], validation_alias="dgdiss0"
     )
     chem_energy: float = Field(
-        ..., description=CHEMICAL_POTENTIAL_EN, examples=[0.0], alias="mg0"
+        ..., description=CHEMICAL_POTENTIAL_EN, examples=[0.0], validation_alias="mg0"
     )
     formula: str = Field(..., description=FORMULA, examples=["A"])
 
@@ -1320,19 +1405,28 @@ class ComplexExtended(StrictModel):
 
 class Component(StrictModel):
     mol_id: int = Field(
-        ..., description=COMPONENT_NUMBER, examples=[1], alias="serial_number"
+        ...,
+        description=COMPONENT_NUMBER,
+        examples=[1],
+        validation_alias="serial_number",
     )
     molecule_type_id: int = Field(
-        ..., description=COMPONENT_TYPE_ID, examples=[1], alias="monomer_id"
+        ..., description=COMPONENT_TYPE_ID, examples=[1], validation_alias="monomer_id"
     )
     auth_asym_id: str = Field(
-        ..., description=AUTH_ASYM_ID, examples=AUTH_ASYM_ID_EXAMPLES, alias="chain_id"
+        ...,
+        description=AUTH_ASYM_ID,
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="chain_id",
     )
     ccd_id: Optional[str] = Field(None)
     auth_seq_id_start: Optional[int] = Field(None)
     auth_seq_id_end: Optional[int] = Field(None)
     molecule_class: str = Field(
-        ..., description=MOLECULE_CLASS, examples=["Protein"], alias="monomer_class"
+        ...,
+        description=MOLECULE_CLASS,
+        examples=["Protein"],
+        validation_alias="monomer_class",
     )
     total_atoms: int = Field(..., description=COMPONENT_TOTAL_ATOMS, examples=[1846])
     total_residues: int = Field(
@@ -1342,22 +1436,25 @@ class Component(StrictModel):
         ...,
         description=N_COMPONENT_SURFACE_ATOMS,
         examples=[1017],
-        alias="surface_atoms",
+        validation_alias="surface_atoms",
     )
     n_surface_residues: int = Field(
         ...,
         description=N_COMPONENT_SURFACE_RESIDUES,
         examples=[223],
-        alias="surface_residues",
+        validation_alias="surface_residues",
     )
     asa: float = Field(
-        ..., description=ISOLATED_COMPONENT_ASA, examples=[11112.6], alias="area"
+        ...,
+        description=ISOLATED_COMPONENT_ASA,
+        examples=[11112.6],
+        validation_alias="area",
     )
     solv_energy: Optional[float] = Field(
         None,
         description=SOLVATION_ENERGY_ISOLATED_STRUCTURE,
         examples=[-220.0],
-        alias="delta_g",
+        validation_alias="delta_g",
     )
 
     @field_validator("asa", "solv_energy")
