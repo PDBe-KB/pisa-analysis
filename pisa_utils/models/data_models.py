@@ -136,7 +136,7 @@ def convert_yes_no_to_bool(v: Literal["Yes", "yes", "No", "no"]) -> bool:
     :return: Boolean value
     :rtype: bool
     """
-    if v is None:
+    if v is None or isinstance(v, bool):
         return v
     if v.lower() == "yes":
         return True
