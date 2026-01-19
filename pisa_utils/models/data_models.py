@@ -797,7 +797,7 @@ class ComplexInfo(StrictModel):
     )
     size: int = Field(..., description=NUM_COMPONENTS, examples=[24, 32, 48])
     mmsize: int = Field(..., description=NUM_MACROMOLECULES, examples=[2, 6, 24])
-    freesize: int = Field(..., description=None, exampls=[16, 26, 40])
+    freesize: int = Field(..., description=None, examples=[16, 26, 40])
     stability_description: Optional[str] = Field(
         None,
         description=STABILITY_DESCR,
@@ -1051,7 +1051,6 @@ class AsymmetricUnit(StrictModel):
 
 
 class Complex(StrictModel):
-
     session_name: Optional[str] = Field(
         None,
         description=SESSION_NAME,
