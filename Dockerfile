@@ -1,7 +1,7 @@
 FROM pdbegroup/pisa AS base
 
 # Copy pisa-analysis code
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 # Create non-privileged user
 RUN useradd -m -u 10001 app \
