@@ -1217,6 +1217,8 @@ class InterfaceExtensionLabels(StrictModel):
         :return: Interface ID as integer
         :rtype: str
         """
+        if isinstance(v, int):
+            return v
         if v[-1].isalpha():
             return v[:-1]
         return v
