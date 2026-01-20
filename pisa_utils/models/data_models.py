@@ -780,6 +780,78 @@ class InterfaceLabels(StrictModel):
         return convert_single_obj_to_list(v)
 
 
+class InterfaceSummaryInfo(StrictModel):
+    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
+    auth_asym_id_1: str = Field(
+        ...,
+        description=f"{AUTH_ASYM_ID} for first molecule in interface",
+        examples=AUTH_ASYM_ID_EXAMPLES,
+    )
+    int_natoms_1: int = Field(
+        ...,
+        description=f"{INTERFACE_N_ATOMS} for first molecule in interface",
+        examples=[100, 200, 325],
+    )
+    int_nres_1: int = Field(
+        ...,
+        description=f"{INTERFACE_N_RESIDUES} for first molecule in interface",
+        examples=[10, 25, 50],
+    )
+    auth_asym_id_2: str = Field(
+        ...,
+        description=f"{AUTH_ASYM_ID} for second molecule in interface",
+        examples=AUTH_ASYM_ID_EXAMPLES,
+        validation_alias="chain_id",
+    )
+    int_natoms_2: int = Field(
+        ...,
+        description=f"{INTERFACE_N_ATOMS} for second molecule in interface",
+        examples=[100, 200, 325],
+    )
+    int_nres_2: int = Field(
+        ...,
+        description=f"{INTERFACE_N_RESIDUES} for second molecule in interface",
+        examples=[10, 25, 50],
+    )
+    int_area: float = Field(
+        ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
+    )
+    int_solv_energy: float = Field(
+        ...,
+        description=INTERFACE_SOLVATION_ENERGY,
+        examples=[-5.5, -10.0, -2.3],
+        validation_alias="int_solv_en",
+    )
+    pvalue: float = Field(
+        ..., description=INTERFACE_P_VALUE, examples=[0.01, 0.05, 0.1, 0.9]
+    )
+    # Present when --as-is set to false
+    css: Optional[float] = Field(
+        None, description=INTERFACE_CSS, examples=[1.0, 0.8, 0.5]
+    )
+    complex_keys_with_interface: Optional[list[int]] = Field(
+        None,
+        description="List of complex keys where this interface is present",
+        examples=[1, 2, 3],
+    )
+
+
+class InterfaceTypeLabel(StrictModel):
+    int_type: int = Field(..., description=INTERFACE_TYPE)
+    interfaces: list[InterfaceSummaryInfo] = Field(
+        ...,
+        description="List of interface summaries for this interface type",
+    )
+
+
+class InterfaceSummary(StrictModel):
+    n_interfaces: int = Field(..., description=INTERFACE_TOTAL, examples=[58, 100, 200])
+    interface_types: list[InterfaceTypeLabel] = Field(
+        ...,
+        description="List of interface type summaries",
+    )
+
+
 class ComplexInfo(StrictModel):
     """Data for a given predicted complex"""
 
