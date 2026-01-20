@@ -13,6 +13,7 @@ from pisa_utils.models.data_models import (
     Components,
     Interface,
     InterfaceExtended,
+    InterfaceSummary,
 )
 from pisa_utils.utils import extract_ligand_contents, id_is_ligand
 
@@ -1186,3 +1187,108 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
         with open(self.path_json, "w") as json_file:
             json.dump(monomers_data, json_file, indent=4)
             LOGGER.info(f"Extended monomer data JSON written: {self.path_json}")
+
+
+class CompileInterfaceSummaryJSON:
+    def __init__(
+        self, path_interface_jsons: str, path_assembly_json: str, path_output_json: str
+    ) -> None:
+        """
+        Reads individual interface JSON files and compiles a summary JSON.
+
+        :param path_interface_jsons: _description_
+        :type path_interface_jsons: str
+        :param path_summary_json: _description_
+        :type path_summary_json: str
+        """
+
+        self.path_interface_jsons = path_interface_jsons
+        self.path_assembly_json = path_assembly_json
+        self.path_output_json = path_output_json
+
+    def _load_assembly_json(self) -> dict:
+
+        # Load assembly data
+        assembly_to_interface_map = {}
+        with open(self.path_assembly_json, "r") as f:
+            d = json.load(f)
+            pqs_sets = d.get("asm_set", [])
+
+            if not pqs_sets:
+                return
+
+            for pqs_set in pqs_sets:
+                for complex in pqs_set["complexes"]:
+                    complex_key = complex["complex_key"]
+                    interfaces = complex.get("interfaces", {})
+                    int_ids = [
+                        interface["interface_id"]
+                        for interface in interfaces.get("interfaces", [])
+                    ]
+                    for int_id in int_ids:
+                        if int_id not in assembly_to_interface_map:
+                            assembly_to_interface_map[int_id] = []
+                        assembly_to_interface_map[int_id].append(complex_key)
+
+    def parse(self) -> None:
+        """
+        Converts individual interface JSON files into a summary JSON file.
+        """
+
+        # Load assembly data
+        assembly_to_interface_map = self._load_assembly_json()
+
+        interface_files = [
+            f
+            for f in os.listdir(self.path_interface_jsons)
+            if f.startswith("interface_") and f.endswith(".json")
+        ]
+
+        # Prepare output data structure
+        interface_summary = {}
+        interface_summary["n_interfaces"] = len(interface_files)
+        interface_summary["interface_types"] = []
+
+        # Extract data
+        for interface_file in interface_files:
+
+            interface_json_path = os.path.join(
+                self.path_interface_jsons, interface_file
+            )
+
+            with open(interface_json_path, "r") as f:
+                d = json.load(f)
+
+                int_data = d["interface"]
+                int_type = int_data["int_type"]
+                mol1 = int_data["molecules"][0]
+                mol2 = int_data["molecules"][1]
+
+                summary_data = {
+                    "interface_id": int_data["interface_id"],
+                    "auth_asym_id_1": mol1["auth_asym_id"],
+                    "int_natoms_1": mol1["int_natoms"],
+                    "int_nres_1": mol1["int_nres"],
+                    "auth_asym_id_2": mol2["auth_asym_id"],
+                    "int_natoms_2": mol2["int_natoms"],
+                    "int_nres_2": mol2["int_nres"],
+                    "int_area": int_data["int_area"],
+                    "int_solv_energy": int_data["int_solv_energy"],
+                    "pvalue": int_data["pvalue"],
+                    "css": int_data.get("css", None),
+                    "complex_keys_with_interface": assembly_to_interface_map.get(
+                        int_data["interface_id"], []
+                    ),
+                }
+
+                if int_type not in interface_summary["interface_types"]:
+                    interface_summary["interface_types"].append(
+                        {"int_type": int_type, "interfaces": [summary_data]}
+                    )
+                else:
+                    for int_type_entry in interface_summary["interface_types"]:
+                        if int_type_entry["int_type"] == int_type:
+                            int_type_entry["interfaces"].append(summary_data)
+                            break
+
+        InterfaceSummary
