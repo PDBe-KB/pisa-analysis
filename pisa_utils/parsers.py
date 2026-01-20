@@ -1212,7 +1212,7 @@ class CompileInterfaceSummaryJSON:
         assembly_to_interface_map = {}
         with open(self.path_assembly_json, "r") as f:
             d = json.load(f)
-            pqs_sets = d.get("asm_set", [])
+            pqs_sets = d.get("pqs_sets", [])
 
             if not pqs_sets:
                 return
@@ -1230,6 +1230,8 @@ class CompileInterfaceSummaryJSON:
                             assembly_to_interface_map[int_id] = []
                         assembly_to_interface_map[int_id].append(complex_key)
 
+        return assembly_to_interface_map
+
     def parse(self) -> None:
         """
         Converts individual interface JSON files into a summary JSON file.
@@ -1237,6 +1239,7 @@ class CompileInterfaceSummaryJSON:
 
         # Load assembly data
         assembly_to_interface_map = self._load_assembly_json()
+        logging.info(f"Loaded assembly data from: {assembly_to_interface_map}")
 
         interface_files = [
             f
@@ -1259,13 +1262,15 @@ class CompileInterfaceSummaryJSON:
             with open(interface_json_path, "r") as f:
                 d = json.load(f)
 
+                interface_id = d["interface_id"]
                 int_data = d["interface"]
                 int_type = int_data["int_type"]
                 mol1 = int_data["molecules"][0]
                 mol2 = int_data["molecules"][1]
 
                 summary_data = {
-                    "interface_id": int_data["interface_id"],
+                    "interface_id": interface_id,
+                    # TODO: consider adding interface type
                     "auth_asym_id_1": mol1["auth_asym_id"],
                     "int_natoms_1": mol1["int_natoms"],
                     "int_nres_1": mol1["int_nres"],
@@ -1277,7 +1282,7 @@ class CompileInterfaceSummaryJSON:
                     "pvalue": int_data["pvalue"],
                     "css": int_data.get("css", None),
                     "complex_keys_with_interface": assembly_to_interface_map.get(
-                        int_data["interface_id"], []
+                        interface_id, []
                     ),
                 }
 
@@ -1291,4 +1296,8 @@ class CompileInterfaceSummaryJSON:
                             int_type_entry["interfaces"].append(summary_data)
                             break
 
-        InterfaceSummary
+        interface_summary = InterfaceSummary(**interface_summary).model_dump()
+
+        with open(self.path_output_json, "w") as json_file:
+            json.dump(interface_summary, json_file, indent=4)
+            LOGGER.info(f"Interface summary JSON written: {self.path_output_json}")

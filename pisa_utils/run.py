@@ -5,6 +5,7 @@ from pisa_utils.analyze import AnalysePisa
 from pisa_utils.constants import SUBDIR_EXTENDED_DATA
 from pisa_utils.models.models import LigandProcessingMode
 from pisa_utils.parsers import (
+    CompileInterfaceSummaryJSON,
     ConvertAssemblyListToJSON,
     ConvertAssemblyXMLToJSON,
     ConvertComponentsListToJSON,
@@ -140,6 +141,13 @@ def service():
                 path_json=os.path.join(args.output_json, "assemblies.json"),
                 path_structure_file=args.input_cif,
                 path_interface_jsons=os.path.join(args.output_json, "interfaces"),
+            ),
+            CompileInterfaceSummaryJSON(
+                path_interface_jsons=os.path.join(args.output_json, "interfaces"),
+                path_assembly_json=os.path.join(args.output_json, "assemblies.json"),
+                path_output_json=os.path.join(
+                    args.output_json, "interface_summary.json"
+                ),
             ),
             ConvertAssemblyListToJSON(
                 path_txt=assemblies_extended_file,
