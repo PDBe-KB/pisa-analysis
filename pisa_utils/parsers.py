@@ -1296,6 +1296,10 @@ class CompileInterfaceSummaryJSON:
                             int_type_entry["interfaces"].append(summary_data)
                             break
 
+        # Order interface_types by int_type
+        interface_summary["interface_types"] = sorted(
+            interface_summary["interface_types"], key=lambda x: x["int_type"]
+        )
         interface_summary = InterfaceSummary(**interface_summary).model_dump()
 
         with open(self.path_output_json, "w") as json_file:
