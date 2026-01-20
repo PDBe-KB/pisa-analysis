@@ -1604,6 +1604,10 @@ class InterfaceOutput(RootModel[Interface]):
     root: Interface
 
 
+class InterfaceSummaryOutput(RootModel[InterfaceSummary]):
+    root: InterfaceSummary
+
+
 class ComplexOutput(RootModel[Complex]):
     root: Complex
 
