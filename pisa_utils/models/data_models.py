@@ -835,6 +835,16 @@ class InterfaceSummaryInfo(StrictModel):
         examples=[1, 2, 3],
     )
 
+    @field_validator("pvalue", "css")
+    @classmethod
+    def precision_round(cls, v):
+        return round(v, PRECISION_DP)
+
+    @field_validator("int_area", "int_solv_energy")
+    @classmethod
+    def standard_round(cls, v):
+        return round(v, STANDARD_DP)
+
 
 class InterfaceTypeLabel(StrictModel):
     int_type: int = Field(..., description=INTERFACE_TYPE)
