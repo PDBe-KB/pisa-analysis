@@ -1200,8 +1200,8 @@ class CompileInterfaceSummaryJSON:
         :type path_interface_jsons: str
         :param path_assembly_json: Path to assembly JSON file.
         :type path_assembly_json: str
-        :param path_summary_json: Path to output summary JSON file.
-        :type path_summary_json: str
+        :param path_output_json: Path to output summary JSON file.
+        :type path_output_json: str
         """
 
         self.path_interface_jsons = path_interface_jsons
