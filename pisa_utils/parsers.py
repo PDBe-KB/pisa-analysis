@@ -1247,7 +1247,7 @@ class CompileInterfaceSummaryJSON:
 
         # Load assembly data
         assembly_to_interface_map = self._load_assembly_json()
-        LOGGER.info(f"Loaded assembly data from: {assembly_to_interface_map}")
+        LOGGER.info(f"Loaded necessary assembly data from: {self.path_assembly_json}")
 
         interface_files = [
             f
