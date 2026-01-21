@@ -838,6 +838,8 @@ class InterfaceSummaryInfo(StrictModel):
     @field_validator("pvalue", "css")
     @classmethod
     def precision_round(cls, v):
+        if v is None:
+            return v
         return round(v, PRECISION_DP)
 
     @field_validator("int_area", "int_solv_energy")
