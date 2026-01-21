@@ -1,0 +1,189 @@
+{
+    "status": "Ok",
+    "n_pqs_sets": 4,
+    "n_interfaces": 10,
+    "pqs_sets": [
+        {
+            "pqs_set_id": 1,
+            "complexes": [
+                {
+                    "complex_key": 1,
+                    "complex_type": 1,
+                    "interfaces": {
+                        "n_interfaces": 1,
+                        "interfaces": [
+                            {
+                                "interface_id": 1,
+                                "dissociates": false,
+                                "css": 0.66
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pqs_set_id": 2,
+            "complexes": [
+                {
+                    "complex_key": 2,
+                    "complex_type": 2,
+                    "interfaces": {
+                        "n_interfaces": 5,
+                        "interfaces": [
+                            {
+                                "interface_id": 2,
+                                "dissociates": true,
+                                "css": 1.0
+                            },
+                            {
+                                "interface_id": 3,
+                                "dissociates": false,
+                                "css": 0.748
+                            },
+                            {
+                                "interface_id": 4,
+                                "dissociates": false,
+                                "css": 0.533
+                            },
+                            {
+                                "interface_id": 7,
+                                "dissociates": false,
+                                "css": 0.213
+                            },
+                            {
+                                "interface_id": 11,
+                                "dissociates": true,
+                                "css": 0.075
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pqs_set_id": 3,
+            "complexes": [
+                {
+                    "complex_key": 3,
+                    "complex_type": 4,
+                    "interfaces": {
+                        "n_interfaces": 3,
+                        "interfaces": [
+                            {
+                                "interface_id": 5,
+                                "dissociates": false,
+                                "css": 0.533
+                            },
+                            {
+                                "interface_id": 6,
+                                "dissociates": true,
+                                "css": 0.155
+                            },
+                            {
+                                "interface_id": 8,
+                                "dissociates": true,
+                                "css": 0.143
+                            }
+                        ]
+                    }
+                },
+                {
+                    "complex_key": 4,
+                    "complex_type": 5,
+                    "interfaces": {
+                        "n_interfaces": 3,
+                        "interfaces": [
+                            {
+                                "interface_id": 4,
+                                "dissociates": true,
+                                "css": 0.748
+                            },
+                            {
+                                "interface_id": 7,
+                                "dissociates": true,
+                                "css": 0.213
+                            },
+                            {
+                                "interface_id": 20,
+                                "dissociates": false,
+                                "css": 0.1
+                            }
+                        ]
+                    }
+                },
+                {
+                    "complex_key": 5,
+                    "complex_type": 6,
+                    "interfaces": {
+                        "n_interfaces": 3,
+                        "interfaces": [
+                            {
+                                "interface_id": 5,
+                                "dissociates": true,
+                                "css": 0.748
+                            },
+                            {
+                                "interface_id": 7,
+                                "dissociates": true,
+                                "css": 0.213
+                            },
+                            {
+                                "interface_id": 20,
+                                "dissociates": false,
+                                "css": 0.1
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "pqs_set_id": 4,
+            "complexes": [
+                {
+                    "complex_key": 6,
+                    "complex_type": 4,
+                    "interfaces": {
+                        "n_interfaces": 1,
+                        "interfaces": [
+                            {
+                                "interface_id": 8,
+                                "dissociates": true,
+                                "css": 0.143
+                            }
+                        ]
+                    }
+                },
+                {
+                    "complex_key": 7,
+                    "complex_type": 5,
+                    "interfaces": {
+                        "n_interfaces": 1,
+                        "interfaces": [
+                            {
+                                "interface_id": 20,
+                                "dissociates": false,
+                                "css": 0.1
+                            }
+                        ]
+                    }
+                },
+                {
+                    "complex_key": 8,
+                    "complex_type": 6,
+                    "interfaces": {
+                        "n_interfaces": 1,
+                        "interfaces": [
+                            {
+                                "interface_id": 20,
+                                "dissociates": false,
+                                "css": 0.1
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

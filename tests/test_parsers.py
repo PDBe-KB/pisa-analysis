@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest import TestCase
 
 from pisa_utils.parsers import (
+    CompileInterfaceSummaryJSON,
     ConvertAssemblyListToJSON,
     ConvertAssemblyXMLToJSON,
     ConvertComponentsListToJSON,
@@ -679,4 +680,61 @@ class TestConvertMonomerListToJSON(TestCase):
             json_expected,
             json_actual,
             msg="Arbitrary maximal monomer list XML->JSON not parsed correctly.",
+        )
+
+
+class TestCompileInterfaceSummaryJSON(TestCase):
+    """
+    Tests for CompileInterfaceSummaryJSON class.
+    """
+
+    def setUp(self):
+        super().setUp()
+
+        self.maxDiff = None
+
+        self.base_input_dir = Path("tests/data/")
+
+        # Remove any existing output data
+        output_path = Path("tests/data/actual_output/")
+        output_path.mkdir(parents=True, exist_ok=True)
+        remove_files(output_path)
+
+    def test_compile_interface_summary_json(self):
+
+        self.input_interface_jsons = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "interfaces_minified",
+        )
+        self.input_assembly_json = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "assemblies.json",
+        )
+        self.output_json = self.base_input_dir.joinpath(
+            "actual_output",
+            "interface_summary.json",
+        )
+        self.expected_json = self.base_input_dir.joinpath(
+            "expected_output",
+            "interface_summary.json",
+        )
+
+        # Run
+        self.compiler = CompileInterfaceSummaryJSON(
+            path_interface_jsons=self.input_interface_jsons,
+            path_assembly_json=self.input_assembly_json,
+            path_output_json=self.output_json,
+        )
+        self.compiler.parse()
+
+        # Check
+        json_expected = json.loads(self.expected_json.read_text().strip())
+        json_actual = json.loads(self.output_json.read_text().strip())
+
+        self.assertDictEqual(
+            json_expected,
+            json_actual,
+            msg="Interface summary JSON not compiled correctly.",
         )
