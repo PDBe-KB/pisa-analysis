@@ -1290,6 +1290,7 @@ class CompileInterfaceSummaryJSON:
                 "int_solv_energy": int_data["int_solv_energy"],
                 "pvalue": int_data["pvalue"],
                 "css": int_data.get("css", None),
+                # NOTE: Consider adding x_rel here
                 "complex_keys_with_interface": assembly_to_interface_map.get(
                     interface_id, []
                 ),

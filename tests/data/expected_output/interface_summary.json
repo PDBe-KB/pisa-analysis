@@ -1,0 +1,197 @@
+{
+    "n_interfaces": 10,
+    "interface_types": [
+        {
+            "int_type": 1,
+            "interfaces": [
+                {
+                    "interface_id": 1,
+                    "auth_asym_id_1": "E",
+                    "int_natoms_1": 188,
+                    "int_nres_1": 25,
+                    "auth_asym_id_2": "A",
+                    "int_natoms_2": 184,
+                    "int_nres_2": 55,
+                    "int_area": 1617.4,
+                    "int_solv_energy": -23.0,
+                    "pvalue": 0.66,
+                    "css": 0.66,
+                    "complex_keys_with_interface": [
+                        1
+                    ]
+                }
+            ]
+        },
+        {
+            "int_type": 2,
+            "interfaces": [
+                {
+                    "interface_id": 2,
+                    "auth_asym_id_1": "C",
+                    "int_natoms_1": 125,
+                    "int_nres_1": 25,
+                    "auth_asym_id_2": "A",
+                    "int_natoms_2": 153,
+                    "int_nres_2": 38,
+                    "int_area": 1360.0,
+                    "int_solv_energy": -11.9,
+                    "pvalue": 0.202,
+                    "css": 1.0,
+                    "complex_keys_with_interface": [
+                        2
+                    ]
+                },
+                {
+                    "interface_id": 3,
+                    "auth_asym_id_1": "F",
+                    "int_natoms_1": 82,
+                    "int_nres_1": 13,
+                    "auth_asym_id_2": "E",
+                    "int_natoms_2": 98,
+                    "int_nres_2": 17,
+                    "int_area": 745.3,
+                    "int_solv_energy": 0.5,
+                    "pvalue": 0.993,
+                    "css": 0.382,
+                    "complex_keys_with_interface": [
+                        2
+                    ]
+                }
+            ]
+        },
+        {
+            "int_type": 4,
+            "interfaces": [
+                {
+                    "interface_id": 4,
+                    "auth_asym_id_1": "F",
+                    "int_natoms_1": 74,
+                    "int_nres_1": 6,
+                    "auth_asym_id_2": "A",
+                    "int_natoms_2": 83,
+                    "int_nres_2": 26,
+                    "int_area": 731.4,
+                    "int_solv_energy": -13.8,
+                    "pvalue": 0.411,
+                    "css": 0.748,
+                    "complex_keys_with_interface": [
+                        2,
+                        4
+                    ]
+                },
+                {
+                    "interface_id": 5,
+                    "auth_asym_id_1": "E",
+                    "int_natoms_1": 70,
+                    "int_nres_1": 10,
+                    "auth_asym_id_2": "D",
+                    "int_natoms_2": 63,
+                    "int_nres_2": 20,
+                    "int_area": 641.7,
+                    "int_solv_energy": -13.1,
+                    "pvalue": 0.634,
+                    "css": 0.533,
+                    "complex_keys_with_interface": [
+                        3, 5
+                    ]
+                }
+            ]
+        },
+        {
+            "int_type": 5,
+            "interfaces": [
+                {
+                    "interface_id": 6,
+                    "auth_asym_id_1": "D",
+                    "int_natoms_1": 73,
+                    "int_nres_1": 19,
+                    "auth_asym_id_2": "C",
+                    "int_natoms_2": 74,
+                    "int_nres_2": 16,
+                    "int_area": 616.2,
+                    "int_solv_energy": -7.1,
+                    "pvalue": 0.263,
+                    "css": 0.155,
+                    "complex_keys_with_interface": [
+                        3
+                    ]
+                },
+                {
+                    "interface_id": 7,
+                    "auth_asym_id_1": "F",
+                    "int_natoms_1": 21,
+                    "int_nres_1": 1,
+                    "auth_asym_id_2": "A",
+                    "int_natoms_2": 49,
+                    "int_nres_2": 19,
+                    "int_area": 279.5,
+                    "int_solv_energy": -1.5,
+                    "pvalue": 0.624,
+                    "css": 0.213,
+                    "complex_keys_with_interface": [
+                        2, 4, 5
+                    ]
+                },
+                {
+                    "interface_id": 8,
+                    "auth_asym_id_1": "E",
+                    "int_natoms_1": 31,
+                    "int_nres_1": 7,
+                    "auth_asym_id_2": "C",
+                    "int_natoms_2": 24,
+                    "int_nres_2": 9,
+                    "int_area": 263.8,
+                    "int_solv_energy": -5.9,
+                    "pvalue": 0.605,
+                    "css": 0.143,
+                    "complex_keys_with_interface": [
+                        3, 6
+                    ]
+                }
+
+            ]
+        },
+        {
+            "int_type": 11,
+            "interfaces": [
+                {
+                    "interface_id": 11,
+                    "auth_asym_id_1": "E",
+                    "int_natoms_1": 27,
+                    "int_nres_1": 6,
+                    "auth_asym_id_2": "A",
+                    "int_natoms_2": 27,
+                    "int_nres_2": 7,
+                    "int_area": 200.4,
+                    "int_solv_energy": -1.9,
+                    "pvalue": 0.784,
+                    "css": 0.075,
+                    "complex_keys_with_interface": [
+                        2
+                    ]
+                }
+            ]
+        },
+        {
+            "int_type": 20,
+            "interfaces": [
+                {
+                    "interface_id": 20,
+                    "auth_asym_id_1": "F",
+                    "int_natoms_1": 11,
+                    "int_nres_1": 1,
+                    "auth_asym_id_2": "F",
+                    "int_natoms_2": 13,
+                    "int_nres_2": 2,
+                    "int_area": 95.9,
+                    "int_solv_energy": -0.3,
+                    "pvalue": 0.671,
+                    "css": 0.1,
+                    "complex_keys_with_interface": [
+                        4, 5, 7, 8
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,43 @@
+{
+    "interface_id": 11,
+    "n_interfaces": 41,
+    "status": "Ok",
+    "pdb_id": "3HAX",
+    "interface": {
+        "int_type": 11,
+        "int_area": 200.4,
+        "int_solv_energy": -1.9,
+        "pvalue": 0.784,
+        "css": 0.075,
+        "x_rel": true,
+        "fixed": false,
+        "molecules": [
+            {
+                "mol_id": 1,
+                "auth_asym_id": "E",
+                "label_asym_id": "D",
+                "symmetry_id": "1_555",
+                "symmetry_operation_number": 1,
+                "symmetry_operation": "x,y,z",
+                "int_natoms": 27,
+                "int_nres": 6,
+                "int_area": 185.5,
+                "int_solv_energy": -3.314,
+                "pvalue": 0.727
+            },
+            {
+                "mol_id": 2,
+                "auth_asym_id": "A",
+                "label_asym_id": "A",
+                "symmetry_id": "3_546",
+                "symmetry_operation_number": 3,
+                "symmetry_operation": "-X+1/2,Y-1/2,-Z+1",
+                "int_natoms": 27,
+                "int_nres": 7,
+                "int_area": 215.2,
+                "int_solv_energy": 1.392,
+                "pvalue": 0.846
+            }
+        ]
+    }
+}
