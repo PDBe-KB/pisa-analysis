@@ -926,7 +926,9 @@ class ComplexInfo(StrictModel):
     symmetry_number: int = Field(
         ..., description=SYMMETRY_NUMBER, examples=[4], validation_alias="symNumber"
     )
-    formula: str = Field(..., description=FORMULA, examples=["A(8)B(4)C(4)a(8)"])
+    formula: Optional[str] = Field(
+        None, description=FORMULA, examples=[None, "A", "(2)", "A(8)B(4)C(4)a(8)"]
+    )
     composition: str = Field(
         ...,
         description=COMPOSITION,
