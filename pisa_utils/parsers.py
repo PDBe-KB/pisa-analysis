@@ -959,8 +959,8 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
                 continue
 
             interface = {
-                "serial_number": parts[0],
-                "interface_id": parts[1],
+                "interface_id": parts[0],
+                "serial_number": parts[1],
                 "monomer_1": parts[2],
                 "monomer_2": parts[3],
                 "symmetry_operation": parts[4],

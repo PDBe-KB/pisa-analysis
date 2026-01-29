@@ -186,6 +186,12 @@ in the crystal."""
 
 FIXED_INTERFACE = """The interface was kept "fixed" during complex search."""
 
+INTERFACE_CRYSTALLOGRAPHIC_CONTACT = (
+    """The interface is crystallographically related."""
+)
+
+INTERFACE_CONTAINS_COVALENT_LINKAGE = """The interface contains covalent linkage."""
+
 SOLVATION_ENERGY_ISOLATED_STRUCTURE = """Solvation energy of chain folding, in
 kcal/mol"""
 

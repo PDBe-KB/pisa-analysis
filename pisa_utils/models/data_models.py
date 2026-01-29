@@ -48,7 +48,9 @@ from pisa_utils.models.labels import (
     INSERTION_CODE,
     INTERFACE_AREA,
     INTERFACE_BOND_TYPES,
+    INTERFACE_CONTAINS_COVALENT_LINKAGE,
     INTERFACE_COVALENT_BONDS,
+    INTERFACE_CRYSTALLOGRAPHIC_CONTACT,
     INTERFACE_CSS,
     INTERFACE_ENERGY,
     INTERFACE_H_BONDS,
@@ -1247,13 +1249,13 @@ class Complex(StrictModel):
 
 
 class InterfaceExtensionLabels(StrictModel):
+    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
     int_type: int = Field(
         ...,
         description=INTERFACE_TYPE,
         examples=[1, 2, 5],
         validation_alias="serial_number",
     )
-    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
     auth_asym_id_1: str = Field(
         ...,
         description=AUTH_ASYM_ID,
@@ -1289,24 +1291,57 @@ class InterfaceExtensionLabels(StrictModel):
     nsb: int = Field(..., description=INTERFACE_N_SALT_BRIDGES, examples=[0, 1, 2, 4])
     nds: int = Field(..., description=INTERFACE_N_SS_BONDS, examples=[0, 1, 2, 4])
 
-    @field_validator("interface_id", mode="before")
-    @classmethod
-    def remove_end_letters_if_present(cls, v: str) -> str:
+    crystallographic_contact: Optional[bool] = Field(
+        False, description=INTERFACE_CRYSTALLOGRAPHIC_CONTACT, examples=[True, False]
+    )
+    fixed_interface: Optional[bool] = Field(
+        False, description=FIXED_INTERFACE, examples=[True, False]
+    )
+    contains_covalent_linkage: Optional[bool] = Field(
+        False, description=INTERFACE_CONTAINS_COVALENT_LINKAGE, examples=[True, False]
+    )
+
+    @model_validator(mode="before")
+    def extract_interface_property_from_id(self: dict):
         """
         Remove the trailing letter from interface ID if present. This lettter was used
         to denote whether the interface was fixed (f) or crystal contact (x). However,
         this information is presented in the interface JSONs and is not needed here.
 
-        :param v: Interface ID value
-        :type v: str
-        :return: Interface ID as integer
-        :rtype: str
+        NOTE: It's unclear what all the possible trailing characters are. From
+        examples seen so far, these are:
+         - f : fixed interface
+         - x : crystal contact
+         - c : interface contains covalent bonds
+         - # : interface was fixed and also is a crystal contact (placeholder for "fx")
         """
-        if isinstance(v, int):
-            return v
-        if v[-1].isalpha():
-            return v[:-1]
-        return v
+        if isinstance(self["serial_number"], int):
+            return self
+
+        if self["serial_number"][-1].isdigit():
+            return self
+
+        else:
+            characteristic = self["serial_number"][-1]
+            match characteristic:
+                case "f":
+                    self["fixed_interface"] = True
+                case "x":
+                    self["crystallographic_contact"] = True
+                case "c":
+                    self["contains_covalent_linkage"] = True
+                case "#":
+                    self["fixed_interface"] = True
+                    self["crystallographic_contact"] = True
+                case _:
+                    raise ValueError(
+                        f"Unknown interface characteristic '{characteristic}' "
+                        f"in interface ID '{self['serial_number']}'"
+                    )
+
+            self["serial_number"] = self["serial_number"][:-1]
+
+        return self
 
     @model_validator(mode="after")
     def extract_ligand_fields(self):
