@@ -1202,8 +1202,8 @@ class Complex(StrictModel):
     )
 
     # Always extant
-    asu_complex: AsymmetricUnit = Field(
-        ...,
+    asu_complex: Optional[AsymmetricUnit] = Field(
+        None,
         description=ASU_COMPLEX,
         examples=[
             AsymmetricUnit(
@@ -1242,7 +1242,7 @@ class Complex(StrictModel):
     def convert_yes_no_to_bool(cls, v):
         return convert_yes_no_to_bool(v)
 
-    @field_validator("status_note", mode="before")
+    @field_validator("status_note", "status_description", mode="before")
     @classmethod
     def remove_extra_whitespace_within_string(cls, v):
         return remove_internal_whitespace(v)
