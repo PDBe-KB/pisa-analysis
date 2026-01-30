@@ -1304,7 +1304,7 @@ class InterfaceExtensionLabels(StrictModel):
     @model_validator(mode="before")
     def extract_interface_property_from_id(self: dict):
         """
-        Remove the trailing letter from interface ID if present. This lettter was used
+        Remove the trailing letter from interface ID if present. This letter was used
         to denote whether the interface was fixed (f) or crystal contact (x). However,
         this information is presented in the interface JSONs and is not needed here.
 
