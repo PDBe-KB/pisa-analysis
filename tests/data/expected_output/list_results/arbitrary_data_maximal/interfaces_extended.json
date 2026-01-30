@@ -17,7 +17,10 @@
             "int_solv_energy": -18.2,
             "nhb": 100,
             "nsb": 100,
-            "nds": 100
+            "nds": 100,
+            "crystallographic_contact": false,
+            "fixed_interface": false,
+            "contains_covalent_linkage": false
         },
         {
             "int_type": 2,
@@ -36,7 +39,10 @@
             "int_solv_energy": 2.4,
             "nhb": 8,
             "nsb": 0,
-            "nds": 0
+            "nds": 0,
+            "crystallographic_contact": false,
+            "fixed_interface": false,
+            "contains_covalent_linkage": false
         },
         {
             "int_type": 3,
@@ -55,7 +61,10 @@
             "int_solv_energy": -0.3,
             "nhb": 3,
             "nsb": 0,
-            "nds": 0
+            "nds": 0,
+            "crystallographic_contact": true,
+            "fixed_interface": false,
+            "contains_covalent_linkage": false
         },
         {
             "int_type": 4,
@@ -74,7 +83,10 @@
             "int_solv_energy": 1.2,
             "nhb": 1,
             "nsb": 1,
-            "nds": 0
+            "nds": 0,
+            "crystallographic_contact": true,
+            "fixed_interface": false,
+            "contains_covalent_linkage": false
         },
         {
             "int_type": 5,
@@ -93,7 +105,10 @@
             "int_solv_energy": 2.0,
             "nhb": 4,
             "nsb": 0,
-            "nds": 0
+            "nds": 0,
+            "crystallographic_contact": false,
+            "fixed_interface": false,
+            "contains_covalent_linkage": true
         },
         {
             "int_type": 6,
@@ -112,7 +127,10 @@
             "int_solv_energy": -9.8,
             "nhb": 0,
             "nsb": 0,
-            "nds": 0
+            "nds": 0,
+            "crystallographic_contact": false,
+            "fixed_interface": true,
+            "contains_covalent_linkage": false
         },
         {
             "int_type": 7,
@@ -131,7 +149,10 @@
             "int_solv_energy": 1.1,
             "nhb": 0,
             "nsb": 0,
-            "nds": 0
+            "nds": 0,
+            "crystallographic_contact": true,
+            "fixed_interface": true,
+            "contains_covalent_linkage": false
         }
     ]
 }
