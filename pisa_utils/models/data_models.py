@@ -1321,25 +1321,24 @@ class InterfaceExtensionLabels(StrictModel):
         if self["serial_number"][-1].isdigit():
             return self
 
-        else:
-            characteristic = self["serial_number"][-1]
-            match characteristic:
-                case "f":
-                    self["fixed_interface"] = True
-                case "x":
-                    self["crystallographic_contact"] = True
-                case "c":
-                    self["contains_covalent_linkage"] = True
-                case "#":
-                    self["fixed_interface"] = True
-                    self["crystallographic_contact"] = True
-                case _:
-                    raise ValueError(
-                        f"Unknown interface characteristic '{characteristic}' "
-                        f"in interface ID '{self['serial_number']}'"
-                    )
+        characteristic = self["serial_number"][-1]
+        match characteristic:
+            case "f":
+                self["fixed_interface"] = True
+            case "x":
+                self["crystallographic_contact"] = True
+            case "c":
+                self["contains_covalent_linkage"] = True
+            case "#":
+                self["fixed_interface"] = True
+                self["crystallographic_contact"] = True
+            case _:
+                raise ValueError(
+                    f"Unknown interface characteristic '{characteristic}' "
+                    f"in interface ID '{self['serial_number']}'"
+                )
 
-            self["serial_number"] = self["serial_number"][:-1]
+        self["serial_number"] = self["serial_number"][:-1]
 
         return self
 
