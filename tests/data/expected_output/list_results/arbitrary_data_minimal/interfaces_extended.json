@@ -17,7 +17,10 @@
             "int_solv_energy": -50.0,
             "nhb": 20,
             "nsb": 10,
-            "nds": 10
+            "nds": 10,
+            "crystallographic_contact": false,
+            "fixed_interface": false,
+            "contains_covalent_linkage": false
         }
     ]
 }
