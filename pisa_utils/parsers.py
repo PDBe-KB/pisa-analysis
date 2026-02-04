@@ -379,6 +379,11 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
             self._parse_interface_from_dict(
                 all_interface_data["pdb_entry"]["interface"]
             )
+        elif self.n_interfaces == "0":
+            LOGGER.warning(
+                f"No interfaces found in XML file: {self.path_xml}. "
+                "No JSON files will be created."
+            )
         else:
             for interface_data in all_interface_data["pdb_entry"]["interface"]:
                 self._parse_interface_from_dict(interface_data)
@@ -1245,15 +1250,21 @@ class CompileInterfaceSummaryJSON:
         Converts individual interface JSON files into a summary JSON file.
         """
 
-        # Load assembly data
-        assembly_to_interface_map = self._load_assembly_json()
-        LOGGER.info(f"Loaded necessary assembly data from: {self.path_assembly_json}")
-
         interface_files = [
             f
             for f in os.listdir(self.path_interface_jsons)
             if f.startswith("interface_") and f.endswith(".json")
         ]
+        if not interface_files:
+            LOGGER.warning(
+                "No interface JSON files found in directory: "
+                f"{self.path_interface_jsons}. No summary JSON will be created."
+            )
+            return
+
+        # Load assembly data
+        assembly_to_interface_map = self._load_assembly_json()
+        LOGGER.info(f"Loaded necessary assembly data from: {self.path_assembly_json}")
 
         # Prepare output data structure
         interface_summary = {}
