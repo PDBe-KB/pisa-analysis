@@ -364,6 +364,13 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
         self.status = all_interface_data["pdb_entry"]["status"]
         self.n_interfaces = all_interface_data["pdb_entry"]["n_interfaces"]
 
+        if self.n_interfaces == "0":
+            LOGGER.warning(
+                f"No interfaces found in XML file: {self.path_xml}. "
+                "No JSON files will be created."
+            )
+            return
+
         # Make interfaces dir
         os.makedirs(self.path_output, exist_ok=True)
         LOGGER.info(f"Created directory for interfaces: {self.path_output}")
@@ -378,11 +385,6 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
         if self.n_interfaces == "1":
             self._parse_interface_from_dict(
                 all_interface_data["pdb_entry"]["interface"]
-            )
-        elif self.n_interfaces == "0":
-            LOGGER.warning(
-                f"No interfaces found in XML file: {self.path_xml}. "
-                "No JSON files will be created."
             )
         else:
             for interface_data in all_interface_data["pdb_entry"]["interface"]:
