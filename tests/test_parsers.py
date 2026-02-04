@@ -255,6 +255,37 @@ class TestConvertInterfaceXML(TestCase):
             msg="Interface XML->JSON not parsed correctly for single interface.",
         )
 
+    def test_parse_no_interface_xml(self):
+        """
+        Test parsing of interface XML files with no interfaces defined.
+        """
+
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_interfaces_none.xml"
+        )
+        self.output_json_dir = self.base_input_dir.joinpath(
+            "actual_output", "interfaces", "3hax_interfaces_none"
+        )
+
+        # Run
+        self.converter = ConvertInterfaceXMLToJSONs(
+            path_xml=self.input_xml,
+            path_jsons=self.output_json_dir,
+            path_structure_file=str(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif")
+            ),
+        )
+        self.converter.parse()
+
+        # Check
+        actual_files = list(self.output_json_dir.iterdir())
+
+        self.assertEqual(
+            0,
+            len(actual_files),
+            msg="Interface XML->JSON parsed interfaces when none were defined.",
+        )
+
 
 class TestConvertInterfaceListToJSON(TestCase):
     """
@@ -396,6 +427,27 @@ class TestConvertInterfaceListToJSON(TestCase):
             json_expected,
             json_actual,
             msg="Arbitrary maximal interface list XML->JSON not parsed correctly.",
+        )
+
+    def test_parse_no_interfaces(self):
+        """
+        Test interface list XML file with no interfaces present.
+        """
+        path_output = self.base_output_dir.joinpath("interfaces_extended.json")
+
+        # Run
+        converter = ConvertInterfaceListToJSON(
+            path_txt=str(
+                self.base_input_dir.joinpath("interfaces_extended_no_interfaces.txt")
+            ),
+            path_json=str(path_output),
+        )
+        converter.parse()
+
+        # Check
+        self.assertFalse(
+            path_output.exists(),
+            msg="Interface list JSON created when no interfaces were present.",
         )
 
 
@@ -701,6 +753,9 @@ class TestCompileInterfaceSummaryJSON(TestCase):
         remove_files(output_path)
 
     def test_compile_interface_summary_json(self):
+        """
+        Test for multiple interfaces present.
+        """
 
         self.input_interface_jsons = self.base_input_dir.joinpath(
             "mock_data",
@@ -737,4 +792,38 @@ class TestCompileInterfaceSummaryJSON(TestCase):
             json_expected,
             json_actual,
             msg="Interface summary JSON not compiled correctly.",
+        )
+
+    def test_compile_interface_summary_json_no_interfaces(self):
+        """
+        Test for no interfaces present. Should not create output JSON.
+        """
+
+        self.input_interface_jsons = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "interfaces_none",
+        )
+        self.input_assembly_json = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "assemblies.json",
+        )
+        self.output_json = self.base_input_dir.joinpath(
+            "actual_output",
+            "interface_summary_no_interfaces.json",
+        )
+
+        # Run
+        self.compiler = CompileInterfaceSummaryJSON(
+            path_interface_jsons=self.input_interface_jsons,
+            path_assembly_json=self.input_assembly_json,
+            path_output_json=self.output_json,
+        )
+        self.compiler.parse()
+
+        # Check
+        self.assertFalse(
+            self.output_json.exists(),
+            msg="Interface summary JSON created when no interfaces were present.",
         )

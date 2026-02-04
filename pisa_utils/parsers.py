@@ -364,6 +364,13 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
         self.status = all_interface_data["pdb_entry"]["status"]
         self.n_interfaces = all_interface_data["pdb_entry"]["n_interfaces"]
 
+        if self.n_interfaces == "0":
+            LOGGER.warning(
+                f"No interfaces found in XML file: {self.path_xml}. "
+                "No JSON files will be created."
+            )
+            return
+
         # Make interfaces dir
         os.makedirs(self.path_output, exist_ok=True)
         LOGGER.info(f"Created directory for interfaces: {self.path_output}")
@@ -902,7 +909,7 @@ class ConvertListTextToJSON(ABC):
         Convert a text file with a list of items to a JSON file.
         """
         with open(self.path_txt, "r") as f:
-            lines = [line.strip() for line in f.readlines()]
+            lines = [line.strip() for line in f.readlines() if line.strip()]
 
         return lines
 
@@ -940,10 +947,16 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
 
         lines = super().parse()
 
-        # Find start of table
-        start_table = self._find_start_of_table(lines)
+        # Check for no interfaces
+        if lines and lines[-1] == "NO INTERFACES FOUND":
+            LOGGER.warning(
+                f"No interfaces found in interface list file: {self.path_txt}. "
+                "Not writing interfaces extended JSON file."
+            )
+            return
 
         # Parse table
+        start_table = self._find_start_of_table(lines)
         interface_data = []
         for line in lines[start_table:]:
 
@@ -1245,15 +1258,21 @@ class CompileInterfaceSummaryJSON:
         Converts individual interface JSON files into a summary JSON file.
         """
 
-        # Load assembly data
-        assembly_to_interface_map = self._load_assembly_json()
-        LOGGER.info(f"Loaded necessary assembly data from: {self.path_assembly_json}")
-
         interface_files = [
             f
             for f in os.listdir(self.path_interface_jsons)
             if f.startswith("interface_") and f.endswith(".json")
         ]
+        if not interface_files:
+            LOGGER.warning(
+                "No interface JSON files found in directory: "
+                f"{self.path_interface_jsons}. No summary JSON will be created."
+            )
+            return
+
+        # Load assembly data
+        assembly_to_interface_map = self._load_assembly_json()
+        LOGGER.info(f"Loaded necessary assembly data from: {self.path_assembly_json}")
 
         # Prepare output data structure
         interface_summary = {}
