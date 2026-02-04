@@ -813,10 +813,6 @@ class TestCompileInterfaceSummaryJSON(TestCase):
             "actual_output",
             "interface_summary_no_interfaces.json",
         )
-        self.expected_json = self.base_input_dir.joinpath(
-            "expected_output",
-            "interface_summary_no_interfaces.json",
-        )
 
         # Run
         self.compiler = CompileInterfaceSummaryJSON(
