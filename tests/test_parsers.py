@@ -429,6 +429,27 @@ class TestConvertInterfaceListToJSON(TestCase):
             msg="Arbitrary maximal interface list XML->JSON not parsed correctly.",
         )
 
+    def test_parse_no_interfaces(self):
+        """
+        Test interface list XML file with no interfaces present.
+        """
+        path_output = self.base_output_dir.joinpath("interfaces_extended.json")
+
+        # Run
+        converter = ConvertInterfaceListToJSON(
+            path_txt=str(
+                self.base_input_dir.joinpath("interfaces_extended_no_interfaces.txt")
+            ),
+            path_json=str(path_output),
+        )
+        converter.parse()
+
+        # Check
+        self.assertFalse(
+            path_output.exists(),
+            msg="Interface list JSON created when no interfaces were present.",
+        )
+
 
 class TestConvertAssemblyListToJSON(TestCase):
     """
