@@ -946,7 +946,7 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         lines = super().parse()
 
         # Check for no interfaces
-        if lines[-1] == "NO INTERFACES FOUND":
+        if lines and lines[-1] == "NO INTERFACES FOUND":
             LOGGER.warning(
                 f"No interfaces found in interface list file: {self.path_txt}. "
                 "Not writing interfaces extended JSON file."
