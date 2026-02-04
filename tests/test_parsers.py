@@ -278,11 +278,9 @@ class TestConvertInterfaceXML(TestCase):
         self.converter.parse()
 
         # Check
-        actual_files = list(self.output_json_dir.iterdir())
-
-        self.assertEqual(
-            0,
-            len(actual_files),
+        # Check
+        self.assertFalse(
+            self.output_json_dir.exists(),
             msg="Interface XML->JSON parsed interfaces when none were defined.",
         )
 
