@@ -907,7 +907,7 @@ class ConvertListTextToJSON(ABC):
         Convert a text file with a list of items to a JSON file.
         """
         with open(self.path_txt, "r") as f:
-            lines = [line.strip() for line in f.readlines()]
+            lines = [line.strip() for line in f.readlines() if line.strip()]
 
         return lines
 
@@ -945,10 +945,16 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
 
         lines = super().parse()
 
-        # Find start of table
-        start_table = self._find_start_of_table(lines)
+        # Check for no interfaces
+        if lines[-1] == "NO INTERFACES FOUND":
+            LOGGER.warning(
+                f"No interfaces found in interface list file: {self.path_txt}. "
+                "Not writing interfaces extended JSON file."
+            )
+            return
 
         # Parse table
+        start_table = self._find_start_of_table(lines)
         interface_data = []
         for line in lines[start_table:]:
 
