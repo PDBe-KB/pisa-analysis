@@ -278,7 +278,6 @@ class TestConvertInterfaceXML(TestCase):
         self.converter.parse()
 
         # Check
-        # Check
         self.assertFalse(
             self.output_json_dir.exists(),
             msg="Interface XML->JSON parsed interfaces when none were defined.",
