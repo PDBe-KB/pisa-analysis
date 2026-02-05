@@ -1202,8 +1202,8 @@ class Complex(StrictModel):
     )
 
     # Always extant
-    asu_complex: AsymmetricUnit = Field(
-        ...,
+    asu_complex: Optional[AsymmetricUnit] = Field(
+        None,
         description=ASU_COMPLEX,
         examples=[
             AsymmetricUnit(
