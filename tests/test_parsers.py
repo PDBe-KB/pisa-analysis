@@ -162,6 +162,46 @@ class TestConvertAssemblyXMLToJSON(TestCase):
             msg="Assembly XML->JSON not parsed correctly for no assemblies defined.",
         )
 
+    def test_parse_assembly_xml_no_asu_complex(self):
+        """
+        Test parsing of assembly XML files with no ASU complex defined.
+        """
+
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "assembly_no_asm_no_asu.xml"
+        )
+        self.output_json = self.base_input_dir.joinpath(
+            "actual_output", "assembly_no_asm_no_asu.json"
+        )
+        self.expected_json = self.base_input_dir.joinpath(
+            "expected_output", "assembly_no_asm_no_asu.json"
+        )
+
+        # Run
+        self.converter = ConvertAssemblyXMLToJSON(
+            path_xml=self.input_xml,
+            path_json=self.output_json,
+            path_interface_jsons=self.base_input_dir.joinpath(
+                "expected_output",
+                "interfaces",
+                "3hax_interfaces",
+            ),
+            path_structure_file=str(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif")
+            ),
+        )
+        self.converter.parse()
+
+        # Check
+        expected = self.expected_json.read_text().strip()
+        actual = self.output_json.read_text().strip()
+
+        self.assertEqual(
+            expected,
+            actual,
+            msg="Assembly XML->JSON not parsed correctly for no ASU complex defined.",
+        )
+
 
 class TestConvertInterfaceXML(TestCase):
     """

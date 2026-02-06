@@ -1,0 +1,17 @@
+<pisa_results>
+  <name>3hax</name>
+  <status>Ok</status>
+  <status_description>
+    Results are not available due to the following reason: Overlapping
+    structures. This means that crystallographic data is not correct or
+    precise, and overlapping symmetry mates of molecules were found at
+    crystal reconstruction. PISA does not attempt to perform an
+    assembly analysis if there are problematic interfaces. Overlapping
+    interfaces are marked by star in the list of interfaces.
+  </status_description>
+  <status_note>
+    If you think that this message is issued in error, please report it
+    to author Eugene Krissinel at eugene.krissinel@stfc.ac.uk,
+    providing all details of your input.
+  </status_note>
+</pisa_results>
