@@ -1201,7 +1201,7 @@ class Complex(StrictModel):
         validation_alias="asm_set",
     )
 
-    # Always extant
+    # Optional ASU complex; may be absent depending on input
     asu_complex: Optional[AsymmetricUnit] = Field(
         None,
         description=ASU_COMPLEX,
