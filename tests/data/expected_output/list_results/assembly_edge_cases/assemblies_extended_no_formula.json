@@ -1,0 +1,14 @@
+{
+    "pqs_data": [],
+    "asu_data": [
+        {
+            "complex_type": 1,
+            "mmsize": 1,
+            "asa": 13950.0,
+            "bsa": 0.0,
+            "diss_energy": 0.0,
+            "chem_energy": 0.0,
+            "formula": null
+        }
+    ]
+}

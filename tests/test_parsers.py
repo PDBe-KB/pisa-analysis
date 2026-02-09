@@ -628,6 +628,27 @@ class TestConvertAssemblyListToJSON(TestCase):
             msg="Arbitrary maximal assembly list XML->JSON not parsed correctly.",
         )
 
+    def test_parse_no_formula(self):
+        """
+        Test assembly list XML file with no formula defined for any assemblies.
+        """
+        path_output = self.base_output_dir.joinpath("assemblies_extended.json")
+
+        # Run
+        converter = ConvertAssemblyListToJSON(
+            path_txt=str(
+                self.path_base_input.joinpath("assemblies_extended_no_formula.txt")
+            ),
+            path_json=str(path_output),
+        )
+        converter.parse()
+
+        # Check
+        self.assertFalse(
+            path_output.exists(),
+            msg="Assembly list JSON created when no assemblies had a formula defined.",
+        )
+
 
 class TestConvertMonomerListToJSON(TestCase):
     """
