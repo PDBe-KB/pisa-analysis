@@ -734,7 +734,7 @@ class TestConvertAssemblyListToJSON(TestCase):
                 ),
             )
 
-    def test_parse_two_three_row_overflow_in_table(self):
+    def test_parse_multi_row_overflow_two_out_of_two(self):
         """
         Test assembly list TXT output from pisa -list with row overflow of three rows in the table.
         """
@@ -766,8 +766,8 @@ class TestConvertAssemblyListToJSON(TestCase):
                 json_expected,
                 json_actual,
                 msg=(
-                    "Assembly list XML->JSON not parsed correctly when row overflow of "
-                    "three rows in the table."
+                    "Assembly list XML->JSON not parsed correctly when two out of two "
+                    "assemblies have multi-row overflow."
                 ),
             )
 
@@ -803,8 +803,8 @@ class TestConvertAssemblyListToJSON(TestCase):
                 json_expected,
                 json_actual,
                 msg=(
-                    "Assembly list XML->JSON not parsed correctly when row overflow of "
-                    "three rows in the table."
+                    "Assembly list XML->JSON not parsed correctly when one out of three "
+                    "assemblies has multi-row overflow."
                 ),
             )
 
