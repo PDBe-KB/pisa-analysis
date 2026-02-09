@@ -1091,18 +1091,26 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
         if len(parts) == 9:
             formula += parts[8]
 
-            # Check next lines
-            for next_line in self.lines[line_index + 1 :]:
+            # Check only contiguous continuation lines immediately following this row
+            next_index = line_index + 1
+            while next_index < len(self.lines):
+                next_line = self.lines[next_index]
+
                 if self._mid_table_rule(next_line):
                     break
 
                 if self._end_of_table(next_line):
                     break
 
-                if self._row_continued(next_line):
-                    next_parts = self._clean_table_line(next_line)
+                if not self._row_continued(next_line):
+                    # Stop as soon as we hit a non-continuation line
+                    break
+
+                next_parts = self._clean_table_line(next_line)
+                if next_parts:
                     formula += next_parts[0]
 
+                next_index += 1
         return formula if formula else None
 
     def parse(self) -> None:
