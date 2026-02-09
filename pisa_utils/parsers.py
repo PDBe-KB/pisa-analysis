@@ -15,7 +15,7 @@ from pisa_utils.models.data_models import (
     InterfaceExtended,
     InterfaceSummary,
 )
-from pisa_utils.utils import extract_ligand_contents, id_is_ligand
+from pisa_utils.utils import extract_ligand_contents, id_is_ligand, is_int_or_float
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +32,6 @@ def get_residue_mappings(structure: gemmi.Structure) -> dict:
     residue_mappings = {}
 
     for chain in structure[0]:
-
         auth_asym_id = chain.name
         residue_mappings[auth_asym_id] = {
             "polymers": {},
@@ -448,7 +447,6 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
         else:
             molecules = interface_output["interface"].get("molecule", [])
             for molecule in molecules if isinstance(molecules, list) else [molecules]:
-
                 auth_asym_id = None
                 ccd_id = None
                 auth_seq_id_start = None
@@ -666,7 +664,6 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
 
                 # Ligand molecule
                 if id_is_ligand(molecule["chain_id"]):
-
                     (auth_asym_id, ccd_id, auth_seq_id) = extract_ligand_contents(
                         molecule["chain_id"]
                     )
@@ -959,7 +956,6 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         start_table = self._find_start_of_table(lines)
         interface_data = []
         for line in lines[start_table:]:
-
             if self._end_of_table(line):
                 break
             parts = self._clean_table_line(line)
@@ -1068,7 +1064,6 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
         pqs_data = []
         for start_index in starts_main_tables:
             for line in lines[start_index:]:
-
                 if self._end_of_table(line):
                     break
                 parts = self._clean_table_line(line)
@@ -1089,24 +1084,43 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
                     "bsa": parts[5],
                     "dgdiss0": parts[6],
                     "mg0": parts[7],
-                    "formula": " ".join(parts[8:]),
+                    "formula": parts[8],
                 }
                 pqs_data.append(pqs)
 
         # Parse second table
         asu_data = []
         for line in lines[start_asu_table:]:
-
             if self._end_of_table(line):
                 break
-            parts = self._clean_table_line(line)
 
-            if len(parts) < 7:
+            # Extract
+            parts = self._clean_table_line(line)
+            n_parts = len(parts)
+
+            if n_parts == 7:
+                formula = parts[6]
+
+            elif n_parts < 6:
                 LOGGER.warning(
                     f"Skipping invalid ASU line: {line}. "
-                    f"Expected at least 7 parts, got {len(parts)}"
+                    f"Expected at least 6 columns, got {n_parts}"
                 )
                 continue
+
+            elif n_parts == 6 and all(is_int_or_float(part) for part in parts):
+                LOGGER.warning(f"Formula is missing for ASU line: {line}. ")
+                formula = None
+
+            else:
+                LOGGER.error(
+                    f"ASU line has unexpected format: {line}. "
+                    f"Expected either 6 or 7 numeric columns, got {n_parts}"
+                )
+                raise Exception(
+                    f"ASU line has unexpected format: {line}. "
+                    f"Expected either 6 or 7 numeric columns, got {n_parts}"
+                )
 
             asu = {
                 "size": parts[0],
@@ -1115,7 +1129,7 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
                 "bsa": parts[3],
                 "dgdiss0": parts[4],
                 "mg0": parts[5],
-                "formula": " ".join(parts[6:]),
+                "formula": formula,
             }
             asu_data.append(asu)
 
@@ -1168,7 +1182,6 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
         # Parse table
         monomer_data = []
         for line in lines[start_table:]:
-
             if self._end_of_table(line):
                 break
             parts = self._clean_table_line(line)
@@ -1282,7 +1295,6 @@ class CompileInterfaceSummaryJSON:
         # Extract data
         int_type_tracker = set()
         for interface_file in interface_files:
-
             interface_json_path = os.path.join(
                 self.path_interface_jsons, interface_file
             )
