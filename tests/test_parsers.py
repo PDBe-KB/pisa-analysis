@@ -662,7 +662,7 @@ class TestConvertAssemblyListToJSON(TestCase):
 
     def test_parse_row_overflow_one_in_table(self):
         """
-        Test assembly list XML file with row overflow of two rows in the table.
+        Test assembly list TXT output from pisa -list with row overflow of two rows in the table.
         """
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -699,7 +699,7 @@ class TestConvertAssemblyListToJSON(TestCase):
 
     def test_parse_row_overflow_two_in_table(self):
         """
-        Test assembly list XML file with row overflow of two rows in the table.
+        Test assembly list TXT output from pisa -list with row overflow of two rows in the table.
         """
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -736,7 +736,7 @@ class TestConvertAssemblyListToJSON(TestCase):
 
     def test_parse_multi_row_overflow_two_out_of_two(self):
         """
-        Test assembly list XML file where two out of two assemblies have multi-row overflow.
+        Test assembly list TXT output from pisa -list with row overflow of three rows in the table.
         """
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -771,9 +771,9 @@ class TestConvertAssemblyListToJSON(TestCase):
                 ),
             )
 
-    def test_parse_multi_row_overflow_one_out_of_three(self):
+    def test_parse_multi_row_overflow_one_out_of_three_in_table(self):
         """
-        Test assembly list XML file where one out of three assemblies has multi-row overflow.
+        Test assembly list TXT output from pisa -list with row overflow of three rows in the table.
         """
 
         with tempfile.TemporaryDirectory() as tmp_dir:
