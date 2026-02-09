@@ -630,7 +630,7 @@ class TestConvertAssemblyListToJSON(TestCase):
 
     def test_parse_no_formula(self):
         """
-        Test assembly list XML file with no formula defined for any assemblies.
+        Test assembly list text file with no formula defined for any assemblies.
         """
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -657,7 +657,7 @@ class TestConvertAssemblyListToJSON(TestCase):
             self.assertEqual(
                 json_expected,
                 json_actual,
-                msg="Assembly list XML->JSON not parsed correctly when no formula.",
+                msg="Assembly list TXT→JSON not parsed correctly when no formula.",
             )
 
     def test_parse_row_overflow_one_in_table(self):
@@ -692,7 +692,7 @@ class TestConvertAssemblyListToJSON(TestCase):
                 json_expected,
                 json_actual,
                 msg=(
-                    "Assembly list XML->JSON not parsed correctly when row overflow of "
+                    "Assembly list TXT→JSON not parsed correctly when row overflow of "
                     "two rows in the table."
                 ),
             )
@@ -729,7 +729,7 @@ class TestConvertAssemblyListToJSON(TestCase):
                 json_expected,
                 json_actual,
                 msg=(
-                    "Assembly list XML->JSON not parsed correctly when row overflow of "
+                    "Assembly list TXT→JSON not parsed correctly when row overflow of "
                     "two rows in the table."
                 ),
             )
@@ -766,7 +766,7 @@ class TestConvertAssemblyListToJSON(TestCase):
                 json_expected,
                 json_actual,
                 msg=(
-                    "Assembly list XML->JSON not parsed correctly when two out of two "
+                    "Assembly list TXT->JSON not parsed correctly when two out of two "
                     "assemblies have multi-row overflow."
                 ),
             )
@@ -803,7 +803,7 @@ class TestConvertAssemblyListToJSON(TestCase):
                 json_expected,
                 json_actual,
                 msg=(
-                    "Assembly list XML->JSON not parsed correctly when one out of three "
+                    "Assembly list TXT->JSON not parsed correctly when one out of three "
                     "assemblies has multi-row overflow."
                 ),
             )
