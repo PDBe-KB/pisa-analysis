@@ -734,6 +734,80 @@ class TestConvertAssemblyListToJSON(TestCase):
                 ),
             )
 
+    def test_parse_two_three_row_overflow_in_table(self):
+        """
+        Test assembly list XML file with row overflow of three rows in the table.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_output = Path(tmp_dir).joinpath("assemblies_extended.json")
+
+            # Run
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "assembly_edge_cases",
+                        "assemblies_extended_multi_row_overflow_2_out_of_2.txt",
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
+
+            path_expected = self.base_expected_dir.joinpath(
+                "assembly_edge_cases",
+                "assemblies_extended_multi_row_overflow_2_out_of_2.json",
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
+
+            # Check
+            self.assertEqual(
+                json_expected,
+                json_actual,
+                msg=(
+                    "Assembly list XML->JSON not parsed correctly when row overflow of "
+                    "three rows in the table."
+                ),
+            )
+
+    def test_parse_one_three_row_overflow_in_table(self):
+        """
+        Test assembly list XML file with row overflow of three rows in the table.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_output = Path(tmp_dir).joinpath("assemblies_extended.json")
+
+            # Run
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "assembly_edge_cases",
+                        "assemblies_extended_multi_row_overflow_1_out_of_3.txt",
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
+
+            path_expected = self.base_expected_dir.joinpath(
+                "assembly_edge_cases",
+                "assemblies_extended_multi_row_overflow_1_out_of_3.json",
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
+
+            # Check
+            self.assertEqual(
+                json_expected,
+                json_actual,
+                msg=(
+                    "Assembly list XML->JSON not parsed correctly when row overflow of "
+                    "three rows in the table."
+                ),
+            )
+
 
 class TestConvertMonomerListToJSON(TestCase):
     """
