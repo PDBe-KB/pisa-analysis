@@ -771,9 +771,9 @@ class TestConvertAssemblyListToJSON(TestCase):
                 ),
             )
 
-    def test_parse_one_three_row_overflow_in_table(self):
+    def test_parse_multi_row_overflow_one_out_of_three(self):
         """
-        Test assembly list XML file with row overflow of three rows in the table.
+        Test assembly list XML file where one out of three assemblies has multi-row overflow.
         """
 
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -803,8 +803,8 @@ class TestConvertAssemblyListToJSON(TestCase):
                 json_expected,
                 json_actual,
                 msg=(
-                    "Assembly list XML->JSON not parsed correctly when row overflow of "
-                    "three rows in the table."
+                    "Assembly list XML->JSON not parsed correctly when one out of three "
+                    "assemblies has multi-row overflow."
                 ),
             )
 
