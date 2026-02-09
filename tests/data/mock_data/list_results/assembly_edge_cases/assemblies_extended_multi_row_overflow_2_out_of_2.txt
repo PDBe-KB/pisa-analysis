@@ -1,0 +1,30 @@
+
+ PISA v.2.1.2 built 15-03-2019   with SSM v.1.4.0, SRS v.1.0.0, MMDB v.2,0.22
+ Session 202602031324
+
+ Analysis of protein interfaces suggests that the following
+ quaternary structures are stable in solution
+ ----.-----.------------------------------------------------.---------------
+ Set |  No | Size  Id      ASA       BSA   DGdiss0    mG0   | Formula
+ ----+-----+------------------------------------------------+---------------
+   1 |   1 |   8    1  164297.5   54678.8     14.3      4.0 | A(8)a(72)b(8)c(8)d(24)
+     |     |                                                | e(24)f(16)g(24)h(8)i(8)
+     |     |                                                | XXXXX
+ ----+-----+------------------------------------------------+---------------
+   2 |   2 |   2    2   43741.5   11002.6      4.4      2.2 | A(2)a(18)b(2)c(2)d(6)e(6)
+     |     |                                                | f(4)g(6)h(2)i(2)
+     |     |                                                | XXXXX
+ ----'-----'------------------------------------------------'---------------
+
+ Analysis of complex, represented by ASU or bare content
+ of the coordinate file
+ -----------------------------------------------.---------------
+ Size  Id      ASA       BSA   DGdiss0    mG0   | Formula
+ -----------------------------------------------+---------------
+   1    3   22347.1    5024.9     -7.4     -7.4 | Aa(9)bcd(3)e(3)f(2)g(3)hi
+ -----------------------------------------------'---------------
+ Set: PQS set number   Size: macromolecular oligomeric state
+ Id:  Assembly id      ASA:  accessible surface area, sq.A
+ BSA: buried SA, sq.A
+ DGdiss0: standard free energy of dissociation, kcal/mol
+ mG0:     standard chemical potential, kcal/mol
