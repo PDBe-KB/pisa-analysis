@@ -48,7 +48,6 @@ class TestConvertAssemblyXMLToJSON(TestCase):
         remove_files(output_path)
 
     def test_parse_multi_assembly_xml(self):
-
         self.input_xml = self.base_input_dir.joinpath(
             "mock_data", "3hax_assembly_multi_asmset.xml"
         )
@@ -85,7 +84,6 @@ class TestConvertAssemblyXMLToJSON(TestCase):
         )
 
     def test_parse_single_assembly_xml(self):
-
         self.maxDiff = None
 
         self.input_xml = self.base_input_dir.joinpath(
@@ -222,7 +220,6 @@ class TestConvertInterfaceXML(TestCase):
         remove_files(output_path)
 
     def test_parse_multi_interface_xml(self):
-
         self.input_xml = self.base_input_dir.joinpath(
             "mock_data", "3hax_interfaces_multi.xml"
         )
@@ -262,7 +259,6 @@ class TestConvertInterfaceXML(TestCase):
             )
 
     def test_parse_single_interface_xml(self):
-
         self.input_xml = self.base_input_dir.joinpath(
             "mock_data", "3hax_interfaces_single.xml"
         )
@@ -494,6 +490,8 @@ class TestConvertAssemblyListToJSON(TestCase):
     Tests for ConvertAssemblyListToJSON class.
     """
 
+    maxDiff = None
+
     def setUp(self):
         super().setUp()
 
@@ -631,7 +629,6 @@ class TestConvertAssemblyListToJSON(TestCase):
             )
 
     def test_parse_no_formula(self):
-
         """
         Test assembly list XML file with no formula defined for any assemblies.
         """
