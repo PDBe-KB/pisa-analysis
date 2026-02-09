@@ -1472,7 +1472,9 @@ class ASUEntry(StrictModel):
     chem_energy: float = Field(
         ..., description=CHEMICAL_POTENTIAL_EN, examples=[0.0], validation_alias="mg0"
     )
-    formula: str = Field(..., description=FORMULA, examples=["A"])
+    formula: Optional[str] = Field(
+        None, description=FORMULA, examples=["A", None, "A(2)"]
+    )
 
     @field_validator("asa", "bsa", "diss_energy", "chem_energy")
     @classmethod

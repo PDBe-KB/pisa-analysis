@@ -1,4 +1,5 @@
 import json
+import tempfile
 from pathlib import Path
 from unittest import TestCase
 
@@ -47,7 +48,6 @@ class TestConvertAssemblyXMLToJSON(TestCase):
         remove_files(output_path)
 
     def test_parse_multi_assembly_xml(self):
-
         self.input_xml = self.base_input_dir.joinpath(
             "mock_data", "3hax_assembly_multi_asmset.xml"
         )
@@ -84,7 +84,6 @@ class TestConvertAssemblyXMLToJSON(TestCase):
         )
 
     def test_parse_single_assembly_xml(self):
-
         self.maxDiff = None
 
         self.input_xml = self.base_input_dir.joinpath(
@@ -221,7 +220,6 @@ class TestConvertInterfaceXML(TestCase):
         remove_files(output_path)
 
     def test_parse_multi_interface_xml(self):
-
         self.input_xml = self.base_input_dir.joinpath(
             "mock_data", "3hax_interfaces_multi.xml"
         )
@@ -261,7 +259,6 @@ class TestConvertInterfaceXML(TestCase):
             )
 
     def test_parse_single_interface_xml(self):
-
         self.input_xml = self.base_input_dir.joinpath(
             "mock_data", "3hax_interfaces_single.xml"
         )
@@ -493,6 +490,8 @@ class TestConvertAssemblyListToJSON(TestCase):
     Tests for ConvertAssemblyListToJSON class.
     """
 
+    maxDiff = None
+
     def setUp(self):
         super().setUp()
 
@@ -603,30 +602,211 @@ class TestConvertAssemblyListToJSON(TestCase):
         Arbitrary maximal complexity assembly list XML file. Should cover all edge
         cases.
         """
-        # Run
-        path_output = self.base_output_dir.joinpath("arbitrary_data_maximal.json")
-        converter = ConvertAssemblyListToJSON(
-            path_txt=str(
-                self.path_base_input.joinpath(
-                    "arbitrary_data_maximal", "assemblies_extended.txt"
-                )
-            ),
-            path_json=str(path_output),
-        )
-        converter.parse()
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Run
+            path_output = Path(tmp_dir).joinpath("arbitrary_data_maximal.json")
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "arbitrary_data_maximal", "assemblies_extended.txt"
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
 
-        # Check
-        path_expected = self.base_expected_dir.joinpath(
-            "arbitrary_data_maximal", "assemblies_extended.json"
-        )
-        json_expected = json.loads(path_expected.read_text().strip())
-        json_actual = json.loads(path_output.read_text().strip())
+            # Check
+            path_expected = self.base_expected_dir.joinpath(
+                "arbitrary_data_maximal", "assemblies_extended.json"
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
 
-        self.assertDictEqual(
-            json_expected,
-            json_actual,
-            msg="Arbitrary maximal assembly list XML->JSON not parsed correctly.",
-        )
+            self.assertDictEqual(
+                json_expected,
+                json_actual,
+                msg="Arbitrary maximal assembly list TXT->JSON not parsed correctly.",
+            )
+
+    def test_parse_no_formula(self):
+        """
+        Test assembly list text file with no formula defined for any assemblies.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_output = Path(tmp_dir).joinpath("assemblies_extended.json")
+
+            # Run
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "assembly_edge_cases", "assemblies_extended_no_formula.txt"
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
+
+            path_expected = self.base_expected_dir.joinpath(
+                "assembly_edge_cases", "assemblies_extended_no_formula.json"
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
+
+            # Check
+            self.assertEqual(
+                json_expected,
+                json_actual,
+                msg="Assembly list TXT→JSON not parsed correctly when no formula.",
+            )
+
+    def test_parse_row_overflow_one_in_table(self):
+        """
+        Test assembly list TXT output from pisa -list with row overflow of two rows in the table.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_output = Path(tmp_dir).joinpath("assemblies_extended.json")
+
+            # Run
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "assembly_edge_cases",
+                        "assemblies_extended_row_overflow_1_out_of_3.txt",
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
+
+            path_expected = self.base_expected_dir.joinpath(
+                "assembly_edge_cases",
+                "assemblies_extended_row_overflow_1_out_of_3.json",
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
+
+            # Check
+            self.assertEqual(
+                json_expected,
+                json_actual,
+                msg=(
+                    "Assembly list TXT→JSON not parsed correctly when row overflow of "
+                    "two rows in the table."
+                ),
+            )
+
+    def test_parse_row_overflow_two_in_table(self):
+        """
+        Test assembly list TXT output from pisa -list with row overflow of two rows in the table.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_output = Path(tmp_dir).joinpath("assemblies_extended.json")
+
+            # Run
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "assembly_edge_cases",
+                        "assemblies_extended_row_overflow_2_out_of_2.txt",
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
+
+            path_expected = self.base_expected_dir.joinpath(
+                "assembly_edge_cases",
+                "assemblies_extended_row_overflow_2_out_of_2.json",
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
+
+            # Check
+            self.assertEqual(
+                json_expected,
+                json_actual,
+                msg=(
+                    "Assembly list TXT→JSON not parsed correctly when row overflow of "
+                    "two rows in the table."
+                ),
+            )
+
+    def test_parse_multi_row_overflow_two_out_of_two(self):
+        """
+        Test assembly list TXT output from pisa -list with row overflow of three rows in the table.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_output = Path(tmp_dir).joinpath("assemblies_extended.json")
+
+            # Run
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "assembly_edge_cases",
+                        "assemblies_extended_multi_row_overflow_2_out_of_2.txt",
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
+
+            path_expected = self.base_expected_dir.joinpath(
+                "assembly_edge_cases",
+                "assemblies_extended_multi_row_overflow_2_out_of_2.json",
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
+
+            # Check
+            self.assertEqual(
+                json_expected,
+                json_actual,
+                msg=(
+                    "Assembly list TXT->JSON not parsed correctly when two out of two "
+                    "assemblies have multi-row overflow."
+                ),
+            )
+
+    def test_parse_multi_row_overflow_one_out_of_three_in_table(self):
+        """
+        Test assembly list TXT output from pisa -list with row overflow of three rows in the table.
+        """
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path_output = Path(tmp_dir).joinpath("assemblies_extended.json")
+
+            # Run
+            converter = ConvertAssemblyListToJSON(
+                path_txt=str(
+                    self.path_base_input.joinpath(
+                        "assembly_edge_cases",
+                        "assemblies_extended_multi_row_overflow_1_out_of_3.txt",
+                    )
+                ),
+                path_json=str(path_output),
+            )
+            converter.parse()
+
+            path_expected = self.base_expected_dir.joinpath(
+                "assembly_edge_cases",
+                "assemblies_extended_multi_row_overflow_1_out_of_3.json",
+            )
+            json_expected = json.loads(path_expected.read_text().strip())
+            json_actual = json.loads(path_output.read_text().strip())
+
+            # Check
+            self.assertEqual(
+                json_expected,
+                json_actual,
+                msg=(
+                    "Assembly list TXT->JSON not parsed correctly when one out of three "
+                    "assemblies has multi-row overflow."
+                ),
+            )
 
 
 class TestConvertMonomerListToJSON(TestCase):

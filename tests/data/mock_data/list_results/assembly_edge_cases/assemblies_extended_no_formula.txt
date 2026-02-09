@@ -1,0 +1,25 @@
+
+ PISA v.2.1.2 built 15-03-2019   with SSM v.1.4.0, SRS v.1.0.0, MMDB v.2,0.22
+ Session 202602031247
+
+ Analysis of protein interfaces has not revealed any specific
+ specific interactions that could result in the formation of
+ stable quaternary structures. Most probably,  structure
+
+                202602031247.cif:A
+
+ does not complexate in solution.
+
+
+ Analysis of complex, represented by ASU or bare content
+ of the coordinate file
+ -----------------------------------------------.---------------
+ Size  Id      ASA       BSA   DGdiss0    mG0   | Formula
+ -----------------------------------------------+---------------
+   1    1   13950.0       0.0      0.0      0.0 |
+ -----------------------------------------------'---------------
+ Set: PQS set number   Size: macromolecular oligomeric state
+ Id:  Assembly id      ASA:  accessible surface area, sq.A
+ BSA: buried SA, sq.A
+ DGdiss0: standard free energy of dissociation, kcal/mol
+ mG0:     standard chemical potential, kcal/mol

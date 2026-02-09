@@ -1,0 +1,37 @@
+{
+    "pqs_data": [
+        {
+            "pqs_set_id": 1,
+            "complex_key": 1,
+            "complex_type": 1,
+            "mmsize": 8,
+            "asa": 164297.5,
+            "bsa": 54678.8,
+            "diss_energy": 14.3,
+            "chem_energy": 4.0,
+            "formula": "A(8)a(72)b(8)c(8)d(24)e(24)f(16)g(24)h(8)i(8)XXXXX"
+        },
+        {
+            "pqs_set_id": 2,
+            "complex_key": 2,
+            "complex_type": 2,
+            "mmsize": 2,
+            "asa": 43741.5,
+            "bsa": 11002.6,
+            "diss_energy": 4.4,
+            "chem_energy": 2.2,
+            "formula": "A(2)a(18)b(2)c(2)d(6)e(6)f(4)g(6)h(2)i(2)XXXXX"
+        }
+    ],
+    "asu_data": [
+        {
+            "complex_type": 3,
+            "mmsize": 1,
+            "asa": 22347.1,
+            "bsa": 5024.9,
+            "diss_energy": -7.4,
+            "chem_energy": -7.4,
+            "formula": "Aa(9)bcd(3)e(3)f(2)g(3)hi"
+        }
+    ]
+}

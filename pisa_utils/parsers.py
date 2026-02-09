@@ -15,7 +15,7 @@ from pisa_utils.models.data_models import (
     InterfaceExtended,
     InterfaceSummary,
 )
-from pisa_utils.utils import extract_ligand_contents, id_is_ligand
+from pisa_utils.utils import extract_ligand_contents, id_is_ligand, is_int_or_float
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +32,6 @@ def get_residue_mappings(structure: gemmi.Structure) -> dict:
     residue_mappings = {}
 
     for chain in structure[0]:
-
         auth_asym_id = chain.name
         residue_mappings[auth_asym_id] = {
             "polymers": {},
@@ -448,7 +447,6 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
         else:
             molecules = interface_output["interface"].get("molecule", [])
             for molecule in molecules if isinstance(molecules, list) else [molecules]:
-
                 auth_asym_id = None
                 ccd_id = None
                 auth_seq_id_start = None
@@ -666,7 +664,6 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
 
                 # Ligand molecule
                 if id_is_ligand(molecule["chain_id"]):
-
                     (auth_asym_id, ccd_id, auth_seq_id) = extract_ligand_contents(
                         molecule["chain_id"]
                     )
@@ -864,10 +861,39 @@ class ConvertListTextToJSON(ABC):
         )
 
     def _clean_table_line(self, line: str) -> list[str]:
+        """
+        Extract relevant contents from a line of the table
+
+        :param line: Line (row) of file to clean.
+        :type line: str
+        :return: List of cleaned contents from the line.
+        :rtype: list[str]
+        """
         return line.strip().replace("|", " ").split()
 
     def _end_of_table(self, line: str) -> bool:
-        return line.startswith("----")
+        """
+        Check if line is the end of the table. The formatting of the end of the table
+        is unique from mid-table rules.
+
+        :param line: Line (row) of file to check.
+        :type line: str
+        :return: True if line is end of table, False otherwise.
+        :rtype: bool
+        """
+        return line.startswith("----") and "'" in line
+
+    def _mid_table_rule(self, line: str) -> bool:
+        """
+        Check if line is a mid-table rule line. Mid-table rules are not the end of the
+        table, but are used to separate merged rows.
+
+        :param line: Line (row) of file to check.
+        :type line: str
+        :return: True if line is a mid-table rule, False otherwise.
+        :rtype: bool
+        """
+        return line.startswith("----") and "+" in line
 
     def _find_start_of_table(self, lines: list[str]) -> int:
         """
@@ -959,7 +985,6 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         start_table = self._find_start_of_table(lines)
         interface_data = []
         for line in lines[start_table:]:
-
             if self._end_of_table(line):
                 break
             parts = self._clean_table_line(line)
@@ -1032,18 +1057,74 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
             and "No" not in line
         )
 
+    def _row_continued(self, line: str) -> bool:
+        """
+        Check if the given line (row) is a continuation of the previous line (row) in
+        the table.
+
+        :param line: Line (row) of the file to check
+        :type line: str
+        :return: True if line is a continuation of the previous line, False otherwise
+        :rtype: bool
+        """
+
+        contains_column_breaks = line.count("|") == 3
+        contains_one_non_empty_column = len(self._clean_table_line(line)) == 1
+
+        return contains_column_breaks and contains_one_non_empty_column
+
+    def _extract_formula(self, parts: list[str], line_index: int) -> str | None:
+        """
+        Extract the formula from the given line and check if it continues on the next
+        lines. If the line has 9 parts, the formula is in the 9th part.
+
+        :param parts: Indidual columns of a row
+        :type parts: list[str]
+        :param line_index: Current line index in the text file, used to check next
+            lines for continued formula
+        :type line_index: int
+        :return: The formula value from the table
+        :rtype: str | None
+        """
+        formula = ""
+
+        if len(parts) == 9:
+            formula += parts[8]
+
+            # Check only contiguous continuation lines immediately following this row
+            next_index = line_index + 1
+            while next_index < len(self.lines):
+                next_line = self.lines[next_index]
+
+                if self._mid_table_rule(next_line):
+                    break
+
+                if self._end_of_table(next_line):
+                    break
+
+                if not self._row_continued(next_line):
+                    # Stop as soon as we hit a non-continuation line
+                    break
+
+                next_parts = self._clean_table_line(next_line)
+                if next_parts:
+                    formula += next_parts[0]
+
+                next_index += 1
+        return formula if formula else None
+
     def parse(self) -> None:
         """
         Convert assembly -list text file to JSON file.
         """
 
-        lines = super().parse()
+        self.lines = super().parse()
 
         # Find indexes of tables
         starts_main_tables = []
         start_asm_table = None
         start_asu_table = None
-        for i, line in enumerate(lines):
+        for i, line in enumerate(self.lines):
             if self._is_first_line_of_first_table(line):
                 start_asm_table = i + 2
                 starts_main_tables.append(start_asm_table)
@@ -1067,10 +1148,16 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
         # Parse first table
         pqs_data = []
         for start_index in starts_main_tables:
-            for line in lines[start_index:]:
-
+            for i, line in enumerate(self.lines[start_index:]):
                 if self._end_of_table(line):
                     break
+
+                if self._mid_table_rule(line):
+                    continue
+
+                if self._row_continued(line):
+                    continue
+
                 parts = self._clean_table_line(line)
 
                 if len(parts) < 8:
@@ -1079,6 +1166,8 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
                         f"Expected at least 8 parts, got {len(parts)}"
                     )
                     continue
+
+                formula = self._extract_formula(parts, start_index + i)
 
                 pqs = {
                     "set": parts[0],
@@ -1089,24 +1178,43 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
                     "bsa": parts[5],
                     "dgdiss0": parts[6],
                     "mg0": parts[7],
-                    "formula": " ".join(parts[8:]),
+                    "formula": formula,
                 }
                 pqs_data.append(pqs)
 
         # Parse second table
         asu_data = []
-        for line in lines[start_asu_table:]:
-
+        for line in self.lines[start_asu_table:]:
             if self._end_of_table(line):
                 break
-            parts = self._clean_table_line(line)
 
-            if len(parts) < 7:
+            # Extract
+            parts = self._clean_table_line(line)
+            n_parts = len(parts)
+
+            if n_parts == 7:
+                formula = parts[6]
+
+            elif n_parts < 6:
                 LOGGER.warning(
                     f"Skipping invalid ASU line: {line}. "
-                    f"Expected at least 7 parts, got {len(parts)}"
+                    f"Expected at least 6 columns, got {n_parts}"
                 )
                 continue
+
+            elif n_parts == 6 and all(is_int_or_float(part) for part in parts):
+                LOGGER.warning(f"Formula is missing for ASU line: {line}. ")
+                formula = None
+
+            else:
+                LOGGER.error(
+                    f"ASU line has unexpected format: {line}. "
+                    f"Expected either 6 or 7 numeric columns, got {n_parts}"
+                )
+                raise Exception(
+                    f"ASU line has unexpected format: {line}. "
+                    f"Expected either 6 or 7 numeric columns, got {n_parts}"
+                )
 
             asu = {
                 "size": parts[0],
@@ -1115,7 +1223,7 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
                 "bsa": parts[3],
                 "dgdiss0": parts[4],
                 "mg0": parts[5],
-                "formula": " ".join(parts[6:]),
+                "formula": formula,
             }
             asu_data.append(asu)
 
@@ -1168,7 +1276,6 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
         # Parse table
         monomer_data = []
         for line in lines[start_table:]:
-
             if self._end_of_table(line):
                 break
             parts = self._clean_table_line(line)
@@ -1282,7 +1389,6 @@ class CompileInterfaceSummaryJSON:
         # Extract data
         int_type_tracker = set()
         for interface_file in interface_files:
-
             interface_json_path = os.path.join(
                 self.path_interface_jsons, interface_file
             )

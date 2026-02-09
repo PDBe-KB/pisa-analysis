@@ -75,12 +75,8 @@ def read_uniprot_info(
         db_num = updated_cif_block.find_values("_pdbx_sifts_xref_db.unp_num")
         res_name = updated_cif_block.find_values("_pdbx_sifts_xref_db.mon_id")
 
-        for (labseqid, resname, dbacc, dbnum) in zip(
-            db_seq_id, res_name, db_acc, db_num
-        ):
-
+        for labseqid, resname, dbacc, dbnum in zip(db_seq_id, res_name, db_acc, db_num):
             if labseqid == int_lab_seqnum.strip() and resname == int_resname.strip():
-
                 n += 1
                 if labseqid != ".":
                     unp_acc = dbacc
@@ -189,3 +185,24 @@ def id_is_ligand(id: str) -> bool:
     :rtype: bool
     """
     return "[" in id and "]" in id and ":" in id
+
+
+def is_int_or_float(value: str) -> bool:
+    """
+    Check if a string can be converted to an integer or a float.
+
+    :param value: String to check.
+    :type value: str
+    :return: True if the string can be converted to an integer or a float, False
+        otherwise.
+    :rtype: bool
+    """
+    # Integer
+    if value.isdigit():
+        return True
+    # Float
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
