@@ -625,7 +625,7 @@ class TestConvertAssemblyListToJSON(TestCase):
             self.assertDictEqual(
                 json_expected,
                 json_actual,
-                msg="Arbitrary maximal assembly list XML->JSON not parsed correctly.",
+                msg="Arbitrary maximal assembly list TXT->JSON not parsed correctly.",
             )
 
     def test_parse_no_formula(self):
