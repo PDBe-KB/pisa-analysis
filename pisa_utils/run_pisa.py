@@ -11,7 +11,7 @@ from pisa_utils.utils import create_pisa_config
 
 
 def run_pisalite(
-    input_cif, xml_output_dir, pisa_binary, pisa_setup_dir
+    input_cif, xml_output_dir, pisa_binary, pisa_setup_dir,
 ) -> Tuple[str, str]:
     """Runs PISA to determine interfaces, and returns XML files describing the
     assembly and interfaces.
@@ -40,6 +40,7 @@ def run_pisalite(
             xml_output_dir=xml_output_dir,
             cfg_file=cfg_file,
             pisa_binary=pisa_binary,
+            asis=True,
         )
 
         totaltime = time() - start

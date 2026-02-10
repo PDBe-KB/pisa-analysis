@@ -23,7 +23,7 @@ def main():
     parser.add_argument("--pdb_id", help="PDB ID", required=True)
     parser.add_argument("--assembly_id", help="Assembly ID", required=True)
     parser.add_argument("--input_updated_cif", help="updated cif path/file")
-
+  
     args = parser.parse_args()
     args = validate_args(args)
 
