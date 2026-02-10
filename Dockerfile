@@ -11,7 +11,6 @@ RUN useradd -m -u 10001 app \
 COPY --chown=app:app pisa_utils /app/pisa_utils
 COPY --chown=app:app pisa_utils/run.py /app/run.py
 COPY --chown=app:app requirements.txt /app/requirements.txt
-COPY --chown=app:app __version__.py /app/__version__.py
 COPY --chown=app:app setup.py /app/setup.py
 COPY --chown=app:app setup.cfg /app/setup.cfg
 

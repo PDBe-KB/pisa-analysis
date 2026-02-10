@@ -1,3 +1,9 @@
+default_install_hook_types:
+  - pre-commit
+  - post-checkout
+  - post-merge
+  - post-rewrite
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -14,24 +20,19 @@ repos:
       - id: check-ast
         language_version: python3.10
       - id: no-commit-to-branch
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.10.1
     hooks:
-      - id: flake8
-        language_version: python3.10
-        additional_dependencies: [flake8-bugbear==22.10.27]
-  - repo: https://github.com/asottile/blacken-docs
-    rev: 1.13.0
+      - id: uv-export
+        name: main dependencies
+        args: [--no-hashes, --no-header, --no-annotate, --no-dev, --output-file, requirements.txt]
+      - id: uv-export
+        name: dev dependencies
+        args: [--no-hashes, --no-header, --no-annotate, --only-group, dev, --output-file, requirements-dev.txt]
+      - id: uv-lock
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.0
     hooks:
-      - id: blacken-docs
-        additional_dependencies: [black==23.3.0]
-  - repo: https://github.com/pycqa/isort
-    rev: 5.11.5
-    hooks:
-      - id: isort
-        name: isort (python)
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-        language_version: python3.10
+      - id: ruff-check
+        args: [ --fix ]
+      - id: ruff-format

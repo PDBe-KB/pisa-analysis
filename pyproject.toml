@@ -1,0 +1,48 @@
+[project]
+name = "pisa-analysis"
+version = "3.0.0"
+description = "This python package works with PISA to analyse data for macromolecular interfaces and interactions in assemblies."
+authors = [
+    { name = "Grisell Diaz Leines", email = "gdiazleines@ebi.ac.uk" },
+]
+readme = "README.md"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+dependencies = [
+    "gemmi>=0.7.3",
+    "jsonschema>=4.25.1",
+    "lxml>=6.0.2",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.4",
+    "xmlschema>=4.2.0",
+    "xmltodict>=1.0.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/PDBe-KB/pisa-analysis"
+Repository = "https://github.com/PDBe-KB/pisa-analysis"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.0",
+    "coverage>=7.3.4",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.5.1",
+    "pytest>=9.0.2",
+    "pre-commit>=4.5.1",
+]
+
+[build-system]
+requires = ["setuptools>=82.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["pisa_utils"]
+
+[project.scripts]
+pisa_analysis = "pisa_utils.run:main"
+pisa_analysis_service = "pisa_utils.run:service"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
