@@ -4,17 +4,10 @@
 
 This python package works with PISA to analyze data for macromolecular interfaces and interactions in assemblies.
 
-The code consists of two separate modules : `pisa_analysis` and `covariations_int` .
+The code consists of the module `pisa_analysis` that will:
 
-pisa_analysis will:
-
-- Analyses macromolecular interfaces with PISA
-- Creates a JSON dictionary with assembly interactions/interfaces information
-
-covariations_int will :
-
-- Adds covariation data to interface contacts
-- Creates a CSV file with covariation data for assembly interfaces
+- Analyse macromolecular interfaces with PISA
+- Create a JSON dictionary with assembly interactions/interfaces information
 
 ```
 git clone https://github.com/PDBe-KB/pisa-analysis
@@ -63,33 +56,36 @@ pre-commit install
 
 ## Usage
 
-Follow below steps to install the modules **pisa_analysis** and **covariations_int** :
+Follow below steps to install the module **pisa_analysis** :
 
 ```
 cd pisa-analysis/
 
-python install .
+python3 -m venv .venv
+source .venv/bin/activate
+
+python3 -m pip install .
+
 
 ```
 
 To run the modules in command line:
 
 **pisa_analysis**:
-
 ```
-python pisa_utils/run.py [-h] --input_cif INPUT_CIF_FILE --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE --output_json OUTPUT_DIR_JSON --output_xml OUTPUT_DIR_XML
-```
-OR
-
-```
-pisa_analysis [-h] -i INPUT_CIF_FILE --pdb_id PDB_ID --assembly_id ASSEMBLY_CODE -o OUTPUT_PATH_JSON --output_xml OUTPUT_DIR_XML
+pisa_analysis [-h] \
+  -i <INPUT_CIF_FILE> \
+  --pdb_id <PDB_ID> \
+  --assembly_id <ASSEMBLY_CODE> \
+  -o <OUTPUT_JSON> \
+  --output_xml <OUTPUT_XML>
 ```
 
 Required arguments are :
 
 ```
 --input_cif (-i)          :  Assembly CIF file (It can also read a PDB file). Optional if --gen_full_results is used and --assembly_id not specified.
---pdb_id                  : Entry ID
+--pdb_id                  :  Entry ID
 --assembly_id             :  Assembly code
 --output_json (-o)        :  Output directory for JSON fille
 --output_xml              :  Output directory for XML files
@@ -103,29 +99,7 @@ Other optional arguments are:
 --force                   : Always runs PISA calculation
 --pisa_setup_dir          : Path to the 'setup' directory in PISA
 --pisa_binary             : Binary file for PISA
-```
-
-**covariations_int**
-
-usage:
-
-```
-python pisa-analysis/pisa_utils/covariations_int.py [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR --acc_unp_ids UNP_acc_IDs
-```
-
-OR
-
-```
-covariations_int [-h] --input_json INPUT_JSON_FILE --input_cov INPUT_CSV_FILE -o OUTPUT_DIR --acc_unp_ids UNP_ACC_IDs
-```
-
-Required arguments are :
-
-```
---input_json              :  JSON file (output of pisa_analysis) with assembly interfaces information
---input_cov               :  CSV file with covariation pairs for UniProt accession
---output_csv (-o)         :  Output CSV file with covariation information for interfaces contacts
---acc_unp_ids             :  List of Uniprot accession ids
+-h, --help                : Show help message
 ```
 
 
@@ -151,26 +125,6 @@ For **pisa_analysis** module:
 
      where xxxx is the pdb id entry and X is the assembly code.
 
-## Setup with Docker
-
-Build the docker image with:
-```shell
-docker build -t pisa-analysis .
-```
-
-Run the docker container with:
-```shell
-docker run -v $PWD:/data -u $(id -u):10001 \
-   pisa-analysis \
-   pisa_analysis \
-   --input_cif \
-   /data/example_data/6nxr_updated.cif  \
-   --pdb_id 6nxr \
-   --assembly_id 1  \
-   --output_json /data/tmp \
-   --output_xml /data/tmp \
-   --input_updated_cif /data/example_data/6nxr_updated.cif
-```
 
 ## Expected JSON files
 
@@ -205,38 +159,23 @@ The simplified assembly json output looks as follows:
 }
 ```
 
-For the **covariation_int** module:
+## Setup with Docker
 
-1. The process first loads the json file with assembly interfaces dictionaries (output from pisa_analysis module). The file is provided as input with `--input_json`:
-
-    *xxxx-assemX_interfaces.json*
-
-    where xxxx is the pdb id entry and X is the assembly code. This file is the output of `pisa_analysis` module.
-
-2. The process will read a CSV file with covariation pairs information (scores and probabilities), for the corresponding UniProt accession. This file is an input `--input_cov`, and it is a file created with [covariation_pairs](https://github.com/PDBe-KB/covariation_pairs) module  :
-
-    XXXXXX_cov.csv
-
-    where XXXXXX is the UniProt accession
-3. The process will then read the interfaces dictionaries and make a list of UniProt sequence numbers and accessions as well as residues for assembly interfaces contacs.
-
-4. Next, the process will identify if interfaces contacts are in the data frame of covariation pairs.
-
-5. Finally, the process will create a data frame with a list of interfaces contacts and covariation information (for pairs with probability > 0.5). The data frame will be saved as a CSV file in the directory defined by `--output_csv` (-o):
-
-   PDBID_interfaces_cov.csv
-
-   where PDBID is the entry or pdb ID for the assembly analysed.
-
-The CSV file with covariation data for assembly interfaces looks as follows:
-
-
+Build the docker image with:
+```shell
+docker build -t pisa-analysis .
 ```
-uniprot_accession_a,uniprot_residue_index_a,residue_label_a,uniprot_accession_b,uniprot_residue_index_b,residue_label_b,contact,interface,covariation_score,covariation_probability
-111,F5HCH8,LEU,87,F5HCH8,ARG,other_bonds,1,-0.0045671,0.645476
-111,F5HCH8,LEU,87,F5HCH8,ARG,other_bonds,1,-0.0045671,0.645476
-159,F5HCP3,CYS,100,F5HCP3,VAL,hydrogen_bonds,6,-0.00117549,0.576407
-44,F5HCH8,THR,182,F5HCH8,GLU,cov_bonds,1,-0.00250218,0.655191
+
+Run the docker container with:
+```
+docker run -v <HOST_DIR>:/data_dir \
+   pisa-analysis \
+   pisa_analysis \
+   --input_cif /data_dir/<INPUT_CIF> \
+   --pdb_id <PDB_ID> \
+   --assembly_id <ASSEMBLY_CODE> \
+   --output_json /data_dir/<OUTPUT_JSON> \
+   --output_xml /data_dir/<OUTPUT_XML>
 ```
 
 ## Versioning
