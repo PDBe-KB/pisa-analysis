@@ -76,7 +76,6 @@ class TestCovariation(TestCase):
 
     @patch("pisa_utils.covariations_int.read_cov_info")
     def test_get_cov_interfaces(self, mock):
-
         """
         Test if function to overlay covariation data on interfaces returns correct list
 
@@ -161,7 +160,6 @@ class TestCovariation(TestCase):
             pd.testing.assert_frame_equal(result, expected_result)
 
     def test_save_covariation_data_invalid_data(self):
-
         """
         Test function raises an error if input data is invalid
         """
@@ -188,7 +186,6 @@ class TestCovariation(TestCase):
         # save_covariation_data(covariation_pairs,pdb_id,output)
 
     def test_save_covariation_data_return_none(self):
-
         """
         Test if function returns None if there is no data to save
 
@@ -202,7 +199,6 @@ class TestCovariation(TestCase):
         expected_result = None
 
         with tempfile.TemporaryDirectory() as output:
-
             result = save_covariation_data(
                 covariation_pairs, pdb_id, assembly_id, output
             )

@@ -219,7 +219,6 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
 
 
 def get_assembly_dict(assemblies):
-
     """
     Function creates a simplified assembly dictionary from xml data which does not
     contain interfaces information

@@ -304,7 +304,7 @@ class ConvertXMLToJSON(ABC):
 
         if len(label_asym_ids) == 0:
             LOGGER.error(
-                f"Could not find label_asym_id for polymer " f"in chain {auth_asym_id}"
+                f"Could not find label_asym_id for polymer in chain {auth_asym_id}"
             )
         elif len(label_asym_ids) > 1:
             LOGGER.error(

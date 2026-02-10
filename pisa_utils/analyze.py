@@ -102,7 +102,6 @@ class AnalysePisa:
                 and n_salt_bridges == 0
                 and other_contacts == 0
             ):
-
                 logging.info(
                     "Bonds: (n_h_bonds, n_ss_bonds, n_covalent_bonds, n_salt_bridges)"
                 )
@@ -196,7 +195,6 @@ class AnalysePisa:
         return interface_count
 
     def assembly_xml_to_json(self, assembly_xml, output_json, interfaces):
-
         """Extracts assembly information from PISA xml file and saves it to json file
 
         Args:
