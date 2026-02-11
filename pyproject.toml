@@ -36,8 +36,8 @@ dev = [
 requires = ["setuptools>=82.0.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["pisa_utils"]
+[tool.setuptools]
+packages = ["pisa_utils"]
 
 [project.scripts]
 pisa_analysis = "pisa_utils.run:main"
