@@ -10,7 +10,6 @@ from pandas import DataFrame
 
 
 def get_cov_interfaces(input_json, input_cov, accs_nums_list):
-
     """
     Add covariation data to interface contacts
 
@@ -50,7 +49,6 @@ def get_cov_interfaces(input_json, input_cov, accs_nums_list):
     covariation_pairs = []
 
     for interface in interfaces:
-
         interface_id = interface.get("interface_id")
 
         for key, prop in interface.items():
@@ -85,7 +83,6 @@ def get_cov_interfaces(input_json, input_cov, accs_nums_list):
                     residues_1,
                     residues_2,
                 ):
-
                     if unp_num_1 == "?":
                         unp_num_1 = None
                     if unp_num_2 == "?":
@@ -96,7 +93,6 @@ def get_cov_interfaces(input_json, input_cov, accs_nums_list):
                         unp_acc_2 = None
 
                     if len(accs_nums_list) == 1:
-
                         if (unp_acc_1 is not None) and (unp_acc_2 is not None):
                             if unp_acc_1 != unp_acc_2:
                                 logging.error(
@@ -112,7 +108,6 @@ def get_cov_interfaces(input_json, input_cov, accs_nums_list):
                                     "match accession number in input file"
                                 )
                         if (unp_num_1 is not None) and (unp_num_2 is not None):
-
                             cov_probability, cov_score = read_cov_info(
                                 unp_num_1, unp_num_2, covs[0]
                             )
@@ -137,7 +132,6 @@ def get_cov_interfaces(input_json, input_cov, accs_nums_list):
                                 )
 
                     if len(accs_nums_list) > 1:
-
                         logging.info("Analysing covariation in Heteromeric complex")
                         # index_covs_1 = find_element(accs_nums_list, unp_acc_1)
                         # index_covs_2 = find_element(accs_nums_list, unp_acc_2)
@@ -160,9 +154,7 @@ def save_covariation_data(covariation_pairs, pdb_id, assembly_id, output_dir):
 
     """
     if len(covariation_pairs) != 0:
-
         try:
-
             df = pd.DataFrame(
                 covariation_pairs,
                 columns=[
@@ -208,7 +200,6 @@ def find_element(acc_nums_list, acc_num):
 
 
 def read_cov_info(r1, r2, df: DataFrame):
-
     """
     Outputs covariation data for residues r1 and r2
 
@@ -233,7 +224,6 @@ def read_cov_info(r1, r2, df: DataFrame):
         unp_res2 = int(r1)
 
     if df is not None:
-
         n = 0
         index = None
         for i, j in zip(df["uniprot_residue_index_a"], df["uniprot_residue_index_b"]):
@@ -241,7 +231,6 @@ def read_cov_info(r1, r2, df: DataFrame):
                 index = n
             n = n + 1
         if index is not None:
-
             Probability = df["covariation_probability"][index]
             Score = df["covariation_score"][index]
 

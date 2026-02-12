@@ -11,16 +11,13 @@ RUN useradd -m -u 10001 app \
 COPY --chown=app:app pisa_utils /app/pisa_utils
 COPY --chown=app:app pisa_utils/run.py /app/run.py
 COPY --chown=app:app requirements.txt /app/requirements.txt
-COPY --chown=app:app __version__.py /app/__version__.py
-COPY --chown=app:app setup.py /app/setup.py
-COPY --chown=app:app setup.cfg /app/setup.cfg
+COPY --chown=app:app pyproject.toml /app/pyproject.toml
 
 WORKDIR /app
 
 # Dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-RUN pip install .
+RUN python -m pip install -r requirements.txt && \
+    python -m pip install .
 
 # Add PISA binary
 COPY --from=base /usr/bin/pisa /usr/bin/pisa

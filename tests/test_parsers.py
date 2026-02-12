@@ -255,7 +255,7 @@ class TestConvertInterfaceXML(TestCase):
             self.assertEqual(
                 expected,
                 actual,
-                msg="Interface XML->JSON not parsed correctly for interface " f"{i}.",
+                msg=f"Interface XML->JSON not parsed correctly for interface {i}.",
             )
 
     def test_parse_single_interface_xml(self):

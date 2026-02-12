@@ -47,7 +47,6 @@ def main():
         or not os.path.exists(interfaces_xml_file)
         or not os.path.exists(assembly_xml_file)
     ):
-
         run_pisalite(
             input_cif=args.input_cif,
             xml_output_dir=args.output_xml,
@@ -129,7 +128,6 @@ def service():
     )
 
     if args.run_all_pisa_commands:
-
         data_parser = (
             ConvertInterfaceXMLToJSONs(
                 path_xml=interfaces_xml_file,

@@ -7,7 +7,6 @@ from pisa_utils.dictionaries import get_bond_dict, get_molecules_dict
 
 
 class TestDictionaries(TestCase):
-
     # Note that the mocked function is imported in dictionaries
     @patch("pisa_utils.dictionaries.read_uniprot_info")
     def test_get_bond_dict(self, mock):
