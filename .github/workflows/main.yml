@@ -55,7 +55,6 @@ jobs:
         run: |
           pip install twine
           TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD }} TWINE_USERNAME=${{ secrets.TWINE_USERNAME }} python -m twine upload --repository-url ${{ secrets.PIP_INDEX_URL }} dist/*
-        continue-on-error: false
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

@@ -6,6 +6,7 @@ authors = [
     { name = "Grisell Diaz Leines", email = "gdiazleines@ebi.ac.uk" },
 ]
 readme = "README.md"
+license = "Apache-2.0"
 requires-python = ">=3.10"
 dependencies = [
     "gemmi>=0.7.3",
