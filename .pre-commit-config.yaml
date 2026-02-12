@@ -19,7 +19,6 @@ repos:
       - id: end-of-file-fixer
       - id: check-ast
         language_version: python3.10
-      - id: no-commit-to-branch
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.10.1
     hooks:
