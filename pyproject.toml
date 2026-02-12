@@ -38,6 +38,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["pisa_utils"]
+license-files = []
 
 [project.scripts]
 pisa_analysis = "pisa_utils.run:main"
