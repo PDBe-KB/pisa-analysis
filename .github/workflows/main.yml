@@ -30,10 +30,10 @@ jobs:
           uv sync --locked --all-extras --dev
       - name: Run pre-commit checks
         uses: pre-commit/action@v3.0.1
-        if: matrix.python-version == "${{ env.BASE_PYTHON_VERSION }}"
+        if: matrix.python-version == env.BASE_PYTHON_VERSION
       - name: Run Tests
         run: |
-          make test
+          uv run make test
 
 
   publish:
