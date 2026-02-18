@@ -26,5 +26,8 @@ ENV PATH=$PATH:/usr/bin/pisa
 COPY --from=base /usr/share/pisa/setup /usr/share/pisa/setup
 ENV PISA_SETUP_DIR=/usr/share/pisa/setup
 
+ENV DATA_DIR=/data
+RUN mkdir -p ${DATA_DIR}
+
 # Switch to non-privileged user
 USER app
