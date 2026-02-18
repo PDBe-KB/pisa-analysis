@@ -16,8 +16,7 @@ COPY --chown=app:app pyproject.toml /app/pyproject.toml
 WORKDIR /app
 
 # Dependencies
-RUN python -m pip install -r requirements.txt && \
-    python -m pip install .
+RUN python -m pip install -r requirements.txt
 
 # Add PISA binary
 COPY --from=base /usr/bin/pisa /usr/bin/pisa
