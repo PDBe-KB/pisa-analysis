@@ -9,7 +9,7 @@ The code consists of the module `pisa_analysis` that will:
 - Analyse macromolecular interfaces with PISA
 - Create a JSON dictionary with assembly interactions/interfaces information
 
-```
+```shell
 git clone https://github.com/PDBe-KB/pisa-analysis
 
 cd pisa-analysis
@@ -22,13 +22,13 @@ To make your life easier when running the process, you can set two path environm
 
 An environment variable to the `pisa` binary:
 
-```
+```shell
 export PATH="$PATH:your_path_to_pisa/pisa/build"
 ```
 
 A path to the setup directory of PISA:
 
-```
+```shell
 export PISA_SETUP_DIR="/your_path_to_pisa/pisa/setup"
 ```
 
@@ -38,7 +38,7 @@ Additionally, it is required that PISA setup directory contains a pisa configura
 
 Other dependencies can be installed with:
 
-```
+```shell
 pip install -r requirements.txt
 ```
 See  [requirements.txt](https://github.com/PDBe-KB/pisa-analysis/blob/main/requirements.txt)
@@ -48,7 +48,7 @@ For development:
 
 **pre-commit usage**
 
-```
+```shell
 pip install pre-commit
 pre-commit
 pre-commit install
@@ -58,21 +58,20 @@ pre-commit install
 
 Follow below steps to install the module **pisa_analysis** :
 
-```
+```shell
 cd pisa-analysis/
 
 python3 -m venv .venv
 source .venv/bin/activate
 
 python3 -m pip install .
-
-
 ```
 
 To run the modules in command line:
 
 **pisa_analysis**:
-```
+
+```shell
 pisa_analysis [-h] \
   -i <INPUT_CIF_FILE> \
   --pdb_id <PDB_ID> \
@@ -133,7 +132,8 @@ Documentation on the assembly interfaces json file and schema can be found here:
 https://pisalite.docs.apiary.io/#reference/0/pisaqualifierjson/interaction-interface-data-per-pdb-assembly-entry
 
 The simplified assembly json output looks as follows:
-```
+
+```json
 {
    "PISA": {
       "pdb_id": "1d2s",
@@ -159,15 +159,9 @@ The simplified assembly json output looks as follows:
 }
 ```
 
-## Setup with Docker
+## Run with Docker
 
-Build the docker image with:
 ```shell
-docker build -t pisa-analysis .
-```
-
-Run the docker container with:
-```
 docker run -v <HOST_DIR>:/data_dir \
    pisa-analysis \
    pisa_analysis \
