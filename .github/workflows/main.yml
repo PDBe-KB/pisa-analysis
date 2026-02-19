@@ -39,7 +39,7 @@ jobs:
 
   publish:
     name: Publish
-    if: github.ref_type == 'tag'
+    if: startsWith(github.ref, 'refs/tags/v')
     needs: build
     runs-on: ubuntu-latest
     environment:
