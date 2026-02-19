@@ -37,10 +37,9 @@ jobs:
         run: |
           uv run make test
 
-
   publish:
     name: Publish
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref_type == 'tag'
     needs: build
     runs-on: ubuntu-latest
     environment:
