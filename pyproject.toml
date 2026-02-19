@@ -1,6 +1,6 @@
 [project]
 name = "pisa-analysis"
-version = "3.0.5"
+version = "3.0.6"
 description = "This python package works with PISA to analyse data for macromolecular interfaces and interactions in assemblies."
 authors = [
     { name = "Grisell Diaz Leines", email = "gdiazleines@ebi.ac.uk" },
