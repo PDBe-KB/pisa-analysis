@@ -102,9 +102,7 @@ def service():
     parser.add_argument(
         "--compress_output",
         "-z",
-        help=(
-            "compress output files (JSON, XML, and extended text data) using gzip"
-        ),
+        help=("compress output files (JSON, XML, and extended text data) using gzip"),
         action="store_true",
         default=False,
     )

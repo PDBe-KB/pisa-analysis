@@ -991,9 +991,7 @@ class ConvertListTextToJSON(ABC):
             with open(output_path, "w") as json_file:
                 json.dump(data, json_file, indent=4)
 
-        LOGGER.info(
-            f"Extended {self.pisa_data_type} data JSON written: {output_path}"
-        )
+        LOGGER.info(f"Extended {self.pisa_data_type} data JSON written: {output_path}")
 
     @abstractmethod
     def parse(self) -> None:
