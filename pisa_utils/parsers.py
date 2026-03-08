@@ -21,7 +21,7 @@ from pisa_utils.utils import (
     extract_ligand_contents,
     id_is_ligand,
     is_int_or_float,
-    open_maybe_compressed,
+    open_compressed,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -105,7 +105,7 @@ class ConvertXMLToJSON(ABC):
         will expect the XML file to be gzip-compressed.
         """
 
-        with open_maybe_compressed(self.path_xml, self.compressed) as xml_file:
+        with open_compressed(self.path_xml, self.compressed) as xml_file:
             pisa_data_xml = xmltodict.parse(xml_file.read())
 
         return pisa_data_xml
@@ -842,7 +842,7 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
                         interface_json_path += ".gz"
 
                     try:
-                        with open_maybe_compressed(
+                        with open_compressed(
                             interface_json_path, self.compressed
                         ) as interface_json_file:
                             interface_data = json.load(interface_json_file)
@@ -871,7 +871,11 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
 
 class ConvertListTextToJSON(ABC):
     def __init__(
-        self, path_txt: str, path_json: str, pisa_data_type: str = None
+        self,
+        path_txt: str,
+        path_json: str,
+        compressed: bool = False,
+        pisa_data_type: str = None,
     ) -> None:
         """
         Base class for converting PISA -list text files to JSON files.
@@ -892,6 +896,7 @@ class ConvertListTextToJSON(ABC):
 
         self.path_json = path_json
         self.pisa_data_type = pisa_data_type.capitalize()
+        self.compressed = compressed
 
     def __str__(self):
         return (
@@ -968,19 +973,38 @@ class ConvertListTextToJSON(ABC):
         """
         return False
 
+    def save(self, data: dict) -> None:
+        """
+        Save the given data to the output JSON file.
+
+        :param data: Data to save to JSON file.
+        :type data: dict
+        """
+        if self.compressed:
+            self.path_json += ".gz"
+            with gzip.open(self.path_json, "wt", compresslevel=9) as json_file:
+                json.dump(data, json_file, indent=4)
+        else:
+            with open(self.path_json, "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+        LOGGER.info(
+            f"Extended {self.pisa_data_type} data JSON written: {self.path_json}"
+        )
+
     @abstractmethod
     def parse(self) -> None:
         """
         Convert a text file with a list of items to a JSON file.
         """
-        with open(self.path_txt, "r") as f:
+        with open_compressed(self.path_txt, self.compressed) as f:
             lines = [line.strip() for line in f.readlines() if line.strip()]
 
         return lines
 
 
 class ConvertInterfaceListToJSON(ConvertListTextToJSON):
-    def __init__(self, path_txt: str, path_json: str) -> None:
+    def __init__(self, path_txt: str, path_json: str, compressed: bool = False) -> None:
         """
         Converts a PISA-generated interface -list text file into a single JSON file.
 
@@ -989,7 +1013,7 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         :param path_json: Path to the output JSON file.
         :type path_json: str
         """
-        super().__init__(path_txt, path_json, "interfaces")
+        super().__init__(path_txt, path_json, compressed, "interfaces")
 
     def _is_first_line_of_table(self, line: str) -> bool:
         return (
@@ -1053,13 +1077,11 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         interfaces_data = {"interfaces": interface_data}
         interfaces_data = InterfaceExtended(**interfaces_data).model_dump()
 
-        with open(self.path_json, "w") as json_file:
-            json.dump(interfaces_data, json_file, indent=4)
-            LOGGER.info(f"Extended interface data JSON written: {self.path_json}")
+        self.save(interfaces_data)
 
 
 class ConvertAssemblyListToJSON(ConvertListTextToJSON):
-    def __init__(self, path_txt: str, path_json: str) -> None:
+    def __init__(self, path_txt: str, path_json: str, compressed: bool = False) -> None:
         """
         Converts a PISA-generated assembly -list text file into a single JSON file.
 
@@ -1068,7 +1090,7 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
         :param path_json: Path to the output JSON file.
         :type path_json: str
         """
-        super().__init__(path_txt, path_json, "assemblies")
+        super().__init__(path_txt, path_json, compressed, "assemblies")
 
     def _is_first_line_of_first_table(self, line: str) -> bool:
         return (
@@ -1272,13 +1294,11 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
         }
         extended_data = ComplexExtended(**extended_data).model_dump()
 
-        with open(self.path_json, "w") as json_file:
-            json.dump(extended_data, json_file, indent=4)
-            LOGGER.info(f"Extended assembly data JSON written: {self.path_json}")
+        self.save(extended_data)
 
 
 class ConvertComponentsListToJSON(ConvertListTextToJSON):
-    def __init__(self, path_txt: str, path_json: str) -> None:
+    def __init__(self, path_txt: str, path_json: str, compressed: bool = False) -> None:
         """
         Converts a PISA-generated monomer -list text file into a single JSON file.
 
@@ -1287,7 +1307,7 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
         :param path_json: Path to the output JSON file.
         :type path_json: str
         """
-        super().__init__(path_txt, path_json, "monomers")
+        super().__init__(path_txt, path_json, compressed, "monomers")
 
     def _is_first_line_of_table(self, line: str) -> bool:
         return (
@@ -1343,9 +1363,7 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
         monomers_data = {"components": monomer_data}
         monomers_data = Components(**monomers_data).model_dump()
 
-        with open(self.path_json, "w") as json_file:
-            json.dump(monomers_data, json_file, indent=4)
-            LOGGER.info(f"Extended monomer data JSON written: {self.path_json}")
+        self.save(monomers_data)
 
 
 class CompileInterfaceSummaryJSON:
@@ -1382,7 +1400,7 @@ class CompileInterfaceSummaryJSON:
 
         # Load assembly data
         assembly_to_interface_map = {}
-        with open_maybe_compressed(self.path_assembly_json, self.compressed) as f:
+        with open_compressed(self.path_assembly_json, self.compressed) as f:
             d = json.load(f)
             pqs_sets = d.get("pqs_sets", [])
 

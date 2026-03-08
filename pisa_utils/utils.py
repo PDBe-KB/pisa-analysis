@@ -5,6 +5,7 @@ import os.path
 import shutil
 import xml.etree.ElementTree as ET
 import gzip
+import subprocess
 
 
 logger = logging.getLogger(__name__)
@@ -212,7 +213,7 @@ def is_int_or_float(value: str) -> bool:
         return False
 
 
-def open_maybe_compressed(file_path: str, compressed: bool = False, mode: str = "rt"):
+def open_compressed(file_path: str, compressed: bool = False, mode: str = "rt"):
     """
     Open a file that may be compressed with gzip.
 
@@ -237,3 +238,16 @@ def open_maybe_compressed(file_path: str, compressed: bool = False, mode: str = 
     else:
         logger.debug(f"Opening uncompressed file: {file_path}")
         return open(file_path, mode)
+
+
+def compress_existing_file(file_path: str, gzip_args: str = "-9") -> None:
+    """
+    Compress a file with gzip. Defaults to maximum compression level (-9) and
+    overwrites the original file.
+
+    :param file_path: Path to the file to compress.
+    :type file_path: str
+    :return: Path to the compressed file.
+    :rtype: str
+    """
+    subprocess.run(["gzip", gzip_args, file_path], check=True)
