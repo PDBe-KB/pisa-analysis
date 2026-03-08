@@ -510,6 +510,7 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
                     ) = self._validate_polymer_ids(polymer_df, auth_asym_id)
 
                 # Set values in molecule dict
+                molecule["component_id"] = molecule["chain_id"]
                 molecule["chain_id"] = auth_asym_id
                 molecule["label_asym_id"] = label_asym_id
                 molecule["ccd_id"] = ccd_id
@@ -1349,6 +1350,7 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
             monomer = {
                 "serial_number": parts[0],
                 "monomer_id": parts[1],
+                "component_id": parts[2],
                 "chain_id": parts[2],
                 "monomer_class": parts[3],
                 "total_atoms": parts[4],
