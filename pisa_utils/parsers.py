@@ -341,6 +341,28 @@ class ConvertXMLToJSON(ABC):
             label_seq_id_end,
         )
 
+    def save(self, path_json: str, data: dict) -> None:
+        """
+        Save data to JSON file, with optional gzip compression.
+
+        :param path_json: Path to the output JSON file.
+        :type path_json: str
+        :param data: Data to save to JSON.
+        :type data: dict
+        """
+
+        if self.compressed and not path_json.endswith(".gz"):
+            path_json += ".gz"
+
+        if self.compressed:
+            with gzip.open(path_json, "wt") as json_file:
+                json.dump(data, json_file, indent=4)
+        else:
+            with open(path_json, "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+        LOGGER.info(f"JSON file written successfully: {path_json}")
+
 
 class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
     def __init__(
@@ -527,13 +549,7 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
             self.path_output, f"interface_{interface_id}.json"
         )
 
-        if self.compressed:
-            interface_json_path += ".gz"
-            with gzip.open(interface_json_path, "wt") as interface_json_file:
-                json.dump(interface_output, interface_json_file, indent=4)
-        else:
-            with open(interface_json_path, "w") as interface_json_file:
-                json.dump(interface_output, interface_json_file, indent=4)
+        self.save(interface_json_path, interface_output)
 
         LOGGER.info(f"Interface JSON written: {interface_json_path}")
 
@@ -559,9 +575,6 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
             path_xml, path_json, path_structure_file, compressed, "Assembly"
         )
         self.path_interface_jsons = path_interface_jsons
-
-        if self.compressed and not self.path_output.endswith(".gz"):
-            self.path_output += ".gz"
 
     def parse(self) -> None:
         """
@@ -860,14 +873,7 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
         assembly_data = Complex(**assembly_data["pisa_results"]).model_dump()
 
         # Write JSON
-        if self.compressed:
-            with gzip.open(self.path_output, "wt") as json_file:
-                json.dump(assembly_data, json_file, indent=4)
-        else:
-            with open(self.path_output, "w") as json_file:
-                json.dump(assembly_data, json_file, indent=4)
-
-        LOGGER.info(f"JSON file written successfully: {self.path_output}")
+        self.save(self.path_output, assembly_data)
 
 
 class ConvertListTextToJSON(ABC):
