@@ -981,16 +981,18 @@ class ConvertListTextToJSON(ABC):
         :param data: Data to save to JSON file.
         :type data: dict
         """
+        output_path = self.path_json
         if self.compressed:
-            self.path_json += ".gz"
-            with gzip.open(self.path_json, "wt") as json_file:
+            if not output_path.endswith(".gz"):
+                output_path = f"{output_path}.gz"
+            with gzip.open(output_path, "wt", compresslevel=9) as json_file:
                 json.dump(data, json_file, indent=4)
         else:
-            with open(self.path_json, "w") as json_file:
+            with open(output_path, "w") as json_file:
                 json.dump(data, json_file, indent=4)
 
         LOGGER.info(
-            f"Extended {self.pisa_data_type} data JSON written: {self.path_json}"
+            f"Extended {self.pisa_data_type} data JSON written: {output_path}"
         )
 
     @abstractmethod
