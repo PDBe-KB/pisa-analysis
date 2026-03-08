@@ -983,7 +983,7 @@ class ConvertListTextToJSON(ABC):
         """
         if self.compressed:
             self.path_json += ".gz"
-            with gzip.open(self.path_json, "wt", compresslevel=9) as json_file:
+            with gzip.open(self.path_json, "wt") as json_file:
                 json.dump(data, json_file, indent=4)
         else:
             with open(self.path_json, "w") as json_file:
