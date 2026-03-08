@@ -1350,7 +1350,11 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
 
 class CompileInterfaceSummaryJSON:
     def __init__(
-        self, path_interface_jsons: str, path_assembly_json: str, path_output_json: str
+        self,
+        path_interface_jsons: str,
+        path_assembly_json: str,
+        path_output_json: str,
+        compressed: bool = False,
     ) -> None:
         """
         Reads individual interface JSON files and compiles a summary JSON.
@@ -1366,6 +1370,7 @@ class CompileInterfaceSummaryJSON:
         self.path_interface_jsons = path_interface_jsons
         self.path_assembly_json = path_assembly_json
         self.path_output_json = path_output_json
+        self.compressed = compressed
 
     def _load_assembly_json(self) -> dict:
         """
@@ -1377,7 +1382,7 @@ class CompileInterfaceSummaryJSON:
 
         # Load assembly data
         assembly_to_interface_map = {}
-        with open(self.path_assembly_json, "r") as f:
+        with open_maybe_compressed(self.path_assembly_json, self.compressed) as f:
             d = json.load(f)
             pqs_sets = d.get("pqs_sets", [])
 
@@ -1486,6 +1491,11 @@ class CompileInterfaceSummaryJSON:
 
         interface_summary = InterfaceSummary(**interface_summary).model_dump()
 
-        with open(self.path_output_json, "w") as json_file:
-            json.dump(interface_summary, json_file, indent=4)
-            LOGGER.info(f"Interface summary JSON written: {self.path_output_json}")
+        if self.compressed:
+            with gzip.open(self.path_output_json, "wt") as json_file:
+                json.dump(interface_summary, json_file, indent=4)
+        else:
+            with open(self.path_output_json, "w") as json_file:
+                json.dump(interface_summary, json_file, indent=4)
+
+        LOGGER.info(f"Interface summary JSON written: {self.path_output_json}")
