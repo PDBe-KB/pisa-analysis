@@ -2,6 +2,7 @@ import json
 import tempfile
 from pathlib import Path
 from unittest import TestCase
+import gzip
 
 from pisa_utils.parsers import (
     CompileInterfaceSummaryJSON,
@@ -46,6 +47,46 @@ class TestConvertAssemblyXMLToJSON(TestCase):
         output_path = Path("tests/data/actual_output/")
         output_path.mkdir(parents=True, exist_ok=True)
         remove_files(output_path)
+
+    def test_parse_multi_assembly_xml_compressed(self):
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_assembly_multi_asmset.xml.gz"
+        )
+        self.output_json = self.base_input_dir.joinpath(
+            "actual_output", "3hax_assembly_multi_asmset.json.gz"
+        )
+        self.expected_json = self.base_input_dir.joinpath(
+            "expected_output", "3hax_assembly_multi_asmset.json"
+        )
+
+        # Run with compressed input and output
+        self.converter = ConvertAssemblyXMLToJSON(
+            path_xml=str(self.input_xml),
+            path_json=str(self.output_json),
+            path_interface_jsons=str(
+                self.base_input_dir.joinpath(
+                    "expected_output",
+                    "interfaces",
+                    "3hax_interfaces_compressed",
+                )
+            ),
+            path_structure_file=str(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif.gz")
+            ),
+            compressed=True,
+        )
+        self.converter.parse()
+
+        # Check
+        expected = self.expected_json.read_text().strip()
+        with gzip.open(self.output_json, "rt") as f:
+            actual = f.read().strip()
+
+        self.assertEqual(
+            expected,
+            actual,
+            msg="Assembly XML->JSON not parsed correctly for multiple assembly sets.",
+        )
 
     def test_parse_multi_assembly_xml(self):
         self.input_xml = self.base_input_dir.joinpath(
