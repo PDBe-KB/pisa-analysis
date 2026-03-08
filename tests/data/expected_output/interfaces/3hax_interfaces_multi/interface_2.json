@@ -15202,6 +15202,7 @@
         "molecules": [
             {
                 "mol_id": 1,
+                "component_id": "C",
                 "auth_asym_id": "C",
                 "label_asym_id": "B",
                 "ccd_id": null,
@@ -15823,6 +15824,7 @@
             },
             {
                 "mol_id": 2,
+                "component_id": "A",
                 "auth_asym_id": "A",
                 "label_asym_id": "A",
                 "ccd_id": null,

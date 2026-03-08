@@ -3,6 +3,7 @@
         {
             "mol_id": 1,
             "molecule_type_id": 1,
+            "component_id": "A",
             "auth_asym_id": "A",
             "ccd_id": null,
             "auth_seq_id_start": null,
@@ -18,6 +19,7 @@
         {
             "mol_id": 2,
             "molecule_type_id": 2,
+            "component_id": "[NA]A:301",
             "auth_asym_id": "A",
             "ccd_id": "NA",
             "auth_seq_id_start": 301,
@@ -33,6 +35,7 @@
         {
             "mol_id": 3,
             "molecule_type_id": 3,
+            "component_id": "[GOL]A:302",
             "auth_asym_id": "A",
             "ccd_id": "GOL",
             "auth_seq_id_start": 302,
