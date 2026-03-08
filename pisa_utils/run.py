@@ -155,7 +155,10 @@ def service():
             ),
             CompileInterfaceSummaryJSON(
                 path_interface_jsons=os.path.join(args.output_json, "interfaces"),
-                path_assembly_json=os.path.join(args.output_json, "assemblies.json"),
+                path_assembly_json=os.path.join(
+                    args.output_json,
+                    "assemblies.json" + (".gz" if args.compress_output else ""),
+                ),
                 path_output_json=os.path.join(
                     args.output_json,
                     "interface_summary.json" + (".gz" if args.compress_output else ""),
