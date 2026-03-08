@@ -110,7 +110,7 @@ def service():
     args = parser.parse_args()
     args = validate_args(args)
 
-    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.DEBUG)
 
     logging.info("input cif: {}".format(args.input_cif))
     logging.info("output xml: {}".format(args.output_xml))
@@ -133,6 +133,7 @@ def service():
         lig_proc_mode=args.lig_proc_mode,
         exclude_ligands=args.exclude_ligands,
         extended_data=args.run_all_pisa_commands,
+        compress_output=args.compress_output,
     )
 
     if args.run_all_pisa_commands:
@@ -141,31 +142,38 @@ def service():
                 path_xml=interfaces_xml_file,
                 path_jsons=os.path.join(args.output_json, "interfaces"),
                 path_structure_file=args.input_cif,
+                compressed=args.compress_output,
             ),
             ConvertAssemblyXMLToJSON(
                 path_xml=assembly_xml_file,
                 path_json=os.path.join(args.output_json, "assemblies.json"),
                 path_structure_file=args.input_cif,
                 path_interface_jsons=os.path.join(args.output_json, "interfaces"),
+                compressed=args.compress_output,
             ),
             CompileInterfaceSummaryJSON(
                 path_interface_jsons=os.path.join(args.output_json, "interfaces"),
                 path_assembly_json=os.path.join(args.output_json, "assemblies.json"),
                 path_output_json=os.path.join(
-                    args.output_json, "interface_summary.json"
+                    args.output_json,
+                    "interface_summary.json" + (".gz" if args.compress_output else ""),
                 ),
+                compressed=args.compress_output,
             ),
             ConvertAssemblyListToJSON(
                 path_txt=assemblies_extended_file,
                 path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
+                compressed=args.compress_output,
             ),
             ConvertInterfaceListToJSON(
                 path_txt=interfaces_extended_file,
                 path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
+                compressed=args.compress_output,
             ),
             ConvertComponentsListToJSON(
                 path_txt=monomers_extended_file,
                 path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
+                compressed=args.compress_output,
             ),
         )
 
