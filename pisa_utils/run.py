@@ -99,6 +99,14 @@ def service():
         action="store_true",
         default=True,
     )
+    parser.add_argument(
+        "--compress_output",
+        "-z",
+        help="compress output JSON files using gzip",
+        action="store_true",
+        default=False,
+    )
+
     args = parser.parse_args()
     args = validate_args(args)
 
