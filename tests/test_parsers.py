@@ -333,6 +333,89 @@ class TestConvertInterfaceXML(TestCase):
             msg="Interface XML->JSON not parsed correctly for single interface.",
         )
 
+    def test_parse_multi_interface_xml_compressed(self):
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_interfaces_multi.xml.gz"
+        )
+        self.output_json_dir = self.base_input_dir.joinpath(
+            "actual_output", "interfaces", "3hax_interfaces_multi_compressed"
+        )
+        self.expected_json_dir = self.base_input_dir.joinpath(
+            "expected_output", "interfaces", "3hax_interfaces_multi"
+        )
+
+        # Run
+        self.converter = ConvertInterfaceXMLToJSONs(
+            path_xml=str(self.input_xml),
+            path_jsons=str(self.output_json_dir),
+            path_structure_file=str(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif.gz")
+            ),
+            compressed=True,
+        )
+        self.converter.parse()
+
+        # Check
+        for i in (1, 2, 3):
+            expected = (
+                self.expected_json_dir.joinpath(f"interface_{i}.json")
+                .read_text()
+                .strip()
+            )
+
+            with gzip.open(
+                self.output_json_dir.joinpath(f"interface_{i}.json.gz"), "rt"
+            ) as f:
+                actual = f.read().strip()
+
+            self.assertEqual(
+                expected,
+                actual,
+                msg=(
+                    "Interface XML->JSON not parsed correctly for compressed "
+                    f"interface {i}."
+                ),
+            )
+
+    def test_parse_single_interface_xml_compressed(self):
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_interfaces_single.xml.gz"
+        )
+        self.output_json_dir = self.base_input_dir.joinpath(
+            "actual_output", "interfaces", "3hax_interfaces_single_compressed"
+        )
+        self.expected_json_dir = self.base_input_dir.joinpath(
+            "expected_output", "interfaces", "3hax_interfaces_single"
+        )
+
+        # Run
+        self.converter = ConvertInterfaceXMLToJSONs(
+            path_xml=str(self.input_xml),
+            path_jsons=str(self.output_json_dir),
+            path_structure_file=str(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif.gz")
+            ),
+            compressed=True,
+        )
+        self.converter.parse()
+
+        # Check
+        expected = (
+            self.expected_json_dir.joinpath("interface_1.json").read_text().strip()
+        )
+
+        with gzip.open(self.output_json_dir.joinpath("interface_1.json.gz"), "rt") as f:
+            actual = f.read().strip()
+
+        self.assertEqual(
+            expected,
+            actual,
+            msg=(
+                "Interface XML->JSON not parsed correctly for single compressed "
+                "interface."
+            ),
+        )
+
     def test_parse_no_interface_xml(self):
         """
         Test parsing of interface XML files with no interfaces defined.
