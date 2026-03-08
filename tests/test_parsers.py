@@ -248,6 +248,8 @@ class TestConvertInterfaceXML(TestCase):
     Tests for ConvertInterfaceXMLToJSON class.
     """
 
+    maxDiff = None
+
     def setUp(self):
         super().setUp()
 
@@ -449,6 +451,8 @@ class TestConvertInterfaceListToJSON(TestCase):
     """
     Tests for ConvertInterfaceListToJSON class.
     """
+
+    maxDiff = None
 
     def setUp(self):
         super().setUp()
@@ -937,6 +941,8 @@ class TestConvertMonomerListToJSON(TestCase):
     """
     Tests for ConvertMonomerListToJSON class.
     """
+
+    maxDiff = None
 
     def setUp(self):
         super().setUp()
