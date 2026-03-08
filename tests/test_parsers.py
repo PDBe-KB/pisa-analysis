@@ -1135,6 +1135,50 @@ class TestCompileInterfaceSummaryJSON(TestCase):
             msg="Interface summary JSON not compiled correctly.",
         )
 
+    def test_compile_interface_summary_json_compressed(self):
+        """
+        Test for multiple interfaces present.
+        """
+
+        self.input_interface_jsons = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "interfaces_minified",
+        )
+        self.input_assembly_json = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "assemblies.json.gz",
+        )
+        self.output_json = self.base_input_dir.joinpath(
+            "actual_output",
+            "interface_summary.json.gz",
+        )
+        self.expected_json = self.base_input_dir.joinpath(
+            "expected_output",
+            "interface_summary.json",
+        )
+
+        # Run
+        self.compiler = CompileInterfaceSummaryJSON(
+            path_interface_jsons=str(self.input_interface_jsons),
+            path_assembly_json=str(self.input_assembly_json),
+            path_output_json=str(self.output_json),
+            compressed=True,
+        )
+        self.compiler.parse()
+
+        # Check
+        json_expected = json.loads(self.expected_json.read_text().strip())
+        with gzip.open(self.output_json, "rt") as f:
+            json_actual = json.loads(f.read().strip())
+
+        self.assertDictEqual(
+            json_expected,
+            json_actual,
+            msg="Interface summary JSON not compiled correctly.",
+        )
+
     def test_compile_interface_summary_json_no_interfaces(self):
         """
         Test for no interfaces present. Should not create output JSON.
