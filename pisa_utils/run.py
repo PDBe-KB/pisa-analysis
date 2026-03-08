@@ -112,7 +112,7 @@ def service():
     args = parser.parse_args()
     args = validate_args(args)
 
-    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
     logging.info("input cif: {}".format(args.input_cif))
     logging.info("output xml: {}".format(args.output_xml))
