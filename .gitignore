@@ -136,3 +136,4 @@ tests/data/actual_output/
 tests/data/actual_output/*
 pisa_cfg_tmp
 tmp_example_data/
+scratch/
