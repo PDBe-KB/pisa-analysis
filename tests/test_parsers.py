@@ -1149,7 +1149,7 @@ class TestCompileInterfaceSummaryJSON(TestCase):
         self.input_interface_jsons = self.base_input_dir.joinpath(
             "mock_data",
             "interface_summary_parser",
-            "interfaces_minified",
+            "interfaces_minified_compressed",
         )
         self.input_assembly_json = self.base_input_dir.joinpath(
             "mock_data",
