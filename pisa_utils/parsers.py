@@ -1435,10 +1435,11 @@ class CompileInterfaceSummaryJSON:
         Converts individual interface JSON files into a summary JSON file.
         """
 
+        ext = ".json.gz" if self.compressed else ".json"
         interface_files = [
             f
             for f in os.listdir(self.path_interface_jsons)
-            if f.startswith("interface_") and f.endswith(".json")
+            if f.startswith("interface_") and f.endswith(ext)
         ]
         if not interface_files:
             LOGGER.warning(
@@ -1463,7 +1464,7 @@ class CompileInterfaceSummaryJSON:
                 self.path_interface_jsons, interface_file
             )
 
-            with open(interface_json_path, "r") as f:
+            with open_compressed(interface_json_path, self.compressed) as f:
                 d = json.load(f)
 
             interface_id = d["interface_id"]
