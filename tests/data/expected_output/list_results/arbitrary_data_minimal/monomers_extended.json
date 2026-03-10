@@ -3,6 +3,7 @@
         {
             "mol_id": 1,
             "molecule_type_id": 1,
+            "component_id": "A",
             "auth_asym_id": "A",
             "ccd_id": null,
             "auth_seq_id_start": null,

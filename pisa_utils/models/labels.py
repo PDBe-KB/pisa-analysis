@@ -220,6 +220,9 @@ AUTH_ASYM_ID_EXAMPLES = ["A", "B", "aB", "12c"]
 VISUAL_ID = """PISA-defined chain ID used in the 'formula' field. Chains with
 sufficiently similar structural similarity are assigned the same visual ID."""
 
+COMPONENT_ID = """Component identifier. For macromolecular components, this is the
+auth_asym_id. For ligands, this is the CCD, auth_asym_id and sequence IDs."""
+
 COMPONENT_NUMBER = """Unique ID corresponding to component instance in the (crystal)
 structure"""
 

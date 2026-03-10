@@ -36,6 +36,7 @@ from pisa_utils.models.labels import (
     COMPLEX_TYPE,
     COMPLEXES_IN_ASU,
     COMPLEXES_IN_PQS_SET,
+    COMPONENT_ID,
     COMPONENT_NUMBER,
     COMPONENT_TOTAL_ATOMS,
     COMPONENT_TOTAL_RESIDUES,
@@ -391,6 +392,11 @@ class Residues(StrictModel):
 
 class Molecule(StrictModel):
     mol_id: int = Field(..., validation_alias="id")
+    component_id: str = Field(
+        ...,
+        description=COMPONENT_ID,
+        examples=["Protein"],
+    )
     auth_asym_id: str = Field(
         ...,
         description=AUTH_ASYM_ID,
@@ -1536,6 +1542,11 @@ class Component(StrictModel):
     molecule_type_id: int = Field(
         ..., description=COMPONENT_TYPE_ID, examples=[1], validation_alias="monomer_id"
     )
+    component_id: str = Field(
+        ...,
+        description=COMPONENT_ID,
+        examples=["A", "[NA]A:301", "o7", "[GOL]A:302"],
+    )
     auth_asym_id: str = Field(
         ...,
         description=AUTH_ASYM_ID,
@@ -1618,6 +1629,7 @@ class Components(StrictModel):
                 Component(
                     serial_number=1,
                     monomer_id=1,
+                    component_id="A",
                     chain_id="A",
                     monomer_class="Protein",
                     total_atoms=1846,
@@ -1630,6 +1642,7 @@ class Components(StrictModel):
                 Component(
                     serial_number=2,
                     monomer_id=2,
+                    component_id="B",
                     chain_id="B",
                     monomer_class="Protein",
                     total_atoms=1500,
@@ -1638,6 +1651,19 @@ class Components(StrictModel):
                     surface_residues=180,
                     area=9500.3,
                     delta_g=-180.5,
+                ),
+                Component(
+                    serial_number=3,
+                    monomer_id=3,
+                    component_id="[NA]A:301",
+                    chain_id="A",
+                    monomer_class="Ligand",
+                    total_atoms=10,
+                    total_residues=1,
+                    surface_atoms=5,
+                    surface_residues=1,
+                    area=50.2,
+                    delta_g=-5.0,
                 ),
             ]
         ],

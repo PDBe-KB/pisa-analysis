@@ -7,7 +7,7 @@ from typing import Optional, Tuple
 
 from pisa_utils.constants import SUBDIR_EXTENDED_DATA
 from pisa_utils.models.models import DataModes, LigandProcessingMode
-from pisa_utils.utils import create_pisa_config
+from pisa_utils.utils import create_pisa_config, compress_existing_file
 
 
 def run_pisalite(
@@ -61,6 +61,7 @@ def run_pisa_service(
     lig_proc_mode: LigandProcessingMode = None,
     exclude_ligands: list[str] = None,
     extended_data: bool = False,
+    compress_output: bool = False,
 ) -> Tuple[str, str, Optional[str], Optional[str], Optional[str]]:
     """
     Wrapper to run PISA with most available options. Intended for internal use at the
@@ -87,6 +88,9 @@ def run_pisa_service(
     :param extended_data: Extract extract information via PISA using the -list
         operation, defaults to False
     :type extended_data: bool, optional
+    :param compress_output: Compress output JSON and XML files using gzip, defaults to
+        False
+    :type compress_output: bool, optional
     :return: Paths to XML files describing assemblies and interfaces, and optionally
         extended data files for assemblies, interfaces and monomers
     :rtype: Tuple[str, str, Optional[str], Optional[str], Optional[str]]
@@ -107,6 +111,7 @@ def run_pisa_service(
             lig_proc_mode=lig_proc_mode,
             exclude_ligands=exclude_ligands,
             extended_data=extended_data,
+            compress_output=compress_output,
         )
 
         logging.info("Finished -analysis, -xml and -list steps of PISA")
@@ -124,6 +129,7 @@ def _run_pisa_command(
     lig_proc_mode: LigandProcessingMode = None,
     exclude_ligands: list[str] = None,
     extended_data: bool = False,
+    compress_output: bool = False,
 ) -> tuple[str, str, Optional[str], Optional[str], Optional[str]]:
     """Wrapper to runa PISA command with various options.
 
@@ -221,6 +227,13 @@ def _run_pisa_command(
             f"{xml_assembly_file}"
         )
 
+    # Compress XMLs if requested
+    if compress_output:
+        compress_existing_file(xml_interfaces_file)
+        compress_existing_file(xml_assembly_file)
+        xml_interfaces_file += ".gz"
+        xml_assembly_file += ".gz"
+
     logging.info(f"XML files: {xml_assembly_file}, {xml_interfaces_file}")
     output_data_paths = [xml_assembly_file, xml_interfaces_file]
 
@@ -242,6 +255,11 @@ def _run_pisa_command(
                     stdout=f,
                     check=True,
                 )
+
+            # Compress extended data files if requested
+            if compress_output:
+                compress_existing_file(path)
+                path += ".gz"
 
             logging.info(f"Extended data file generated: {path}")
             output_data_paths.append(path)

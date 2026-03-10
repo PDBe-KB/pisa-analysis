@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from abc import ABC, abstractmethod
+import gzip
 
 import gemmi
 import pandas as pd
@@ -15,7 +16,13 @@ from pisa_utils.models.data_models import (
     InterfaceExtended,
     InterfaceSummary,
 )
-from pisa_utils.utils import extract_ligand_contents, id_is_ligand, is_int_or_float
+from pisa_utils.models.models import AllowedModelFileFormats
+from pisa_utils.utils import (
+    extract_ligand_contents,
+    id_is_ligand,
+    is_int_or_float,
+    open_compressed,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,6 +66,7 @@ class ConvertXMLToJSON(ABC):
         path_xml: str,
         path_output: str,
         path_structure_file: str,
+        compressed: bool = False,
         data_type: str = None,
     ) -> None:
         """
@@ -72,12 +80,15 @@ class ConvertXMLToJSON(ABC):
         :type path_structure_file: str
         :param data_type: Possible options are defined by the inheriting object,
             defaults to None
+        :param compressed: Whether the input XML and output JSON(s) files are
+            gzip-compressed, defaults to False
         :type data_type: str, optional
         """
         self.path_xml = path_xml
         self.path_output = path_output
         self.path_structure_file = path_structure_file
         self.data_type = data_type
+        self.compressed = compressed
 
         # Instantiated during runtime
         self.df: pd.DataFrame
@@ -90,12 +101,11 @@ class ConvertXMLToJSON(ABC):
     @abstractmethod
     def parse(self) -> dict:
         """
-        Convert any XML file to a JSON file.
+        Convert any XML file to a JSON file. If `compressed=True`, method
+        will expect the XML file to be gzip-compressed.
         """
 
-        with open(self.path_xml) as xml_file:
-            # Parse XML to JSON
-            LOGGER.info(f"Reading XML file: {self.path_xml}")
+        with open_compressed(self.path_xml, self.compressed) as xml_file:
             pisa_data_xml = xmltodict.parse(xml_file.read())
 
         return pisa_data_xml
@@ -107,9 +117,12 @@ class ConvertXMLToJSON(ABC):
         :return: True if PDB file, False otherwise.
         :rtype: bool
         """
-        return self.path_structure_file.endswith(
-            ".pdb"
-        ) or self.path_structure_file.endswith(".ent")
+        return (
+            self.path_structure_file.endswith(AllowedModelFileFormats.PDB)
+            or self.path_structure_file.endswith(AllowedModelFileFormats.PDB_GZ)
+            or self.path_structure_file.endswith(AllowedModelFileFormats.ENT)
+            or self.path_structure_file.endswith(AllowedModelFileFormats.ENT_GZ)
+        )
 
     def _extract_mmcif_contents(self, path_mmcif: str) -> pd.DataFrame:
         """
@@ -328,10 +341,36 @@ class ConvertXMLToJSON(ABC):
             label_seq_id_end,
         )
 
+    def save(self, path_json: str, data: dict) -> None:
+        """
+        Save data to JSON file, with optional gzip compression.
+
+        :param path_json: Path to the output JSON file.
+        :type path_json: str
+        :param data: Data to save to JSON.
+        :type data: dict
+        """
+
+        if self.compressed and not path_json.endswith(".gz"):
+            path_json += ".gz"
+
+        if self.compressed:
+            with gzip.open(path_json, "wt") as json_file:
+                json.dump(data, json_file, indent=4)
+        else:
+            with open(path_json, "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+        LOGGER.info(f"JSON file written successfully: {path_json}")
+
 
 class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
     def __init__(
-        self, path_xml: str, path_jsons: str, path_structure_file: str
+        self,
+        path_xml: str,
+        path_jsons: str,
+        path_structure_file: str,
+        compressed: bool = False,
     ) -> None:
         """
         Handles conversion of a PISA-generated interface XML into N separate JSONs,
@@ -342,7 +381,9 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
         :param path_jsons: Path to the output directory for interface JSON files.
         :type path_jsons: str
         """
-        super().__init__(path_xml, path_jsons, path_structure_file, "Interface")
+        super().__init__(
+            path_xml, path_jsons, path_structure_file, compressed, "Interface"
+        )
 
         self.bond_types = (
             "h-bonds",
@@ -491,6 +532,7 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
                     ) = self._validate_polymer_ids(polymer_df, auth_asym_id)
 
                 # Set values in molecule dict
+                molecule["component_id"] = molecule["chain_id"]
                 molecule["chain_id"] = auth_asym_id
                 molecule["label_asym_id"] = label_asym_id
                 molecule["ccd_id"] = ccd_id
@@ -507,9 +549,9 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
             self.path_output, f"interface_{interface_id}.json"
         )
 
-        with open(interface_json_path, "w") as interface_json_file:
-            json.dump(interface_output, interface_json_file, indent=4)
-            LOGGER.info(f"Interface JSON written: {interface_json_path}")
+        self.save(interface_json_path, interface_output)
+
+        LOGGER.info(f"Interface JSON written: {interface_json_path}")
 
 
 class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
@@ -519,6 +561,7 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
         path_json: str,
         path_structure_file: str,
         path_interface_jsons: str,
+        compressed: bool = False,
     ) -> None:
         """
         Converts a PISA-generated assembly XML into a single JSON file.
@@ -528,7 +571,9 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
         :param path_json: Path to the output assembly JSON file.
         :type path_json: str
         """
-        super().__init__(path_xml, path_json, path_structure_file, "Assembly")
+        super().__init__(
+            path_xml, path_json, path_structure_file, compressed, "Assembly"
+        )
         self.path_interface_jsons = path_interface_jsons
 
     def parse(self) -> None:
@@ -807,9 +852,13 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
                         self.path_interface_jsons,
                         f"interface_{interface_id}.json",
                     )
+                    if self.compressed:
+                        interface_json_path += ".gz"
 
                     try:
-                        with open(interface_json_path, "r") as interface_json_file:
+                        with open_compressed(
+                            interface_json_path, self.compressed
+                        ) as interface_json_file:
                             interface_data = json.load(interface_json_file)
                             interface["css"] = interface_data.get("interface", {}).get(
                                 "css", None
@@ -824,15 +873,16 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
         assembly_data = Complex(**assembly_data["pisa_results"]).model_dump()
 
         # Write JSON
-        with open(self.path_output, "w") as json_file:
-            # Parse via a pydantic model. Assemblies must be lists
-            json.dump(assembly_data, json_file, indent=4)
-            LOGGER.info(f"JSON file written successfully: {self.path_output}")
+        self.save(self.path_output, assembly_data)
 
 
 class ConvertListTextToJSON(ABC):
     def __init__(
-        self, path_txt: str, path_json: str, pisa_data_type: str = None
+        self,
+        path_txt: str,
+        path_json: str,
+        compressed: bool = False,
+        pisa_data_type: str = None,
     ) -> None:
         """
         Base class for converting PISA -list text files to JSON files.
@@ -853,6 +903,7 @@ class ConvertListTextToJSON(ABC):
 
         self.path_json = path_json
         self.pisa_data_type = pisa_data_type.capitalize()
+        self.compressed = compressed
 
     def __str__(self):
         return (
@@ -929,19 +980,38 @@ class ConvertListTextToJSON(ABC):
         """
         return False
 
+    def save(self, data: dict) -> None:
+        """
+        Save the given data to the output JSON file.
+
+        :param data: Data to save to JSON file.
+        :type data: dict
+        """
+        output_path = self.path_json
+        if self.compressed:
+            if not output_path.endswith(".gz"):
+                output_path = f"{output_path}.gz"
+            with gzip.open(output_path, "wt", compresslevel=9) as json_file:
+                json.dump(data, json_file, indent=4)
+        else:
+            with open(output_path, "w") as json_file:
+                json.dump(data, json_file, indent=4)
+
+        LOGGER.info(f"Extended {self.pisa_data_type} data JSON written: {output_path}")
+
     @abstractmethod
     def parse(self) -> None:
         """
         Convert a text file with a list of items to a JSON file.
         """
-        with open(self.path_txt, "r") as f:
+        with open_compressed(self.path_txt, self.compressed) as f:
             lines = [line.strip() for line in f.readlines() if line.strip()]
 
         return lines
 
 
 class ConvertInterfaceListToJSON(ConvertListTextToJSON):
-    def __init__(self, path_txt: str, path_json: str) -> None:
+    def __init__(self, path_txt: str, path_json: str, compressed: bool = False) -> None:
         """
         Converts a PISA-generated interface -list text file into a single JSON file.
 
@@ -950,7 +1020,7 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         :param path_json: Path to the output JSON file.
         :type path_json: str
         """
-        super().__init__(path_txt, path_json, "interfaces")
+        super().__init__(path_txt, path_json, compressed, "interfaces")
 
     def _is_first_line_of_table(self, line: str) -> bool:
         return (
@@ -1014,13 +1084,11 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         interfaces_data = {"interfaces": interface_data}
         interfaces_data = InterfaceExtended(**interfaces_data).model_dump()
 
-        with open(self.path_json, "w") as json_file:
-            json.dump(interfaces_data, json_file, indent=4)
-            LOGGER.info(f"Extended interface data JSON written: {self.path_json}")
+        self.save(interfaces_data)
 
 
 class ConvertAssemblyListToJSON(ConvertListTextToJSON):
-    def __init__(self, path_txt: str, path_json: str) -> None:
+    def __init__(self, path_txt: str, path_json: str, compressed: bool = False) -> None:
         """
         Converts a PISA-generated assembly -list text file into a single JSON file.
 
@@ -1029,7 +1097,7 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
         :param path_json: Path to the output JSON file.
         :type path_json: str
         """
-        super().__init__(path_txt, path_json, "assemblies")
+        super().__init__(path_txt, path_json, compressed, "assemblies")
 
     def _is_first_line_of_first_table(self, line: str) -> bool:
         return (
@@ -1233,13 +1301,11 @@ class ConvertAssemblyListToJSON(ConvertListTextToJSON):
         }
         extended_data = ComplexExtended(**extended_data).model_dump()
 
-        with open(self.path_json, "w") as json_file:
-            json.dump(extended_data, json_file, indent=4)
-            LOGGER.info(f"Extended assembly data JSON written: {self.path_json}")
+        self.save(extended_data)
 
 
 class ConvertComponentsListToJSON(ConvertListTextToJSON):
-    def __init__(self, path_txt: str, path_json: str) -> None:
+    def __init__(self, path_txt: str, path_json: str, compressed: bool = False) -> None:
         """
         Converts a PISA-generated monomer -list text file into a single JSON file.
 
@@ -1248,7 +1314,7 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
         :param path_json: Path to the output JSON file.
         :type path_json: str
         """
-        super().__init__(path_txt, path_json, "monomers")
+        super().__init__(path_txt, path_json, compressed, "monomers")
 
     def _is_first_line_of_table(self, line: str) -> bool:
         return (
@@ -1290,6 +1356,7 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
             monomer = {
                 "serial_number": parts[0],
                 "monomer_id": parts[1],
+                "component_id": parts[2],
                 "chain_id": parts[2],
                 "monomer_class": parts[3],
                 "total_atoms": parts[4],
@@ -1304,14 +1371,16 @@ class ConvertComponentsListToJSON(ConvertListTextToJSON):
         monomers_data = {"components": monomer_data}
         monomers_data = Components(**monomers_data).model_dump()
 
-        with open(self.path_json, "w") as json_file:
-            json.dump(monomers_data, json_file, indent=4)
-            LOGGER.info(f"Extended monomer data JSON written: {self.path_json}")
+        self.save(monomers_data)
 
 
 class CompileInterfaceSummaryJSON:
     def __init__(
-        self, path_interface_jsons: str, path_assembly_json: str, path_output_json: str
+        self,
+        path_interface_jsons: str,
+        path_assembly_json: str,
+        path_output_json: str,
+        compressed: bool = False,
     ) -> None:
         """
         Reads individual interface JSON files and compiles a summary JSON.
@@ -1327,6 +1396,7 @@ class CompileInterfaceSummaryJSON:
         self.path_interface_jsons = path_interface_jsons
         self.path_assembly_json = path_assembly_json
         self.path_output_json = path_output_json
+        self.compressed = compressed
 
     def _load_assembly_json(self) -> dict:
         """
@@ -1338,7 +1408,7 @@ class CompileInterfaceSummaryJSON:
 
         # Load assembly data
         assembly_to_interface_map = {}
-        with open(self.path_assembly_json, "r") as f:
+        with open_compressed(self.path_assembly_json, self.compressed) as f:
             d = json.load(f)
             pqs_sets = d.get("pqs_sets", [])
 
@@ -1365,10 +1435,11 @@ class CompileInterfaceSummaryJSON:
         Converts individual interface JSON files into a summary JSON file.
         """
 
+        ext = ".json.gz" if self.compressed else ".json"
         interface_files = [
             f
             for f in os.listdir(self.path_interface_jsons)
-            if f.startswith("interface_") and f.endswith(".json")
+            if f.startswith("interface_") and f.endswith(ext)
         ]
         if not interface_files:
             LOGGER.warning(
@@ -1393,7 +1464,7 @@ class CompileInterfaceSummaryJSON:
                 self.path_interface_jsons, interface_file
             )
 
-            with open(interface_json_path, "r") as f:
+            with open_compressed(interface_json_path, self.compressed) as f:
                 d = json.load(f)
 
             interface_id = d["interface_id"]
@@ -1447,6 +1518,11 @@ class CompileInterfaceSummaryJSON:
 
         interface_summary = InterfaceSummary(**interface_summary).model_dump()
 
-        with open(self.path_output_json, "w") as json_file:
-            json.dump(interface_summary, json_file, indent=4)
-            LOGGER.info(f"Interface summary JSON written: {self.path_output_json}")
+        if self.compressed:
+            with gzip.open(self.path_output_json, "wt") as json_file:
+                json.dump(interface_summary, json_file, indent=4)
+        else:
+            with open(self.path_output_json, "w") as json_file:
+                json.dump(interface_summary, json_file, indent=4)
+
+        LOGGER.info(f"Interface summary JSON written: {self.path_output_json}")

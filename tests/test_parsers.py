@@ -2,6 +2,7 @@ import json
 import tempfile
 from pathlib import Path
 from unittest import TestCase
+import gzip
 
 from pisa_utils.parsers import (
     CompileInterfaceSummaryJSON,
@@ -30,6 +31,20 @@ def remove_files(path: Path):
         path.mkdir(parents=True, exist_ok=True)
 
 
+def compress_and_store(path_file: Path, path_compressed: Path) -> None:
+    """
+    Compress a file with gzip and store it at the specified path.
+
+    :param path_file: _description_
+    :type path_file: Path
+    :param path_compressed: _description_
+    :type path_compressed: Path
+    """
+    with open(path_file, "rt") as f_in:
+        with gzip.open(path_compressed, "wt") as f_out:
+            f_out.writelines(f_in)
+
+
 class TestConvertAssemblyXMLToJSON(TestCase):
     """
     Tests for ConvertAssemblyXMLToJSON class.
@@ -46,6 +61,68 @@ class TestConvertAssemblyXMLToJSON(TestCase):
         output_path = Path("tests/data/actual_output/")
         output_path.mkdir(parents=True, exist_ok=True)
         remove_files(output_path)
+
+    def test_parse_multi_assembly_xml_compressed(self):
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_assembly_multi_asmset.xml"
+        )
+        self.path_interface_jsons = self.base_input_dir.joinpath(
+            "expected_output",
+            "interfaces",
+            "3hax_interfaces",
+        )
+        self.expected_json = self.base_input_dir.joinpath(
+            "expected_output", "3hax_assembly_multi_asmset.json"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self.output_json = Path(tmp_dir).joinpath(
+                "3hax_assembly_multi_asmset.json.gz"
+            )
+
+            # Compress input XML into temporary directory
+            self.input_xml_compressed = Path(tmp_dir).joinpath(
+                "3hax_assembly_multi_asmset.xml.gz"
+            )
+            compress_and_store(self.input_xml, self.input_xml_compressed)
+
+            # Compress interface JSONs into temporary directory
+            self.path_interface_jsons_compressed = Path(tmp_dir).joinpath(
+                "3hax_interfaces_compressed"
+            )
+            self.path_interface_jsons_compressed.mkdir(parents=True, exist_ok=True)
+            for i in self.path_interface_jsons.glob("*.json"):
+                compress_and_store(
+                    i, self.path_interface_jsons_compressed.joinpath(i.name + ".gz")
+                )
+
+            # Compress structure file into temporary directory
+            self.path_struct_compressed = Path(tmp_dir).joinpath("3hax.cif.gz")
+            compress_and_store(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif"),
+                self.path_struct_compressed,
+            )
+
+            # Run with compressed input and output
+            self.converter = ConvertAssemblyXMLToJSON(
+                path_xml=str(self.input_xml_compressed),
+                path_json=str(self.output_json),
+                path_interface_jsons=str(self.path_interface_jsons_compressed),
+                path_structure_file=str(self.path_struct_compressed),
+                compressed=True,
+            )
+            self.converter.parse()
+
+            # Check
+            expected = self.expected_json.read_text().strip()
+            with gzip.open(self.output_json, "rt") as f:
+                actual = f.read().strip()
+
+            self.assertEqual(
+                expected,
+                actual,
+                msg="Assembly XML->JSON not parsed correctly for multiple assembly sets.",
+            )
 
     def test_parse_multi_assembly_xml(self):
         self.input_xml = self.base_input_dir.joinpath(
@@ -207,6 +284,8 @@ class TestConvertInterfaceXML(TestCase):
     Tests for ConvertInterfaceXMLToJSON class.
     """
 
+    maxDiff = None
+
     def setUp(self):
         super().setUp()
 
@@ -292,6 +371,118 @@ class TestConvertInterfaceXML(TestCase):
             msg="Interface XML->JSON not parsed correctly for single interface.",
         )
 
+    def test_parse_multi_interface_xml_compressed(self):
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_interfaces_multi.xml"
+        )
+        self.expected_json_dir = self.base_input_dir.joinpath(
+            "expected_output", "interfaces", "3hax_interfaces_multi"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Compress input XML into temporary directory
+            self.input_xml_compressed = Path(tmp_dir).joinpath(
+                "3hax_interfaces_multi.xml.gz"
+            )
+            compress_and_store(self.input_xml, self.input_xml_compressed)
+
+            # Set output directory in temporary directory
+            self.output_json_dir = Path(tmp_dir).joinpath(
+                "3hax_interfaces_multi_compressed"
+            )
+
+            # Compress structure file into temporary directory
+            self.path_struct_compressed = Path(tmp_dir).joinpath("3hax.cif.gz")
+            compress_and_store(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif"),
+                self.path_struct_compressed,
+            )
+
+            # Run
+            self.converter = ConvertInterfaceXMLToJSONs(
+                path_xml=str(self.input_xml_compressed),
+                path_jsons=str(self.output_json_dir),
+                path_structure_file=str(self.path_struct_compressed),
+                compressed=True,
+            )
+            self.converter.parse()
+
+            # Check
+            for i in (1, 2, 3):
+                expected = (
+                    self.expected_json_dir.joinpath(f"interface_{i}.json")
+                    .read_text()
+                    .strip()
+                )
+
+                with gzip.open(
+                    self.output_json_dir.joinpath(f"interface_{i}.json.gz"), "rt"
+                ) as f:
+                    actual = f.read().strip()
+
+                self.assertEqual(
+                    expected,
+                    actual,
+                    msg=(
+                        "Interface XML->JSON not parsed correctly for compressed "
+                        f"interface {i}."
+                    ),
+                )
+
+    def test_parse_single_interface_xml_compressed(self):
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_interfaces_single.xml"
+        )
+        self.expected_json_dir = self.base_input_dir.joinpath(
+            "expected_output", "interfaces", "3hax_interfaces_single"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Compress input XML into temporary directory
+            self.input_xml_compressed = Path(tmp_dir).joinpath(
+                "3hax_interfaces_single.xml.gz"
+            )
+            compress_and_store(self.input_xml, self.input_xml_compressed)
+
+            self.output_json_dir_compressed = Path(tmp_dir).joinpath(
+                "3hax_interfaces_single_compressed"
+            )
+
+            # Compress structure file into temporary directory
+            self.path_struct_compressed = Path(tmp_dir).joinpath("3hax.cif.gz")
+            compress_and_store(
+                self.base_input_dir.joinpath("mock_data", "3hax.cif"),
+                self.path_struct_compressed,
+            )
+
+            # Run
+            self.converter = ConvertInterfaceXMLToJSONs(
+                path_xml=str(self.input_xml_compressed),
+                path_jsons=str(self.output_json_dir_compressed),
+                path_structure_file=str(self.path_struct_compressed),
+                compressed=True,
+            )
+            self.converter.parse()
+
+            # Check
+            expected = (
+                self.expected_json_dir.joinpath("interface_1.json").read_text().strip()
+            )
+
+            with gzip.open(
+                self.output_json_dir_compressed.joinpath("interface_1.json.gz"), "rt"
+            ) as f:
+                actual = f.read().strip()
+
+            self.assertEqual(
+                expected,
+                actual,
+                msg=(
+                    "Interface XML->JSON not parsed correctly for single compressed "
+                    "interface."
+                ),
+            )
+
     def test_parse_no_interface_xml(self):
         """
         Test parsing of interface XML files with no interfaces defined.
@@ -325,6 +516,8 @@ class TestConvertInterfaceListToJSON(TestCase):
     """
     Tests for ConvertInterfaceListToJSON class.
     """
+
+    maxDiff = None
 
     def setUp(self):
         super().setUp()
@@ -814,6 +1007,8 @@ class TestConvertMonomerListToJSON(TestCase):
     Tests for ConvertMonomerListToJSON class.
     """
 
+    maxDiff = None
+
     def setUp(self):
         super().setUp()
 
@@ -1010,6 +1205,70 @@ class TestCompileInterfaceSummaryJSON(TestCase):
             json_actual,
             msg="Interface summary JSON not compiled correctly.",
         )
+
+    def test_compile_interface_summary_json_compressed(self):
+        """
+        Test for multiple interfaces present.
+        """
+
+        self.input_interface_jsons = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "interfaces_minified",
+        )
+        self.input_assembly_json = self.base_input_dir.joinpath(
+            "mock_data",
+            "interface_summary_parser",
+            "assemblies.json",
+        )
+        self.expected_json = self.base_input_dir.joinpath(
+            "expected_output",
+            "interface_summary.json",
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Compress input assembly JSON into temporary directory
+            self.input_assembly_json_compressed = Path(tmp_dir).joinpath(
+                "assemblies.json.gz"
+            )
+            compress_and_store(
+                self.input_assembly_json, self.input_assembly_json_compressed
+            )
+
+            # Compress input interface JSONs into temporary directory
+            self.input_interface_jsons_compressed = Path(tmp_dir).joinpath(
+                "interfaces_minified_compressed"
+            )
+            self.input_interface_jsons_compressed.mkdir()
+            for json_file in self.input_interface_jsons.glob("*.json"):
+                compress_and_store(
+                    json_file,
+                    self.input_interface_jsons_compressed.joinpath(
+                        json_file.name + ".gz"
+                    ),
+                )
+
+            self.output_json = Path(tmp_dir).joinpath("interface_summary.json.gz")
+
+            # Run
+            self.compiler = CompileInterfaceSummaryJSON(
+                path_interface_jsons=str(self.input_interface_jsons_compressed),
+                path_assembly_json=str(self.input_assembly_json_compressed),
+                path_output_json=str(self.output_json),
+                compressed=True,
+            )
+            self.compiler.parse()
+
+            # Check
+            json_expected = json.loads(self.expected_json.read_text().strip())
+            with gzip.open(self.output_json, "rt") as f:
+                json_actual = json.loads(f.read().strip())
+
+            self.assertDictEqual(
+                json_expected,
+                json_actual,
+                msg="Interface summary JSON not compiled correctly.",
+            )
 
     def test_compile_interface_summary_json_no_interfaces(self):
         """

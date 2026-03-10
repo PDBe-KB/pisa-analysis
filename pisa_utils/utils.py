@@ -4,6 +4,10 @@ import os
 import os.path
 import shutil
 import xml.etree.ElementTree as ET
+import gzip
+
+
+logger = logging.getLogger(__name__)
 
 
 def parse_xml_file(xml_file):
@@ -85,8 +89,8 @@ def read_uniprot_info(
                     return unp_acc, unp_num
 
                 else:
-                    logging.debug("No UNP numbers found for atom:")
-                    logging.debug(
+                    logger.debug("No UNP numbers found for atom:")
+                    logger.debug(
                         "name {},label_seq_id {},seq_num {}, residue {}".format(
                             int_atname, int_lab_seqnum, int_seqnum, int_resname
                         )
@@ -96,8 +100,8 @@ def read_uniprot_info(
                     return unp_acc, unp_num
         # If residue was not found in updated cif file, return message
         if not n:
-            logging.debug("residue not found in updated cif file:")
-            logging.debug(
+            logger.debug("residue not found in updated cif file:")
+            logger.debug(
                 "name {},label_seq_id {},seq_num {}, residue {}".format(
                     int_atname, int_lab_seqnum, int_seqnum, int_resname
                 )
@@ -206,3 +210,51 @@ def is_int_or_float(value: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def open_compressed(file_path: str, compressed: bool = False, mode: str = "rt"):
+    """
+    Open a file that may be compressed with gzip.
+
+    :param file_path: Path to the file to open.
+    :type file_path: str
+    :param mode: Mode to open the file in. Defaults to "rt" (read text).
+    :type mode: str, optional
+    :return: File object.
+    :rtype: file object
+    """
+
+    if compressed:
+        if not file_path.endswith(".gz"):
+            logger.error(f"Expected a .gz file for compressed input, got: {file_path}")
+            raise ValueError(
+                f"Expected a .gz file for compressed input, got: {file_path}"
+            )
+
+        logger.debug(f"Opening compressed file: {file_path}")
+        return gzip.open(file_path, mode)
+
+    else:
+        logger.debug(f"Opening uncompressed file: {file_path}")
+        return open(file_path, mode)
+
+
+def compress_existing_file(file_path: str) -> None:
+    """
+    Compress a file with gzip. Defaults to maximum compression level (-9) and
+    overwrites the original file.
+
+    :param file_path: Path to the file to compress.
+    :type file_path: str
+    :return: Path to the compressed file.
+    :rtype: str
+    """
+
+    compressed_file_path = file_path + ".gz"
+
+    with open(file_path, "rb") as f_in:
+        with gzip.open(compressed_file_path, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+    os.remove(file_path)
+    logger.debug(f"Compressed file created at: {compressed_file_path}")
