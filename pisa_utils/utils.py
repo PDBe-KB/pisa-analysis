@@ -5,7 +5,6 @@ import os.path
 import shutil
 import xml.etree.ElementTree as ET
 import gzip
-import subprocess
 
 
 logger = logging.getLogger(__name__)
@@ -240,7 +239,7 @@ def open_compressed(file_path: str, compressed: bool = False, mode: str = "rt"):
         return open(file_path, mode)
 
 
-def compress_existing_file(file_path: str, gzip_args: str = "-9") -> None:
+def compress_existing_file(file_path: str) -> None:
     """
     Compress a file with gzip. Defaults to maximum compression level (-9) and
     overwrites the original file.
@@ -250,4 +249,12 @@ def compress_existing_file(file_path: str, gzip_args: str = "-9") -> None:
     :return: Path to the compressed file.
     :rtype: str
     """
-    subprocess.run(["gzip", gzip_args, file_path], check=True)
+
+    compressed_file_path = file_path + ".gz"
+
+    with open(file_path, "rb") as f_in:
+        with gzip.open(compressed_file_path, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+    os.remove(file_path)
+    logger.debug(f"Compressed file created at: {compressed_file_path}")
