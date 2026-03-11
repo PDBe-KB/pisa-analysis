@@ -484,6 +484,8 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
                         continue
                     residue["label_seq_num"] = None
 
+                molecule["component_id"] = molecule["chain_id"]
+
         # Add missing label_asym_ids from mmCIF file
         else:
             molecules = interface_output["interface"].get("molecule", [])
