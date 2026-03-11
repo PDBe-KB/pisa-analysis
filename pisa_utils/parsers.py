@@ -45,8 +45,8 @@ def get_residue_mappings(structure: gemmi.Structure) -> dict:
             "ligands": {},
         }
 
-        polymer = chain.get_polymer()
-        res_seq_ids = [residue.seqid.num for residue in polymer]
+        res_seq_ids = [residue.seqid.num for residue in chain]
+
         residue_mappings[auth_asym_id]["polymers"] = {
             "start": min(res_seq_ids),
             "end": max(res_seq_ids),
@@ -57,6 +57,7 @@ def get_residue_mappings(structure: gemmi.Structure) -> dict:
             auth_seq_id = ligand.seqid.num
             residue_mappings[auth_asym_id]["ligands"][ccd_id] = auth_seq_id
 
+    logging.info(f"Generated residue mappings: {residue_mappings}")
     return residue_mappings
 
 
@@ -1437,12 +1438,20 @@ class CompileInterfaceSummaryJSON:
         Converts individual interface JSON files into a summary JSON file.
         """
 
+        if not os.path.isdir(self.path_interface_jsons):
+            LOGGER.warning(
+                f"Interface JSON directory not found: {self.path_interface_jsons}. "
+                "No summary JSON will be created."
+            )
+            return
+
         ext = ".json.gz" if self.compressed else ".json"
         interface_files = [
             f
             for f in os.listdir(self.path_interface_jsons)
             if f.startswith("interface_") and f.endswith(ext)
         ]
+
         if not interface_files:
             LOGGER.warning(
                 "No interface JSON files found in directory: "
