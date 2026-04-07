@@ -57,7 +57,6 @@ def get_residue_mappings(structure: gemmi.Structure) -> dict:
             auth_seq_id = ligand.seqid.num
             residue_mappings[auth_asym_id]["ligands"][ccd_id] = auth_seq_id
 
-    logging.info(f"Generated residue mappings: {residue_mappings}")
     return residue_mappings
 
 
