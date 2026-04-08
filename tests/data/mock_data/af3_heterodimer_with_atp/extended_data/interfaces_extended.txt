@@ -1,0 +1,16 @@
+
+ PISA v.2.1.2 built 15-03-2019   with SSM v.1.4.0, SRS v.1.0.0, MMDB v.2,0.22
+ Session af3dimerwithatp
+
+ LIST OF INTERFACES
+ -------.-------------.-----------------------------------------.---------------------------
+  ## Id |   Monomer1  |   Monomer2    Symmetry operation Sym.Id |   Area  DeltaG Nhb Nsb Nds
+ -------+-------------+-----------------------------------------+---------------------------
+   1  1 |      A      |      B                     X,Y,Z  0_555 |   383.8  -11.4   0   0   0
+   2  2 |      B      | [ATP]C:1                   X,Y,Z  0_555 |   146.0   -0.1   2   0   0
+   3  3 |      A      | [ATP]C:1                   X,Y,Z  0_555 |    78.4    0.0   1   0   0
+ -------'-------------'-----------------------------------------'---------------------------
+ ##:  serial number          Monomer: selection range    Sym.Op: applies to 2nd monomer
+ Id:  interface type id      Area:    sq. angstrom       DeltaG:  kcal/mol
+ Nhb: no. of hydrogen bonds  Nsb:     no. of salt bridges
+ Nds: no. of disulfide bonds

@@ -1,0 +1,14 @@
+{
+    "pqs_data": [],
+    "asu_data": [
+        {
+            "complex_type": 1,
+            "mmsize": 2,
+            "asa": 8714.8,
+            "bsa": 1216.5,
+            "diss_energy": 2.4,
+            "chem_energy": 1.2,
+            "formula": "ABa"
+        }
+    ]
+}
