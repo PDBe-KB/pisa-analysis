@@ -278,6 +278,54 @@ class TestConvertAssemblyXMLToJSON(TestCase):
             msg="Assembly XML->JSON not parsed correctly for no ASU complex defined.",
         )
 
+    def test_parse_af3_model(self):
+        """
+        Check parsing compatibility with assembly XML file from AlphaFold3 heterodimer
+        in complex with ATP.
+        """
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "af3_heterodimer_with_atp", "assembly.xml"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self.output_json = Path(tmp_dir).joinpath("af3_assembly.json")
+
+            # Run
+            self.converter = ConvertAssemblyXMLToJSON(
+                path_xml=self.input_xml,
+                path_json=self.output_json,
+                path_interface_jsons=self.base_input_dir.joinpath(
+                    "expected_output",
+                    "interfaces",
+                    "af3_heterodimer_with_atp",
+                ),
+                path_structure_file=str(
+                    self.base_input_dir.joinpath(
+                        "mock_data", "af3_heterodimer_with_atp.cif"
+                    )
+                ),
+            )
+
+            self.converter.parse()
+
+            # Check
+            expected_path = self.base_input_dir.joinpath(
+                "expected_output",
+                "af3_heterodimer_with_atp",
+                "assemblies.json",
+            )
+            with open(expected_path, "r") as f:
+                expected = json.load(f)
+
+            with open(self.output_json, "r") as f:
+                actual = json.load(f)
+
+            self.assertDictEqual(
+                expected,
+                actual,
+                msg="Assembly XML->JSON not parsed correctly for AF3 model.",
+            )
+
 
 class TestConvertInterfaceXML(TestCase):
     """
@@ -510,6 +558,50 @@ class TestConvertInterfaceXML(TestCase):
             self.output_json_dir.exists(),
             msg="Interface XML->JSON parsed interfaces when none were defined.",
         )
+
+    def test_parse_af3_model(self):
+        """
+        Check parsing compatibility with interface XML file from AlphaFold3 heterodimer
+        in complex with ATP.
+        """
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "af3_heterodimer_with_atp", "interfaces.xml"
+        )
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self.output_json_dir = Path(tmp_dir).joinpath("af3_interfaces")
+
+            # Run
+            self.converter = ConvertInterfaceXMLToJSONs(
+                path_xml=self.input_xml,
+                path_jsons=self.output_json_dir,
+                path_structure_file=str(
+                    self.base_input_dir.joinpath(
+                        "mock_data", "af3_heterodimer_with_atp.cif"
+                    )
+                ),
+            )
+            self.converter.parse()
+
+            # Check
+            for i in range(1, 4):
+                expected_path = self.base_input_dir.joinpath(
+                    "expected_output",
+                    "interfaces",
+                    "af3_heterodimer_with_atp",
+                    f"interface_{i}.json",
+                )
+                with open(expected_path, "r") as f:
+                    expected = json.load(f)
+
+                actual_path = self.output_json_dir.joinpath(f"interface_{i}.json")
+                with open(actual_path, "r") as f:
+                    actual = json.load(f)
+
+                self.assertDictEqual(
+                    expected,
+                    actual,
+                    msg="Interface XML->JSON not parsed correctly for AF3 model.",
+                )
 
 
 class TestConvertInterfaceListToJSON(TestCase):
