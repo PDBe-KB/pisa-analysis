@@ -215,7 +215,7 @@ PDB_ID = "PDB identifier (if available)"
 AUTH_ASYM_ID = "Chain identifier (auth_asym_id)"
 LABEL_ASYM_ID = """Chain identifier (label_asym_id) from mmCIF file. Not available in
 PDB files."""
-AUTH_ASYM_ID_EXAMPLES = ["A", "B", "aB", "12c"]
+AUTH_ASYM_ID_EXAMPLES = ("A", "B", "aB", "12c")
 
 VISUAL_ID = """PISA-defined chain ID used in the 'formula' field. Chains with
 sufficiently similar structural similarity are assigned the same visual ID."""
@@ -233,11 +233,11 @@ PISA_STABILISATION_ENERGY = "Stabilization energy (kcal/mol)"
 
 CHEMICAL_POTENTIAL_EN = "Standard chemical potential energy, kcal/mol"
 
-RESIDUE_3_LETTER_CODE = "Residue three-letter code"
-RESIDUE_3_LETTER_EXAMPLES = ["THR", "ALA", "HIS"]
+RESIDUE_3_LETTER_CODE = "Residue three-letter code (`label_comp_id` in mmCIF files)"
+RESIDUE_3_LETTER_EXAMPLES = ("THR", "ALA", "HIS")
 RESIDUE_SEQ_ID = "Residue sequence ID"
 ATOM_LABEL = "Atom label"
-ATOM_LABEL_EXAMPLES = ["CA", "N", "O", "CB", "OG1", "OD1"]
+ATOM_LABEL_EXAMPLES = ("CA", "N", "O", "CB", "OG1", "OD1")
 
 
 # PISA BondInfo descriptions

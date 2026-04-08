@@ -203,6 +203,7 @@ class Bond(StrictModel):
         validation_alias="pdbx_sifts_xref_db_acc-1",
         exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
+    # TODO: Change to label_comp_id -- but will be breaking change for API
     auth_comp_id_1: str = Field(
         ...,
         description=RESIDUE_3_LETTER_CODE,
@@ -257,6 +258,7 @@ class Bond(StrictModel):
         validation_alias="pdbx_sifts_xref_db_name-2",
         exclude=EXCLUDE_SIFTS_XREF_DB_FIELDS,
     )
+    # TODO: Change to label_comp_id -- but will be breaking change for API
     auth_comp_id_2: str = Field(
         ...,
         description=RESIDUE_3_LETTER_CODE,
@@ -337,6 +339,7 @@ class Residue(StrictModel):
         examples=[1, 2, 3, 100],
         validation_alias="ser_no",
     )
+    # TODO: Change to label_comp_id -- but will be breaking change for API
     auth_comp_id: str = Field(..., examples=["MET"], validation_alias="name")
     auth_seq_id: int = Field(
         ..., description=AUTH_SEQ_ID, examples=[1, 2, 5], validation_alias="seq_num"
