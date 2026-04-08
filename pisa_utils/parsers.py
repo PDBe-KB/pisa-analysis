@@ -754,6 +754,11 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
             # ASM set (also known as PQS set)
             residue_mappings = get_residue_mappings(structure)
 
+            if isinstance(assembly_data["pisa_results"].get("asm_set"), dict):
+                assembly_data["pisa_results"]["asm_set"] = [
+                    assembly_data["pisa_results"]["asm_set"]
+                ]
+
             for pqs_set in assembly_data["pisa_results"].get("asm_set", []):
                 if not pqs_set:
                     continue
