@@ -135,14 +135,14 @@ class ConvertXMLToJSON(ABC):
         """
         block = gemmi.cif.read(path_mmcif).sole_block()
 
-        headers = [
+        headers = (
             "group_PDB",
             "label_asym_id",
             "label_seq_id",
+            "label_comp_id",
             "auth_seq_id",
-            "auth_comp_id",
             "auth_asym_id",
-        ]
+        )
         table = block.find("_atom_site.", headers)
 
         return pd.DataFrame(
@@ -168,7 +168,7 @@ class ConvertXMLToJSON(ABC):
 
         return self.df.loc[
             (self.df["group_PDB"] == "HETATM")
-            & (self.df["auth_comp_id"] == ccd_id)
+            & (self.df["label_comp_id"] == ccd_id)
             & (self.df["auth_asym_id"] == auth_asym_id)
             & (self.df["auth_seq_id"].astype(int) == auth_seq_id)
         ]
