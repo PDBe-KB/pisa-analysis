@@ -40,8 +40,7 @@ def trigger_helpful_validation_error(error_details: list[ErrorDetails]):
             )
             raise MissingChainIDError()
 
-        else:
-            LOGGER.warning(f"Pydantic error {i}: Validation error details: {error}")
-            raise ValidationError.from_exception_data(
-                "Unhandled pydantic validation errors", error_details
-            )
+        LOGGER.warning(f"Pydantic error {i}: Validation error details: {error}")
+        raise ValidationError.from_exception_data(
+            "Unhandled pydantic validation errors", error_details
+        )
