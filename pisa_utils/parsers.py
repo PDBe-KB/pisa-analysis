@@ -770,6 +770,9 @@ class ConvertAssemblyXMLToJSON(ConvertXMLToJSON):
                     if not complex:
                         continue
 
+                    if isinstance(complex.get("molecule"), dict):
+                        complex["molecule"] = [complex["molecule"]]
+
                     for molecule in complex.get("molecule", []):
                         if not molecule:
                             continue

@@ -201,7 +201,6 @@ class TestConvertAssemblyXMLToJSON(TestCase):
             )
 
     def test_parse_single_assembly_xml(self):
-        self.maxDiff = None
 
         self.input_xml = self.base_input_dir.joinpath(
             "mock_data", "3hax_assembly_single_asmset.xml"
@@ -237,6 +236,47 @@ class TestConvertAssemblyXMLToJSON(TestCase):
             actual,
             msg="Assembly XML->JSON not parsed correctly for a single assembly set.",
         )
+
+    def test_parse_single_assembly_xml_with_pdb_file(self):
+
+        self.input_xml = self.base_input_dir.joinpath(
+            "mock_data", "3hax_assembly_single_asmset_from_pdb.xml"
+        )
+        self.expected_json = self.base_input_dir.joinpath(
+            "expected_output", "3hax_assembly_single_asmset_from_pdb.json"
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            self.output_json = Path(tmp_dir).joinpath(
+                "3hax_assembly_single_asmset_from_pdb.json"
+            )
+
+            # Run
+            self.converter = ConvertAssemblyXMLToJSON(
+                path_xml=self.input_xml,
+                path_json=self.output_json,
+                path_interface_jsons=self.base_input_dir.joinpath(
+                    "expected_output",
+                    "interfaces",
+                    "3hax_interfaces",
+                ),
+                path_structure_file=str(
+                    self.base_input_dir.joinpath("mock_data", "3hax.pdb")
+                ),
+            )
+            self.converter.parse()
+
+            # Check
+            with self.expected_json.open("r") as f:
+                expected = json.load(f)
+            with self.output_json.open("r") as f:
+                actual = json.load(f)
+
+            self.assertDictEqual(
+                expected,
+                actual,
+                msg="Assembly XML->JSON not parsed correctly for a single assembly set.",
+            )
 
     def test_parse_assembly_xml_no_asmset(self):
         """
