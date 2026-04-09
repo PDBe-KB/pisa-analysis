@@ -549,7 +549,6 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
         try:
             interface_output = Interface(**interface_output).model_dump()
         except ValidationError as e:
-            LOGGER.warning(f"Validation error for interface {interface_id}: {e}")
             trigger_helpful_validation_error(e.errors())
 
         # Write interface JSON

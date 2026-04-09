@@ -30,14 +30,11 @@ def trigger_helpful_validation_error(error_details: list[ErrorDetails]):
     :raises MissingChainIDError: If any validation error indicates missing chain ID
         assignment in the input data.
     """
-    LOGGER.warning(f"Iterating over {len(error_details)} pydantic validation errors...")
 
     for i, error in enumerate(error_details):
-        # auth_asym_id (chain ID) not assigned by user
+        # Error due to auth_asym_id (chain ID) not assigned by user
         if error["input"] is None and error["loc"][-1] in CHAIN_ID_SYNONYMS:
             LOGGER.warning(
                 f"Pydantic error {i}: Missing chain ID detected. Details: {error}"
             )
             raise MissingChainIDError()
-
-        # Future, bespoke validation error handling...
