@@ -171,6 +171,9 @@ You can also build the Docker image locally and then run it as described above:
 docker build . -t pdbegroup/pisa-analysis
 ```
 
+## Error codes
+ - Exit Status `9`: File not found
+
 ## Versioning
 
 We use [SemVer](https://semver.org) for versioning.
