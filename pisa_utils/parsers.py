@@ -6,6 +6,7 @@ import gzip
 
 import gemmi
 import pandas as pd
+from pydantic_core import ValidationError
 import xmltodict
 
 from pisa_utils.models.data_models import (
@@ -17,6 +18,7 @@ from pisa_utils.models.data_models import (
     InterfaceSummary,
 )
 from pisa_utils.models.models import AllowedModelFileFormats
+from pisa_utils.models.validation_error_handlers import trigger_helpful_validation_error
 from pisa_utils.utils import (
     extract_ligand_contents,
     id_is_ligand,
@@ -544,7 +546,10 @@ class ConvertInterfaceXMLToJSONs(ConvertXMLToJSON):
                 molecule["label_seq_id_end"] = label_seq_id_end
 
         # Validate through pydantic model
-        interface_output = Interface(**interface_output).model_dump()
+        try:
+            interface_output = Interface(**interface_output).model_dump()
+        except ValidationError as e:
+            trigger_helpful_validation_error(e.errors())
 
         # Write interface JSON
         interface_json_path = os.path.join(
