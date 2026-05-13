@@ -12,6 +12,16 @@ from pydantic import (
 )
 
 from pisa_utils.constants import EXCLUDE_SIFTS_XREF_DB_FIELDS, PRECISION_DP, STANDARD_DP
+from pisa_utils.models.data_fields import (
+    ComplexAccessibleSurfaceAreaField,
+    ComplexBuriedSurfaceAreaField,
+    ComplexCompositionField,
+    ComplexDissociationEnergyField,
+    ComplexEntropyChangeField,
+    ComplexFormulaField,
+    ComplexInterfaceEnergyField,
+    PQSSetIdField,
+)
 from pisa_utils.models.labels import (
     ASU_COMPLEX,
     ATOM_LABEL,
@@ -27,7 +37,6 @@ from pisa_utils.models.labels import (
     COMPLEX_ASA,
     COMPLEX_BSA,
     COMPLEX_DISS_ENERGY,
-    COMPLEX_ENTROPY_CHANGE,
     COMPLEX_INSTANCE_ID,
     COMPLEX_STABILITY,
     COMPLEX_STABLE,
@@ -41,7 +50,6 @@ from pisa_utils.models.labels import (
     COMPONENT_TOTAL_ATOMS,
     COMPONENT_TOTAL_RESIDUES,
     COMPONENT_TYPE_ID,
-    COMPOSITION,
     COPIES_IN_UNIT_CELL,
     DISS_AREA,
     FIXED_INTERFACE,
@@ -53,7 +61,6 @@ from pisa_utils.models.labels import (
     INTERFACE_COVALENT_BONDS,
     INTERFACE_CRYSTALLOGRAPHIC_CONTACT,
     INTERFACE_CSS,
-    INTERFACE_ENERGY,
     INTERFACE_H_BONDS,
     INTERFACE_N_ATOMS,
     INTERFACE_N_BONDS,
@@ -899,31 +906,21 @@ class ComplexInfo(StrictModel):
         examples=["This assembly appears to be stable in solution."],
         validation_alias="score",
     )
-    diss_energy: float = Field(
-        ...,
-        description=COMPLEX_DISS_ENERGY,
-        examples=[2.2527918698, 215.83686019],
-    )
+    diss_energy: float = ComplexDissociationEnergyField()
     diss_energy_0: Optional[float] = Field(
         None, description=COMPLEX_STANARD_DISS_ENERGY
     )
     stable: Optional[bool] = Field(
         None, description=COMPLEX_STABLE, examples=[True, False]
     )
-    asa: float = Field(..., description=COMPLEX_ASA, examples=[154727.96462])
-    bsa: float = Field(..., description=COMPLEX_BSA, examples=[64624.674488])
-    entropy: float = Field(
-        ..., description=COMPLEX_ENTROPY_CHANGE, examples=[76.165107939]
-    )
+    asa: float = ComplexAccessibleSurfaceAreaField()
+    bsa: float = ComplexBuriedSurfaceAreaField()
+    entropy: float = ComplexEntropyChangeField()
     entropy_0: Optional[float] = Field(
         None, description=COMPLEX_STANDARD_ENTROPY_CHANGE
     )
     diss_area: float = Field(..., description=DISS_AREA, examples=[7375.0457086])
-    int_energy: float = Field(
-        ...,
-        description=INTERFACE_ENERGY,
-        examples=[-318.20296299],
-    )
+    int_energy: float = ComplexInterfaceEnergyField()
     n_uc: int = Field(
         ...,
         description=COPIES_IN_UNIT_CELL,
@@ -937,14 +934,8 @@ class ComplexInfo(StrictModel):
     symmetry_number: int = Field(
         ..., description=SYMMETRY_NUMBER, examples=[4], validation_alias="symNumber"
     )
-    formula: Optional[str] = Field(
-        None, description=FORMULA, examples=[None, "A", "(2)", "A(8)B(4)C(4)a(8)"]
-    )
-    composition: str = Field(
-        ...,
-        description=COMPOSITION,
-        examples=["ADEFIKNOBGJLCHMP[NAD](8)"],
-    )
+    formula: Optional[str] = ComplexFormulaField(default=None)
+    composition: str = ComplexCompositionField()
     interfaces: Optional[InterfaceLabels] = Field(
         None,
         description="Summary information of interfaces associated with the complex",
@@ -1061,9 +1052,7 @@ class ComplexInfo(StrictModel):
 
 
 class PQSSet(StrictModel):
-    pqs_set_id: int = Field(
-        ..., description=PQS_SET_ID, examples=[1, 2, 3, 25], validation_alias="ser_no"
-    )
+    pqs_set_id: int = PQSSetIdField(validation_alias="ser_no")
     all_chains_at_identity: bool = Field(..., description=None, examples=[True, False])
     stability: Optional[str] = Field(
         None,
