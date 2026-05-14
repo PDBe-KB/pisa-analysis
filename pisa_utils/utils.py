@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import os
 import os.path
@@ -237,6 +238,32 @@ def open_compressed(file_path: str, compressed: bool = False, mode: str = "rt"):
     else:
         logger.debug(f"Opening uncompressed file: {file_path}")
         return open(file_path, mode)
+
+
+def save_json(data: dict, output_path: str, compressed: bool = False) -> None:
+    """
+    Save a dictionary to a JSON file, with optional gzip compression.
+
+    :param data: Data to save to JSON.
+    :type data: dict
+    :param output_path: Path to the output JSON file.
+    :type output_path: str
+    :param compressed: Whether to compress the output file with gzip. Defaults to
+        False.
+    :type compressed: bool, optional
+    """
+
+    if compressed and not output_path.endswith(".gz"):
+        output_path += ".gz"
+
+    if compressed:
+        with gzip.open(output_path, "wt") as json_file:
+            json.dump(data, json_file, indent=4)
+    else:
+        with open(output_path, "w") as json_file:
+            json.dump(data, json_file, indent=4)
+
+    logger.info(f"JSON file written successfully: {output_path}")
 
 
 def compress_existing_file(file_path: str) -> None:

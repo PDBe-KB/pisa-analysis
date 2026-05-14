@@ -24,6 +24,7 @@ from pisa_utils.utils import (
     id_is_ligand,
     is_int_or_float,
     open_compressed,
+    save_json,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -353,15 +354,7 @@ class ConvertXMLToJSON(ABC):
         :type data: dict
         """
 
-        if self.compressed and not path_json.endswith(".gz"):
-            path_json += ".gz"
-
-        if self.compressed:
-            with gzip.open(path_json, "wt") as json_file:
-                json.dump(data, json_file, indent=4)
-        else:
-            with open(path_json, "w") as json_file:
-                json.dump(data, json_file, indent=4)
+        save_json(data, path_json, compressed=self.compressed)
 
         LOGGER.info(f"JSON file written successfully: {path_json}")
 
