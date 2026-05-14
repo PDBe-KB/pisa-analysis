@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 import json
 import logging
-import gzip
 
 from pisa_utils.models.post_process_models import (
     PQSSetRow,
     ComplexTableRow,
     ComplexTable,
 )
+from pisa_utils.utils import save_json
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,15 +31,7 @@ class PostProcesser(ABC):
         :type data: dict
         """
 
-        if self.compressed and not path_json.endswith(".gz"):
-            path_json += ".gz"
-
-        if self.compressed:
-            with gzip.open(path_json, "wt") as json_file:
-                json.dump(data, json_file, indent=4)
-        else:
-            with open(path_json, "w") as json_file:
-                json.dump(data, json_file, indent=4)
+        save_json(data, path_json, compressed=self.compressed)
 
         LOGGER.info(f"JSON file written successfully: {path_json}")
 
@@ -69,6 +61,7 @@ class PostProcessComplexTable(PostProcesser):
                         bsa=complex["bsa"],
                         int_energy=complex["int_energy"],
                         diss_energy=complex["diss_energy"],
+                        entropy=complex["entropy"],
                     )
                     for complex in complexes
                 ],
