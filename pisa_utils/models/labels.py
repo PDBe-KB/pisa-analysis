@@ -123,7 +123,7 @@ MOLECULE_CLASS = """Type of molecule"""
 INTERFACE_N_ATOMS = "Number of atoms at interface"
 INTERFACE_N_RESIDUES = "Number of residues at interface"
 
-INTERFACE_TOTAL = "Total number of interfaces across all (predicted) complexes"
+INTERFACE_TOTAL = "Total number of interfaces in complex"
 INTERFACE_NUMBER = """Unique interface identifier. Several unique interface identifiers
 may correspond to the same interface type."""
 

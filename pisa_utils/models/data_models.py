@@ -16,11 +16,16 @@ from pisa_utils.models.data_fields import (
     ComplexAccessibleSurfaceAreaField,
     ComplexBuriedSurfaceAreaField,
     ComplexCompositionField,
+    ComplexCopiesInUnitCellField,
     ComplexDissociationEnergyField,
     ComplexEntropyChangeField,
     ComplexFormulaField,
     ComplexInterfaceEnergyField,
+    ComplexKeyField,
+    ComplexNumberMacromoleculesField,
+    ComplexSymmetryNumberField,
     PQSSetIdField,
+    TotalInterfacesField,
 )
 from pisa_utils.models.labels import (
     ASU_COMPLEX,
@@ -50,7 +55,6 @@ from pisa_utils.models.labels import (
     COMPONENT_TOTAL_ATOMS,
     COMPONENT_TOTAL_RESIDUES,
     COMPONENT_TYPE_ID,
-    COPIES_IN_UNIT_CELL,
     DISS_AREA,
     FIXED_INTERFACE,
     FORMULA,
@@ -115,7 +119,6 @@ from pisa_utils.models.labels import (
     STATUS_DESCRIPTION,
     STATUS_NOTE,
     SYMMETRY_ID,
-    SYMMETRY_NUMBER,
     SYMMETRY_OPERATION,
     SYMMETRY_OPERATION_NUMBER,
     TX,
@@ -778,7 +781,7 @@ class InterfaceLabels(StrictModel):
     A minimal list of interfaces.
     """
 
-    n_interfaces: int = Field(..., description=INTERFACE_TOTAL, examples=[0, 1, 5, 58])
+    n_interfaces: int = TotalInterfacesField()
     interfaces: Optional[list[InterfaceLabel]] = Field(
         [],
         description="List of minimal interfaces",
@@ -885,11 +888,8 @@ class InterfaceSummary(StrictModel):
 class ComplexInfo(StrictModel):
     """Data for a given predicted complex"""
 
-    complex_key: Optional[int] = Field(
-        None,
-        description=COMPLEX_INSTANCE_ID,
-        examples=[1, 2, 3],
-        validation_alias="serial_no",
+    complex_key: Optional[int] = ComplexKeyField(
+        default=None, validation_alias="serial_no"
     )
     complex_type: int = Field(
         ...,
@@ -898,7 +898,7 @@ class ComplexInfo(StrictModel):
         validation_alias="id",
     )
     size: int = Field(..., description=NUM_COMPONENTS, examples=[24, 32, 48])
-    mmsize: int = Field(..., description=NUM_MACROMOLECULES, examples=[2, 6, 24])
+    mmsize: int = ComplexNumberMacromoleculesField()
     freesize: int = Field(..., description=None, examples=[16, 26, 40])
     stability_description: Optional[str] = Field(
         None,
@@ -919,21 +919,15 @@ class ComplexInfo(StrictModel):
     entropy_0: Optional[float] = Field(
         None, description=COMPLEX_STANDARD_ENTROPY_CHANGE
     )
-    diss_area: float = Field(..., description=DISS_AREA, examples=[7375.0457086])
+    diss_area: float = Field(..., description=DISS_AREA, examples=[7375.05])
     int_energy: float = ComplexInterfaceEnergyField()
-    n_uc: int = Field(
-        ...,
-        description=COPIES_IN_UNIT_CELL,
-        examples=[0, 1, 2, 3],
-    )
+    n_uc: int = ComplexCopiesInUnitCellField()
     n_diss: int = Field(
         ...,
         description=N_DISS,
         examples=[0, 1, 2, 3],
     )
-    symmetry_number: int = Field(
-        ..., description=SYMMETRY_NUMBER, examples=[4], validation_alias="symNumber"
-    )
+    symmetry_number: int = ComplexSymmetryNumberField(validation_alias="symNumber")
     formula: Optional[str] = ComplexFormulaField(default=None)
     composition: str = ComplexCompositionField()
     interfaces: Optional[InterfaceLabels] = Field(
@@ -1064,25 +1058,27 @@ class PQSSet(StrictModel):
         examples=[
             [
                 ComplexInfo(
-                    serial_no=1,
-                    id=1,
-                    size=2,
-                    mmsize=2,
-                    freesize=2,
-                    score=("This assembly appears to be stable in solution."),
-                    diss_energy=10.123456,
-                    asa=12345.6789,
-                    bsa=2345.6789,
-                    entropy=50.123456,
-                    diss_area=1234.5678,
-                    int_energy=-150.12345,
-                    n_uc=1,
-                    n_diss=0,
-                    symNumber=2,
-                    formula="A(2)",
-                    composition="AB(2)",
-                    interfaces=None,
-                    molecule=[],
+                    **{
+                        "serial_no": 1,
+                        "id": 1,
+                        "size": 2,
+                        "mmsize": 2,
+                        "freesize": 2,
+                        "score": "This assembly appears to be stable in solution.",
+                        "diss_energy": 10.123456,
+                        "asa": 12345.6789,
+                        "bsa": 2345.6789,
+                        "entropy": 50.123456,
+                        "diss_area": 1234.5678,
+                        "int_energy": -150.12345,
+                        "n_uc": 1,
+                        "n_diss": 0,
+                        "symNumber": 2,
+                        "formula": "A(2)",
+                        "composition": "AB(2)",
+                        "interfaces": None,
+                        "molecule": [],
+                    }
                 )
             ]
         ],

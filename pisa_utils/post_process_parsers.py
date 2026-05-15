@@ -62,6 +62,10 @@ class PostProcessComplexTable(PostProcesser):
                         int_energy=complex["int_energy"],
                         diss_energy=complex["diss_energy"],
                         entropy=complex["entropy"],
+                        mmsize=complex["mmsize"],
+                        n_uc=complex["n_uc"],
+                        symmetry_number=complex["symmetry_number"],
+                        n_interfaces=complex.get("interfaces", {}).get("n_interfaces"),
                     )
                     for complex in complexes
                 ],
