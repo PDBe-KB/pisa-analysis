@@ -127,7 +127,7 @@ from pisa_utils.models.labels import (
     VISUAL_ID,
     XRAY_RELATED,
 )
-from pisa_utils.utils import extract_ligand_contents, id_is_ligand
+from pisa_utils.field_handlers import extract_ligand_contents, id_is_ligand
 
 LOGGER = logging.getLogger(__name__)
 

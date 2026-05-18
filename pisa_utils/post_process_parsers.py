@@ -7,7 +7,7 @@ from pisa_utils.models.post_process_models import (
     ComplexTableRow,
     ComplexTable,
 )
-from pisa_utils.utils import save_json
+from pisa_utils.file_io import save_json
 
 LOGGER = logging.getLogger(__name__)
 

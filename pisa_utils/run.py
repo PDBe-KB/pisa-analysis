@@ -2,6 +2,7 @@ import logging
 import os
 
 from pisa_utils.analyze import AnalysePisa
+from pisa_utils.cli_tools import collect_base_args
 from pisa_utils.constants import SUBDIR_EXTENDED_DATA
 from pisa_utils.models.models import LigandProcessingMode
 from pisa_utils.parsers import (
@@ -14,7 +15,7 @@ from pisa_utils.parsers import (
 )
 from pisa_utils.post_process_parsers import PostProcessComplexTable
 from pisa_utils.run_pisa import run_pisa_service, run_pisalite
-from pisa_utils.utils import collect_base_args, validate_args
+from pisa_utils.cli_tools import validate_args
 
 
 def main():
