@@ -22,7 +22,7 @@ from pisa_utils.models.labels import COMPLEXES_IN_PQS_SET_POST_PROC
 
 class ComplexTableRow(BaseModel):
     complex_key: int = ComplexKeyField()
-    formula: str = ComplexFormulaField()
+    formula: Optional[str] = ComplexFormulaField()
     composition: str = ComplexCompositionField()
     asa: float = ComplexAccessibleSurfaceAreaField()
     bsa: float = ComplexBuriedSurfaceAreaField()
