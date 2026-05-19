@@ -35,6 +35,7 @@ def ComplexKeyField(**kwargs) -> Field:
 
 def ComplexFormulaField(**kwargs) -> Field:
     defaults = {
+        "default": None,
         "description": FORMULA,
         "examples": [None, "A", "(2)", "A(8)B(4)C(4)a(8)"],
     }

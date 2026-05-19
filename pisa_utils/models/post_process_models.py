@@ -1,5 +1,5 @@
 from typing import Optional
-
+from enum import Enum
 from pydantic import BaseModel, Field, RootModel
 
 from pisa_utils.models.data_fields import (
@@ -20,6 +20,11 @@ from pisa_utils.models.data_fields import (
 from pisa_utils.models.labels import COMPLEXES_IN_PQS_SET_POST_PROC
 
 
+class PISAAnalysisType(str, Enum):
+    PQS = "PQS set"
+    ASU = "Assymmetric unit"
+
+
 class ComplexTableRow(BaseModel):
     complex_key: int = ComplexKeyField()
     formula: Optional[str] = ComplexFormulaField()
@@ -36,7 +41,10 @@ class ComplexTableRow(BaseModel):
 
 
 class PQSSetRow(BaseModel):
-    pqs_set_id: int = PQSSetIdField()
+    pqs_set_id: Optional[int] = PQSSetIdField(default=None)
+    pisa_analysis_type: PISAAnalysisType = Field(
+        default=PISAAnalysisType.PQS, description="Type of complex from PISA analysis"
+    )
     complexes: list[ComplexTableRow] = Field(
         default=[], description=COMPLEXES_IN_PQS_SET_POST_PROC
     )
