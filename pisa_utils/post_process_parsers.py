@@ -13,7 +13,7 @@ from pisa_utils.file_io import save_json
 LOGGER = logging.getLogger(__name__)
 
 
-class PostProcesser(ABC):
+class PostProcessor(ABC):
     def __init__(self, input_json_path, output_json_path, compressed=False):
         self.input_json_path = input_json_path
         self.output_json_path = output_json_path
@@ -41,7 +41,7 @@ class PostProcesser(ABC):
         pass
 
 
-class PostProcessComplexTable(PostProcesser):
+class PostProcessComplexTable(PostProcessor):
     def parse(self):
         output = []
 
