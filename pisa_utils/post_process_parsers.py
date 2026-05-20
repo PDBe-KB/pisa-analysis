@@ -8,7 +8,7 @@ from pisa_utils.models.post_process_models import (
     ComplexTable,
     PISAAnalysisType,
 )
-from pisa_utils.file_io import save_json
+from pisa_utils.file_io import save_json, open_compressed
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class PostProcessor(ABC):
         self.output_json_path = output_json_path
         self.compressed = compressed
 
-        with open(self.input_json_path, "r") as f:
+        with open_compressed(self.input_json_path, compressed=self.compressed) as f:
             self.data = json.load(f)
 
     def save(self, path_json: str, data: dict) -> None:
