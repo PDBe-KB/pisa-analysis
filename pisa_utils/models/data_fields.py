@@ -95,7 +95,7 @@ def ComplexNumberMacromoleculesField(**kwargs) -> Field:
         "description": NUM_MACROMOLECULES,
         "examples": [2, 6, 24],
     }
-    return {**defaults, **kwargs}
+    return Field(**{**defaults, **kwargs})
 
 
 def ComplexCopiesInUnitCellField(**kwargs) -> Field:
