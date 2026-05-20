@@ -22,7 +22,7 @@ from pisa_utils.models.labels import COMPLEXES_IN_PQS_SET_POST_PROC
 
 class PISAAnalysisType(str, Enum):
     PQS = "PQS set"
-    ASU = "Assymmetric unit"
+    ASU = "Asymmetric unit"
 
 
 class ComplexTableRow(BaseModel):
