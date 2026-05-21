@@ -13,6 +13,7 @@ from pydantic import (
 
 from pisa_utils.constants import EXCLUDE_SIFTS_XREF_DB_FIELDS, PRECISION_DP, STANDARD_DP
 from pisa_utils.models.data_fields import (
+    AuthAsymIdField,
     ComplexAccessibleSurfaceAreaField,
     ComplexBuriedSurfaceAreaField,
     ComplexCompositionField,
@@ -23,7 +24,11 @@ from pisa_utils.models.data_fields import (
     ComplexInterfaceEnergyField,
     ComplexKeyField,
     ComplexNumberMacromoleculesField,
+    ComplexSignificanceScoreField,
     ComplexSymmetryNumberField,
+    InterfaceIdField,
+    InterfaceTypeField,
+    MoleculeClassField,
     PQSSetIdField,
     TotalInterfacesField,
 )
@@ -32,7 +37,6 @@ from pisa_utils.models.labels import (
     ATOM_LABEL,
     ATOM_LABEL_EXAMPLES,
     AUTH_ASYM_ID,
-    AUTH_ASYM_ID_EXAMPLES,
     AUTH_SEQ_ID,
     BOND_DISTANCES,
     CELL_I,
@@ -64,7 +68,6 @@ from pisa_utils.models.labels import (
     INTERFACE_CONTAINS_COVALENT_LINKAGE,
     INTERFACE_COVALENT_BONDS,
     INTERFACE_CRYSTALLOGRAPHIC_CONTACT,
-    INTERFACE_CSS,
     INTERFACE_H_BONDS,
     INTERFACE_N_ATOMS,
     INTERFACE_N_BONDS,
@@ -72,19 +75,16 @@ from pisa_utils.models.labels import (
     INTERFACE_N_RESIDUES,
     INTERFACE_N_SALT_BRIDGES,
     INTERFACE_N_SS_BONDS,
-    INTERFACE_NUMBER,
     INTERFACE_OTHER_BONDS,
     INTERFACE_P_VALUE,
     INTERFACE_SALT_BRIDGES,
     INTERFACE_SOLVATION_ENERGY,
     INTERFACE_SS_BONDS,
     INTERFACE_TOTAL,
-    INTERFACE_TYPE,
     ISOLATED_COMPONENT_ASA,
     JOB_STATUS,
     LABEL_ASYM_ID,
     LABEL_SEQ_ID,
-    MOLECULE_CLASS,
     MULTIMERIC_STATE,
     N_COMPONENT_SURFACE_ATOMS,
     N_COMPONENT_SURFACE_RESIDUES,
@@ -185,10 +185,8 @@ class StrictModel(BaseModel):
 
 class Bond(StrictModel):
     # First chain info
-    auth_asym_id_1: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    auth_asym_id_1: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for first molecule in bond",
         validation_alias="chain-1",
     )
     label_asym_id_1: Optional[str] = Field(
@@ -241,10 +239,8 @@ class Bond(StrictModel):
     )
 
     # Second chain info
-    auth_asym_id_2: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    auth_asym_id_2: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for second molecule in bond",
         validation_alias="chain-2",
     )
     label_asym_id_2: Optional[str] = Field(
@@ -410,12 +406,7 @@ class Molecule(StrictModel):
         description=COMPONENT_ID,
         examples=["Protein"],
     )
-    auth_asym_id: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
-        validation_alias="chain_id",
-    )
+    auth_asym_id: str = AuthAsymIdField(validation_alias="chain_id")
     label_asym_id: Optional[str] = Field(None, description=LABEL_ASYM_ID, examples=[])
     ccd_id: Optional[str] = Field(None)
 
@@ -425,9 +416,7 @@ class Molecule(StrictModel):
     label_seq_id_start: Optional[int] = Field(None)
     label_seq_id_end: Optional[int] = Field(None)
 
-    molecule_class: str = Field(
-        ..., description=MOLECULE_CLASS, examples=["Protein"], validation_alias="class"
-    )
+    molecule_class: str = MoleculeClassField(validation_alias="class")
     symmetry_id: Optional[str] = Field(
         None, description=SYMMETRY_ID, examples=["0_555", "1_555"]
     )
@@ -573,7 +562,7 @@ class Molecule(StrictModel):
 
 
 class InterfaceInfo(StrictModel):
-    int_type: int = Field(..., description=INTERFACE_TYPE, validation_alias="type")
+    int_type: int = InterfaceTypeField(validation_alias="type")
     n_occ: int = Field(...)
     int_area: float = Field(
         ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
@@ -592,9 +581,7 @@ class InterfaceInfo(StrictModel):
     )
 
     # Present when --as-is set to false
-    css: Optional[float] = Field(
-        None, description=INTERFACE_CSS, examples=[1.0, 0.8, 0.5]
-    )
+    css: Optional[float] = ComplexSignificanceScoreField()
     overlap: Optional[str] = Field(None, description=None, examples=["No"])
     x_rel: Optional[bool] = Field(
         None, description=XRAY_RELATED, examples=[True, False], validation_alias="x-rel"
@@ -647,7 +634,7 @@ class InterfaceInfo(StrictModel):
 
 
 class Interface(StrictModel):
-    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3, 10])
+    interface_id: int = InterfaceIdField()
     n_interfaces: int = Field(..., description=INTERFACE_TOTAL, examples=[58, 100, 200])
 
     status: str = Field(..., description=STATUS, examples=["Ok"])
@@ -660,12 +647,7 @@ class Interface(StrictModel):
 
 
 class MoleculeLabels(StrictModel):
-    auth_asym_id: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
-        validation_alias="chain_id",
-    )
+    auth_asym_id: str = AuthAsymIdField(validation_alias="chain_id")
     label_asym_id: Optional[str] = Field(None, description=LABEL_ASYM_ID, examples=[])
     visual_id: Optional[str] = Field(
         None, description=VISUAL_ID, examples=["A", "B", "C", "a", "b", "c", "{-}"]
@@ -762,13 +744,9 @@ class MoleculeLabels(StrictModel):
 
 
 class InterfaceLabel(StrictModel):
-    interface_id: int = Field(
-        ..., description=INTERFACE_NUMBER, examples=[1, 2, 60], validation_alias="id"
-    )
+    interface_id: int = InterfaceIdField(validation_alias="id")
     dissociates: bool = Field(..., description=None, examples=[True, False])
-    css: Optional[float] = Field(
-        None, description=INTERFACE_CSS, examples=[0.0, 1.0, 0.8, 0.5]
-    )
+    css: Optional[float] = ComplexSignificanceScoreField()
 
     @field_validator("dissociates", mode="before")
     @classmethod
@@ -802,11 +780,9 @@ class InterfaceLabels(StrictModel):
 
 
 class InterfaceSummaryInfo(StrictModel):
-    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
-    auth_asym_id_1: str = Field(
-        ...,
+    interface_id: int = InterfaceIdField()
+    auth_asym_id_1: str = AuthAsymIdField(
         description=f"{AUTH_ASYM_ID} for first molecule in interface",
-        examples=AUTH_ASYM_ID_EXAMPLES,
     )
     int_natoms_1: int = Field(
         ...,
@@ -818,10 +794,8 @@ class InterfaceSummaryInfo(StrictModel):
         description=f"{INTERFACE_N_RESIDUES} for first molecule in interface",
         examples=[10, 25, 50],
     )
-    auth_asym_id_2: str = Field(
-        ...,
+    auth_asym_id_2: str = AuthAsymIdField(
         description=f"{AUTH_ASYM_ID} for second molecule in interface",
-        examples=AUTH_ASYM_ID_EXAMPLES,
         validation_alias="chain_id",
     )
     int_natoms_2: int = Field(
@@ -847,9 +821,7 @@ class InterfaceSummaryInfo(StrictModel):
         ..., description=INTERFACE_P_VALUE, examples=[0.01, 0.05, 0.1, 0.9]
     )
     # Present when --as-is set to false
-    css: Optional[float] = Field(
-        None, description=INTERFACE_CSS, examples=[1.0, 0.8, 0.5]
-    )
+    css: Optional[float] = ComplexSignificanceScoreField()
     complex_keys_with_interface: Optional[list[int]] = Field(
         None,
         description="List of complex keys where this interface is present",
@@ -870,7 +842,7 @@ class InterfaceSummaryInfo(StrictModel):
 
 
 class InterfaceTypeLabel(StrictModel):
-    int_type: int = Field(..., description=INTERFACE_TYPE)
+    int_type: int = InterfaceTypeField()
     interfaces: list[InterfaceSummaryInfo] = Field(
         ...,
         description="List of interface summaries for this interface type",
@@ -1243,26 +1215,17 @@ class Complex(StrictModel):
 
 
 class InterfaceExtensionLabels(StrictModel):
-    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
-    int_type: int = Field(
-        ...,
-        description=INTERFACE_TYPE,
-        examples=[1, 2, 5],
-        validation_alias="serial_number",
-    )
-    auth_asym_id_1: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    interface_id: int = InterfaceIdField()
+    int_type: int = InterfaceTypeField(validation_alias="serial_number")
+    auth_asym_id_1: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for first molecule in interface",
         validation_alias="monomer_1",
     )
     ccd_id_1: Optional[str] = Field(None)
     auth_seq_id_start_1: Optional[int] = Field(None)
     auth_seq_id_end_1: Optional[int] = Field(None)
-    auth_asym_id_2: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    auth_asym_id_2: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for second molecule in interface",
         validation_alias="monomer_2",
     )
     ccd_id_2: Optional[str] = Field(None)
@@ -1535,21 +1498,11 @@ class Component(StrictModel):
         description=COMPONENT_ID,
         examples=["A", "[NA]A:301", "o7", "[GOL]A:302"],
     )
-    auth_asym_id: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
-        validation_alias="chain_id",
-    )
+    auth_asym_id: str = AuthAsymIdField(validation_alias="chain_id")
     ccd_id: Optional[str] = Field(None)
     auth_seq_id_start: Optional[int] = Field(None)
     auth_seq_id_end: Optional[int] = Field(None)
-    molecule_class: str = Field(
-        ...,
-        description=MOLECULE_CLASS,
-        examples=["Protein"],
-        validation_alias="monomer_class",
-    )
+    molecule_class: str = MoleculeClassField(validation_alias="monomer_class")
     total_atoms: int = Field(..., description=COMPONENT_TOTAL_ATOMS, examples=[1846])
     total_residues: int = Field(
         ..., description=COMPONENT_TOTAL_RESIDUES, examples=[248]

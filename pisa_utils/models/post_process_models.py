@@ -3,6 +3,7 @@ from enum import Enum
 from pydantic import BaseModel, Field, RootModel
 
 from pisa_utils.models.data_fields import (
+    AuthAsymIdField,
     ComplexAccessibleSurfaceAreaField,
     ComplexBuriedSurfaceAreaField,
     ComplexCompositionField,
@@ -13,7 +14,11 @@ from pisa_utils.models.data_fields import (
     ComplexInterfaceEnergyField,
     ComplexKeyField,
     ComplexNumberMacromoleculesField,
+    ComplexSignificanceScoreField,
     ComplexSymmetryNumberField,
+    InterfaceIdField,
+    InterfaceTypeField,
+    MoleculeClassField,
     PQSSetIdField,
     TotalInterfacesField,
 )
@@ -48,6 +53,31 @@ class PQSSetRow(BaseModel):
     complexes: list[ComplexTableRow] = Field(
         default=[], description=COMPLEXES_IN_PQS_SET_POST_PROC
     )
+
+
+class InterfaceDetailsComponent(BaseModel):
+    pass
+    auth_asym_id: str = AuthAsymIdField()
+    molecule_class: str = MoleculeClassField()
+    # symmetry_operation
+    # symmetry_id
+    # int_natoms
+    # int_nres
+    # int_area
+    # int_natoms
+    # int_nres
+    # int_area
+    # asa
+    # solv_energy
+    # int_solv_energy
+    # pvalue
+
+
+class InterfaceDetails(BaseModel):
+    interface_id: int = InterfaceIdField()
+    int_type: int = InterfaceTypeField()
+    css: Optional[float] = ComplexSignificanceScoreField()
+    components: list[InterfaceDetailsComponent] = Field()
 
 
 class ComplexTable(RootModel[list[PQSSetRow]]):

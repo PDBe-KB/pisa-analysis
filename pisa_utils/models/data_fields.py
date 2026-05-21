@@ -1,6 +1,8 @@
 from pydantic import Field
 
 from pisa_utils.models.labels import (
+    AUTH_ASYM_ID,
+    AUTH_ASYM_ID_EXAMPLES,
     COMPLEX_ASA,
     COMPLEX_BSA,
     COMPLEX_DISS_ENERGY,
@@ -10,11 +12,23 @@ from pisa_utils.models.labels import (
     COMPOSITION,
     COPIES_IN_UNIT_CELL,
     FORMULA,
+    INTERFACE_CSS,
+    INTERFACE_NUMBER,
     INTERFACE_TOTAL,
+    INTERFACE_TYPE,
+    MOLECULE_CLASS,
     NUM_MACROMOLECULES,
     PQS_SET_ID,
     SYMMETRY_NUMBER,
 )
+
+
+def AuthAsymIdField(**kwargs) -> Field:
+    defaults = {
+        "description": AUTH_ASYM_ID,
+        "examples": AUTH_ASYM_ID_EXAMPLES,
+    }
+    return Field(**{**defaults, **kwargs})
 
 
 def PQSSetIdField(**kwargs) -> Field:
@@ -118,5 +132,38 @@ def TotalInterfacesField(**kwargs) -> Field:
     defaults = {
         "description": INTERFACE_TOTAL,
         "examples": [0, 1, 5, 58],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def InterfaceIdField(**kwargs) -> Field:
+    defaults = {
+        "description": INTERFACE_NUMBER,
+        "examples": [1, 2, 3, 10],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def InterfaceTypeField(**kwargs) -> Field:
+    defaults = {
+        "description": INTERFACE_TYPE,
+        "examples": [1, 2, 5],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def ComplexSignificanceScoreField(**kwargs) -> Field:
+    defaults = {
+        "default": None,
+        "description": INTERFACE_CSS,
+        "examples": [1.0, 0.8, 0.5],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def MoleculeClassField(**kwargs) -> Field:
+    defaults = {
+        "description": MOLECULE_CLASS,
+        "examples": ["Protein", "DNA", "RNA", "Ligand"],
     }
     return Field(**{**defaults, **kwargs})
