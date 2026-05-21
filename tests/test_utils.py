@@ -4,7 +4,8 @@ from unittest import TestCase
 
 from gemmi import cif
 
-from pisa_utils.utils import create_pisa_config, parse_xml_file, read_uniprot_info
+from pisa_utils.file_io import create_pisa_config, parse_xml_file
+from pisa_utils.field_handlers import read_uniprot_info
 
 
 class TestUtils(TestCase):

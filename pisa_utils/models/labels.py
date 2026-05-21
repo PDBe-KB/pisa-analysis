@@ -12,6 +12,9 @@ based on its dissociation energy."""
 COMPLEXES_IN_PQS_SET = """List of extended information about all complexes in the PQS
 set. Each complex in the PQS set makes up a solution within the crystal."""
 
+COMPLEXES_IN_PQS_SET_POST_PROC = """List of complexes in the PQS set.
+Each complex in the PQS set makes up a solution within the crystal."""
+
 COMPLEXES_IN_ASU = """Extended information on the components of the crystallographic
 unit cell taken as is, without prediction of complexes into PQS sets"""
 
@@ -68,8 +71,8 @@ dissociation, at RTP in kcal/mol"""
 
 DISS_AREA = """Dissociation Interface Area (A^2)"""
 
-INTERFACE_ENERGY = """The solvation free energy gain upon formation of the complex, in
-kcal/mol"""
+COMPLEX_INTERFACE_ENERGY = """The solvation free energy gain upon formation of the
+complex, in kcal/mol"""
 
 COPIES_IN_UNIT_CELL = """The number of given complexes found in a unit cell"""
 
@@ -120,7 +123,7 @@ MOLECULE_CLASS = """Type of molecule"""
 INTERFACE_N_ATOMS = "Number of atoms at interface"
 INTERFACE_N_RESIDUES = "Number of residues at interface"
 
-INTERFACE_TOTAL = "Total number of interfaces across all (predicted) complexes"
+INTERFACE_TOTAL = "Total number of interfaces"
 INTERFACE_NUMBER = """Unique interface identifier. Several unique interface identifiers
 may correspond to the same interface type."""
 

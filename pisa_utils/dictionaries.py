@@ -1,4 +1,4 @@
-from pisa_utils.utils import read_uniprot_info
+from pisa_utils.field_handlers import read_uniprot_info
 
 
 def get_molecules_dict(molecules):

@@ -1,0 +1,37 @@
+[
+    {
+        "pqs_set_id": null,
+        "pisa_analysis_type": "Asymmetric unit",
+        "complexes": [
+            {
+                "complex_key": 0,
+                "composition": "ACDEF[PGE](2)[EDO](2)[PG4][MG](5)[FHU]",
+                "asa": 30301.0,
+                "bsa": 14879.2,
+                "int_energy": -78.5,
+                "diss_energy": 27.891,
+                "entropy": 11.7,
+                "mmsize": 5,
+                "n_uc": 0,
+                "symmetry_number": 1
+            }
+        ]
+    },
+    {
+        "pqs_set_id": 1,
+        "complexes": [
+            {
+                "complex_key": 1,
+                "composition": "ACDEF[PGE](2)[EDO](2)[ZN][PG4][MG](5)[FHU]",
+                "asa": 30770.9,
+                "bsa": 14507.2,
+                "int_energy": -94.4,
+                "diss_energy": 27.836,
+                "entropy": 11.8,
+                "mmsize": 5,
+                "n_uc": 4,
+                "symmetry_number": 1
+            }
+        ]
+    }
+]

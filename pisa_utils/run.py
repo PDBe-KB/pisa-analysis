@@ -2,6 +2,7 @@ import logging
 import os
 
 from pisa_utils.analyze import AnalysePisa
+from pisa_utils.cli_tools import collect_base_args
 from pisa_utils.constants import SUBDIR_EXTENDED_DATA
 from pisa_utils.models.models import LigandProcessingMode
 from pisa_utils.parsers import (
@@ -12,8 +13,9 @@ from pisa_utils.parsers import (
     ConvertInterfaceListToJSON,
     ConvertInterfaceXMLToJSONs,
 )
+from pisa_utils.post_process_parsers import PostProcessComplexTable
 from pisa_utils.run_pisa import run_pisa_service, run_pisalite
-from pisa_utils.utils import collect_base_args, validate_args
+from pisa_utils.cli_tools import validate_args
 
 
 def main():
@@ -178,6 +180,17 @@ def service():
                 path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
                 compressed=args.compress_output,
             ),
+            PostProcessComplexTable(
+                input_json_path=os.path.join(
+                    args.output_json,
+                    "assemblies.json" + (".gz" if args.compress_output else ""),
+                ),
+                output_json_path=os.path.join(
+                    args.output_json,
+                    "complex_table.json" + (".gz" if args.compress_output else ""),
+                ),
+                compressed=args.compress_output,
+            ),
         )
 
         for parser in data_parser:
@@ -187,3 +200,6 @@ def service():
 
 if __name__ == "__main__":
     main()
+
+# status.json -- store job error meesage/code. Potential code mapping
+# Fix API handling of Slurm failure messages -- e.g. re-run if Slurm error, not PISA failure.

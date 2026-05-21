@@ -9,6 +9,7 @@ import pandas as pd
 from pydantic_core import ValidationError
 import xmltodict
 
+from pisa_utils.file_io import open_compressed, save_json
 from pisa_utils.models.data_models import (
     Complex,
     ComplexExtended,
@@ -19,11 +20,10 @@ from pisa_utils.models.data_models import (
 )
 from pisa_utils.models.models import AllowedModelFileFormats
 from pisa_utils.models.validation_error_handlers import trigger_helpful_validation_error
-from pisa_utils.utils import (
+from pisa_utils.field_handlers import (
     extract_ligand_contents,
     id_is_ligand,
     is_int_or_float,
-    open_compressed,
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -353,15 +353,7 @@ class ConvertXMLToJSON(ABC):
         :type data: dict
         """
 
-        if self.compressed and not path_json.endswith(".gz"):
-            path_json += ".gz"
-
-        if self.compressed:
-            with gzip.open(path_json, "wt") as json_file:
-                json.dump(data, json_file, indent=4)
-        else:
-            with open(path_json, "w") as json_file:
-                json.dump(data, json_file, indent=4)
+        save_json(data, path_json, compressed=self.compressed)
 
         LOGGER.info(f"JSON file written successfully: {path_json}")
 

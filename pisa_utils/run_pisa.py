@@ -6,8 +6,9 @@ from time import time
 from typing import Optional, Tuple
 
 from pisa_utils.constants import SUBDIR_EXTENDED_DATA
+from pisa_utils.file_io import compress_existing_file
 from pisa_utils.models.models import DataModes, LigandProcessingMode
-from pisa_utils.utils import create_pisa_config, compress_existing_file
+from pisa_utils.file_io import create_pisa_config
 
 
 def run_pisalite(
