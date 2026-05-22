@@ -12,14 +12,23 @@ from pisa_utils.models.labels import (
     COMPOSITION,
     COPIES_IN_UNIT_CELL,
     FORMULA,
+    INTERFACE_AREA,
     INTERFACE_CSS,
+    INTERFACE_N_ATOMS,
+    INTERFACE_N_RESIDUES,
     INTERFACE_NUMBER,
+    INTERFACE_P_VALUE,
+    INTERFACE_SOLVATION_ENERGY,
     INTERFACE_TOTAL,
     INTERFACE_TYPE,
+    ISOLATED_COMPONENT_ASA,
     MOLECULE_CLASS,
     NUM_MACROMOLECULES,
     PQS_SET_ID,
+    SOLVATION_ENERGY_ISOLATED_STRUCTURE,
+    SYMMETRY_ID,
     SYMMETRY_NUMBER,
+    SYMMETRY_OPERATION,
 )
 
 
@@ -128,6 +137,22 @@ def ComplexSymmetryNumberField(**kwargs) -> Field:
     return Field(**{**defaults, **kwargs})
 
 
+def SymmetryOperationField(**kwargs) -> Field:
+    defaults = {
+        "description": SYMMETRY_OPERATION,
+        "examples": ["x,y,z", "-X-1,Y,-Z+1/2", "X,Y,Z"],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def SymmetryIdField(**kwargs) -> Field:
+    defaults = {
+        "description": SYMMETRY_ID,
+        "examples": ["0_555", "1_555", "3_455"],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
 def TotalInterfacesField(**kwargs) -> Field:
     defaults = {
         "description": INTERFACE_TOTAL,
@@ -165,5 +190,61 @@ def MoleculeClassField(**kwargs) -> Field:
     defaults = {
         "description": MOLECULE_CLASS,
         "examples": ["Protein", "DNA", "RNA", "Ligand"],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def PValueField(**kwargs) -> Field:
+    defaults = {
+        "description": INTERFACE_P_VALUE,
+        "examples": [0.01, 0.05, 0.1, 0.9],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def InterfaceNumAtomsField(**kwargs) -> Field:
+    defaults = {
+        "description": INTERFACE_N_ATOMS,
+        "examples": [100, 200, 325],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def InterfaceNumResiduesField(**kwargs) -> Field:
+    defaults = {
+        "description": INTERFACE_N_RESIDUES,
+        "examples": [10, 25, 50],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def InterfaceAreaField(**kwargs) -> Field:
+    defaults = {
+        "description": INTERFACE_AREA,
+        "examples": [150.5, 300.75, 12.0],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def InterfaceSolvationEnergyField(**kwargs) -> Field:
+    defaults = {
+        "description": INTERFACE_SOLVATION_ENERGY,
+        "examples": [-18.2, -5.5, -10.0, -2.3],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def ComponentTotalSurfaceAreaField(**kwargs) -> Field:
+    defaults = {
+        "description": ISOLATED_COMPONENT_ASA,
+        "examples": [11112.6],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def ComponentIsolatedSolvationEnergyField(**kwargs) -> Field:
+    defaults = {
+        "description": SOLVATION_ENERGY_ISOLATED_STRUCTURE,
+        "examples": [-220.0],
     }
     return Field(**{**defaults, **kwargs})

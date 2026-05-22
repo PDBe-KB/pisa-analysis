@@ -16,13 +16,26 @@ from pisa_utils.models.data_fields import (
     ComplexNumberMacromoleculesField,
     ComplexSignificanceScoreField,
     ComplexSymmetryNumberField,
+    ComponentIsolatedSolvationEnergyField,
+    ComponentTotalSurfaceAreaField,
+    InterfaceAreaField,
     InterfaceIdField,
+    InterfaceNumAtomsField,
+    InterfaceNumResiduesField,
+    InterfaceSolvationEnergyField,
     InterfaceTypeField,
     MoleculeClassField,
     PQSSetIdField,
+    PValueField,
+    SymmetryIdField,
+    SymmetryOperationField,
     TotalInterfacesField,
 )
-from pisa_utils.models.labels import COMPLEXES_IN_PQS_SET_POST_PROC
+from pisa_utils.models.labels import (
+    COMPLEXES_IN_PQS_SET_POST_PROC,
+    INTERFACE_COMPONENT_P_VALUE,
+    INTERFACE_COMPONENT_SOLVATION_ENERGY,
+)
 
 
 class PISAAnalysisType(str, Enum):
@@ -56,28 +69,29 @@ class PQSSetRow(BaseModel):
 
 
 class InterfaceDetailsComponent(BaseModel):
-    pass
     auth_asym_id: str = AuthAsymIdField()
     molecule_class: str = MoleculeClassField()
-    # symmetry_operation
-    # symmetry_id
-    # int_natoms
-    # int_nres
-    # int_area
-    # int_natoms
-    # int_nres
-    # int_area
-    # asa
-    # solv_energy
-    # int_solv_energy
-    # pvalue
+    symmetry_operation: str = SymmetryOperationField()
+    symmetry_id: str = SymmetryIdField()
+    int_natoms: int = InterfaceNumAtomsField()
+    int_nres: int = InterfaceNumResiduesField()
+    int_area: float = InterfaceAreaField()
+    asa: float = ComponentTotalSurfaceAreaField()
+    solv_energy: Optional[float] = ComponentIsolatedSolvationEnergyField(default=None)
+    # FIXME: Change to component-specific name, avoid confusion with interface at large
+    int_solv_energy: float = InterfaceSolvationEnergyField(
+        description=INTERFACE_COMPONENT_SOLVATION_ENERGY
+    )
+    pvalue: float = PValueField(description=INTERFACE_COMPONENT_P_VALUE)
 
 
 class InterfaceDetails(BaseModel):
     interface_id: int = InterfaceIdField()
     int_type: int = InterfaceTypeField()
     css: Optional[float] = ComplexSignificanceScoreField()
-    components: list[InterfaceDetailsComponent] = Field()
+    components: list[InterfaceDetailsComponent] = Field(
+        description="List of data on components that form the interface",
+    )
 
 
 class ComplexTable(RootModel[list[PQSSetRow]]):
