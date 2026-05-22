@@ -19,9 +19,6 @@ class PostProcessor(ABC):
         self.output_json_path = output_json_path
         self.compressed = compressed
 
-        with open_compressed(self.input_json_path, compressed=self.compressed) as f:
-            self.data = json.load(f)
-
     def save(self, path_json: str, data: dict) -> None:
         """
         Save data to JSON file, with optional gzip compression.
@@ -38,11 +35,14 @@ class PostProcessor(ABC):
 
     @abstractmethod
     def parse(self):
-        pass
+        with open_compressed(self.input_json_path, compressed=self.compressed) as f:
+            self.data = json.load(f)
 
 
 class PostProcessComplexTable(PostProcessor):
     def parse(self):
+        super().parse()
+
         output = []
 
         # Add ASU complex
