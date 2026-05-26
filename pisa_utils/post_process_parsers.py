@@ -165,12 +165,13 @@ class PostProcessInterfaceDetailsList(PostProcessor):
 
     def parse(self):
         super().parse()
+        LOGGER.info("Generating interface details file for all interfaces")
 
         output = []
 
         # Iterate over interfaces JSONs
         for interface_json_file in os.listdir(self.path_interfaces):
-            LOGGER.info(f"Processing interface JSON file: {interface_json_file}")
+            LOGGER.debug(f"Processing interface JSON file: {interface_json_file}")
 
             with open_compressed(
                 os.path.join(self.path_interfaces, interface_json_file),
@@ -190,7 +191,7 @@ class PostProcessInterfaceDetailsList(PostProcessor):
                 auth_asym_id = molecule["auth_asym_id"]
                 component_id = molecule["component_id"]
 
-                LOGGER.info(f"Processing molecule with component_id: {component_id}")
+                LOGGER.debug(f"Processing molecule with component_id: {component_id}")
 
                 monomer_data_filtered = self._extract_monomer_data(
                     component_id=component_id, interface_auth_asym_id=auth_asym_id
@@ -224,6 +225,9 @@ class PostProcessInterfaceDetailsList(PostProcessor):
                 components=components,
             )
             output.append(interface_details)
+
+        # Order output list by interface ID for consistency
+        output.sort(key=lambda x: x.interface_id)
 
         interface_details_list = InterfaceDetailsList(output).model_dump()
 
