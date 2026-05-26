@@ -155,9 +155,12 @@ class PostProcessInterfaceDetailsList(PostProcessor):
             LOGGER.error(f"No monomer data found for component ID: {component_id}")
             raise ValueError(f"No monomer data found for component ID: {component_id}")
 
-        if interface_auth_asym_id:
-            assert monomer_data_filtered["auth_asym_id"] == interface_auth_asym_id, (
-                f"Component ID mismatch: interface says {interface_auth_asym_id}, "
+        if (
+            interface_auth_asym_id
+            and monomer_data_filtered["auth_asym_id"] != interface_auth_asym_id
+        ):
+            raise ValueError(
+                f"auth_asym_id mismatch: interface says {interface_auth_asym_id}, "
                 f"but monomer data is {monomer_data_filtered['auth_asym_id']}"
             )
 
