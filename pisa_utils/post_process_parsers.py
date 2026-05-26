@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import json
 import logging
 import os
+from typing import Optional
 
 from pisa_utils.models.post_process_models import (
     InterfaceDetails,
@@ -125,7 +126,7 @@ class PostProcessInterfaceDetailsList(PostProcessor):
         self.path_interfaces = path_interfaces
 
     def _extract_monomer_data(
-        self, component_id: str, interface_auth_asym_id: str = None
+        self, component_id: str, interface_auth_asym_id: Optional[str] = None
     ) -> dict:
         """
         Extract monomer (component) data for a given component ID
