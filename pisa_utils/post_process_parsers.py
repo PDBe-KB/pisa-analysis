@@ -172,8 +172,30 @@ class PostProcessInterfaceDetailsList(PostProcessor):
 
         output = []
 
+        if not os.path.isdir(self.path_interfaces):
+            LOGGER.warning(
+                f"Interface JSON directory not found: {self.path_interfaces}. "
+                "No interface details JSON will be created."
+            )
+            return
+
+        ext = ".json.gz" if self.compressed else ".json"
+        interface_files = [
+            f
+            for f in os.listdir(self.path_interfaces)
+            if f.startswith("interface_") and f.endswith(ext)
+            and os.path.isfile(os.path.join(self.path_interfaces, f))
+        ]
+
+        if not interface_files:
+            LOGGER.warning(
+                "No interface JSON files found in directory: "
+                f"{self.path_interfaces}. No interface details JSON will be created."
+            )
+            return
+
         # Iterate over interfaces JSONs
-        for interface_json_file in os.listdir(self.path_interfaces):
+        for interface_json_file in interface_files:
             LOGGER.debug(f"Processing interface JSON file: {interface_json_file}")
 
             with open_compressed(
