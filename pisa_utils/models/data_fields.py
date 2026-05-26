@@ -9,6 +9,8 @@ from pisa_utils.models.labels import (
     COMPLEX_ENTROPY_CHANGE,
     COMPLEX_INSTANCE_ID,
     COMPLEX_INTERFACE_ENERGY,
+    COMPONENT_TOTAL_ATOMS,
+    COMPONENT_TOTAL_RESIDUES,
     COMPOSITION,
     COPIES_IN_UNIT_CELL,
     FORMULA,
@@ -23,6 +25,8 @@ from pisa_utils.models.labels import (
     INTERFACE_TYPE,
     ISOLATED_COMPONENT_ASA,
     MOLECULE_CLASS,
+    N_COMPONENT_SURFACE_ATOMS,
+    N_COMPONENT_SURFACE_RESIDUES,
     NUM_MACROMOLECULES,
     PQS_SET_ID,
     SOLVATION_ENERGY_ISOLATED_STRUCTURE,
@@ -246,5 +250,37 @@ def ComponentIsolatedSolvationEnergyField(**kwargs) -> Field:
     defaults = {
         "description": SOLVATION_ENERGY_ISOLATED_STRUCTURE,
         "examples": [-220.0],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def ComponentTotalAtomsField(**kwargs) -> Field:
+    defaults = {
+        "description": COMPONENT_TOTAL_ATOMS,
+        "examples": [1846],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def ComponentTotalResiduesField(**kwargs) -> Field:
+    defaults = {
+        "description": COMPONENT_TOTAL_RESIDUES,
+        "examples": [248],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def ComponentNumSurfaceAtomsField(**kwargs) -> Field:
+    defaults = {
+        "description": N_COMPONENT_SURFACE_ATOMS,
+        "examples": [500, 1000, 1500],
+    }
+    return Field(**{**defaults, **kwargs})
+
+
+def ComponentNumSurfaceResiduesField(**kwargs) -> Field:
+    defaults = {
+        "description": N_COMPONENT_SURFACE_RESIDUES,
+        "examples": [50, 100, 150],
     }
     return Field(**{**defaults, **kwargs})

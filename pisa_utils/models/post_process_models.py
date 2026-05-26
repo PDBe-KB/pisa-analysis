@@ -17,6 +17,10 @@ from pisa_utils.models.data_fields import (
     ComplexSignificanceScoreField,
     ComplexSymmetryNumberField,
     ComponentIsolatedSolvationEnergyField,
+    ComponentNumSurfaceAtomsField,
+    ComponentNumSurfaceResiduesField,
+    ComponentTotalAtomsField,
+    ComponentTotalResiduesField,
     ComponentTotalSurfaceAreaField,
     InterfaceAreaField,
     InterfaceIdField,
@@ -73,10 +77,18 @@ class InterfaceDetailsComponent(BaseModel):
     molecule_class: str = MoleculeClassField()
     symmetry_operation: str = SymmetryOperationField()
     symmetry_id: str = SymmetryIdField()
+
     int_natoms: int = InterfaceNumAtomsField()
+    surface_natoms: int = ComponentNumSurfaceAtomsField()
+    total_atoms: int = ComponentTotalAtomsField()
+
     int_nres: int = InterfaceNumResiduesField()
+    surface_nres: int = ComponentNumSurfaceResiduesField()
+    total_residues: int = ComponentTotalResiduesField()
+
     int_area: float = InterfaceAreaField()
-    asa: float = ComponentTotalSurfaceAreaField()
+    surface_area: float = ComponentTotalSurfaceAreaField()
+
     solv_energy: Optional[float] = ComponentIsolatedSolvationEnergyField(default=None)
     # FIXME: Change to component-specific name, avoid confusion with interface at large
     int_solv_energy: float = InterfaceSolvationEnergyField(
@@ -95,4 +107,8 @@ class InterfaceDetails(BaseModel):
 
 
 class ComplexTable(RootModel[list[PQSSetRow]]):
+    pass
+
+
+class InterfaceDetailsList(RootModel[list[InterfaceDetails]]):
     pass

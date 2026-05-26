@@ -27,6 +27,10 @@ from pisa_utils.models.data_fields import (
     ComplexSignificanceScoreField,
     ComplexSymmetryNumberField,
     ComponentIsolatedSolvationEnergyField,
+    ComponentNumSurfaceAtomsField,
+    ComponentNumSurfaceResiduesField,
+    ComponentTotalAtomsField,
+    ComponentTotalResiduesField,
     ComponentTotalSurfaceAreaField,
     InterfaceAreaField,
     InterfaceIdField,
@@ -65,8 +69,6 @@ from pisa_utils.models.labels import (
     COMPLEXES_IN_PQS_SET,
     COMPONENT_ID,
     COMPONENT_NUMBER,
-    COMPONENT_TOTAL_ATOMS,
-    COMPONENT_TOTAL_RESIDUES,
     COMPONENT_TYPE_ID,
     DISS_AREA,
     FIXED_INTERFACE,
@@ -94,8 +96,6 @@ from pisa_utils.models.labels import (
     LABEL_ASYM_ID,
     LABEL_SEQ_ID,
     MULTIMERIC_STATE,
-    N_COMPONENT_SURFACE_ATOMS,
-    N_COMPONENT_SURFACE_RESIDUES,
     N_DISS,
     N_PQS_SETS,
     NUM_COMPONENTS,
@@ -1467,20 +1467,12 @@ class Component(StrictModel):
     auth_seq_id_start: Optional[int] = Field(None)
     auth_seq_id_end: Optional[int] = Field(None)
     molecule_class: str = MoleculeClassField(validation_alias="monomer_class")
-    total_atoms: int = Field(..., description=COMPONENT_TOTAL_ATOMS, examples=[1846])
-    total_residues: int = Field(
-        ..., description=COMPONENT_TOTAL_RESIDUES, examples=[248]
-    )
-    n_surface_atoms: int = Field(
-        ...,
-        description=N_COMPONENT_SURFACE_ATOMS,
-        examples=[1017],
+    total_atoms: int = ComponentTotalAtomsField()
+    total_residues: int = ComponentTotalResiduesField()
+    n_surface_atoms: int = ComponentNumSurfaceAtomsField(
         validation_alias="surface_atoms",
     )
-    n_surface_residues: int = Field(
-        ...,
-        description=N_COMPONENT_SURFACE_RESIDUES,
-        examples=[223],
+    n_surface_residues: int = ComponentNumSurfaceResiduesField(
         validation_alias="surface_residues",
     )
     asa: float = ComponentTotalSurfaceAreaField(validation_alias="area")
