@@ -184,7 +184,8 @@ class PostProcessInterfaceDetailsList(PostProcessor):
         interface_files = [
             f
             for f in os.listdir(self.path_interfaces)
-            if f.startswith("interface_") and f.endswith(ext)
+            if f.startswith("interface_")
+            and f.endswith(ext)
             and os.path.isfile(os.path.join(self.path_interfaces, f))
         ]
 
