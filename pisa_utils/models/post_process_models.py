@@ -1,7 +1,8 @@
 from typing import Optional
 from enum import Enum
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, Field, RootModel, field_validator
 
+from pisa_utils.constants import PRECISION_DP, STANDARD_DP
 from pisa_utils.models.data_fields import (
     AuthAsymIdField,
     ComplexAccessibleSurfaceAreaField,
@@ -96,14 +97,33 @@ class InterfaceDetailsComponent(BaseModel):
     )
     pvalue: float = PValueField(description=INTERFACE_COMPONENT_P_VALUE)
 
+    @field_validator("int_area", "surface_area", "solv_energy")
+    @classmethod
+    def standard_round(cls, v):
+        if v is None:
+            return v
+        return round(v, STANDARD_DP)
+
+    @field_validator("int_solv_energy", "pvalue")
+    @classmethod
+    def prevision_round(cls, v):
+        return round(v, PRECISION_DP)
+
 
 class InterfaceDetails(BaseModel):
     interface_id: int = InterfaceIdField()
     int_type: int = InterfaceTypeField()
     css: Optional[float] = ComplexSignificanceScoreField()
     components: list[InterfaceDetailsComponent] = Field(
-        description="List of data on components that form the interface",
+        description="List of data on the two components that form the interface",
     )
+
+    @field_validator("css")
+    @classmethod
+    def prevision_round(cls, v):
+        if v is None:
+            return v
+        return round(v, PRECISION_DP)
 
 
 class ComplexTable(RootModel[list[PQSSetRow]]):
