@@ -1,0 +1,125 @@
+[
+    {
+        "interface_id": 1,
+        "int_type": 1,
+        "css": 0.66,
+        "components": [
+            {
+                "auth_asym_id": "E",
+                "molecule_class": "RNA",
+                "symmetry_operation": "x,y,z",
+                "symmetry_id": "1_555",
+                "int_natoms": 188,
+                "surface_natoms": 916,
+                "total_atoms": 1246,
+                "int_nres": 25,
+                "surface_nres": 60,
+                "total_residues": 60,
+                "int_area": 1680.4,
+                "surface_area": 11475.9,
+                "solv_energy": null,
+                "int_solv_energy": -20.833,
+                "pvalue": 0.973
+            },
+            {
+                "auth_asym_id": "A",
+                "molecule_class": "Protein",
+                "symmetry_operation": "X,Y,Z",
+                "symmetry_id": "1_555",
+                "int_natoms": 184,
+                "surface_natoms": 1423,
+                "total_atoms": 2621,
+                "int_nres": 55,
+                "surface_nres": 287,
+                "total_residues": 329,
+                "int_area": 1554.4,
+                "surface_area": 16502.5,
+                "solv_energy": -356.2,
+                "int_solv_energy": -2.2,
+                "pvalue": 0.448
+            }
+        ]
+    },
+    {
+        "interface_id": 2,
+        "int_type": 2,
+        "css": 1.0,
+        "components": [
+            {
+                "auth_asym_id": "C",
+                "molecule_class": "Protein",
+                "symmetry_operation": "x,y,z",
+                "symmetry_id": "1_555",
+                "int_natoms": 125,
+                "surface_natoms": 338,
+                "total_atoms": 444,
+                "int_nres": 25,
+                "surface_nres": 53,
+                "total_residues": 53,
+                "int_area": 1378.9,
+                "surface_area": 5113.9,
+                "solv_energy": -39.9,
+                "int_solv_energy": -6.529,
+                "pvalue": 0.236
+            },
+            {
+                "auth_asym_id": "A",
+                "molecule_class": "Protein",
+                "symmetry_operation": "X,Y,Z",
+                "symmetry_id": "1_555",
+                "int_natoms": 153,
+                "surface_natoms": 1423,
+                "total_atoms": 2621,
+                "int_nres": 38,
+                "surface_nres": 287,
+                "total_residues": 329,
+                "int_area": 1341.2,
+                "surface_area": 16502.5,
+                "solv_energy": -356.2,
+                "int_solv_energy": -5.336,
+                "pvalue": 0.173
+            }
+        ]
+    },
+    {
+        "interface_id": 3,
+        "int_type": 3,
+        "css": 0.213,
+        "components": [
+            {
+                "auth_asym_id": "F",
+                "molecule_class": "Ligand",
+                "symmetry_operation": "x,y,z",
+                "symmetry_id": "1_555",
+                "int_natoms": 21,
+                "surface_natoms": 21,
+                "total_atoms": 22,
+                "int_nres": 1,
+                "surface_nres": 1,
+                "total_residues": 1,
+                "int_area": 355.4,
+                "surface_area": 455.3,
+                "solv_energy": null,
+                "int_solv_energy": -2.247,
+                "pvalue": 0.518
+            },
+            {
+                "auth_asym_id": "A",
+                "molecule_class": "Protein",
+                "symmetry_operation": "X,Y,Z",
+                "symmetry_id": "1_555",
+                "int_natoms": 49,
+                "surface_natoms": 1423,
+                "total_atoms": 2621,
+                "int_nres": 19,
+                "surface_nres": 287,
+                "total_residues": 329,
+                "int_area": 203.6,
+                "surface_area": 16502.5,
+                "solv_energy": -356.2,
+                "int_solv_energy": 0.746,
+                "pvalue": 0.752
+            }
+        ]
+    }
+]
