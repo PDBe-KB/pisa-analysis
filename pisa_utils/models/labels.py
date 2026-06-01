@@ -98,8 +98,15 @@ interfacing structures, divided by two, in A^2"""
 INTERFACE_SOLVATION_ENERGY = """The solvation free energy gain upon interface
 formation, in kcal/mol"""
 
+INTERFACE_COMPONENT_SOLVATION_ENERGY = """The solvation free energy gain upon interface
+formation for the given molecule only, in kcal/mol"""
+
 INTERFACE_P_VALUE = """The probability of getting a lower than observed ΔiG, when the
 interface atoms are picked randomly from the protein surface"""
+
+INTERFACE_COMPONENT_P_VALUE = """The probability of getting a lower than observed ΔiG,
+when the interface atoms from the selected protein component are picked randomly from
+the component's surface"""
 
 INTERFACE_CSS = """Complexation Significance Score (CSS) indicates the significance of
 an interface towards complex formation"""

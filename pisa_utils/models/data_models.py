@@ -13,6 +13,7 @@ from pydantic import (
 
 from pisa_utils.constants import EXCLUDE_SIFTS_XREF_DB_FIELDS, PRECISION_DP, STANDARD_DP
 from pisa_utils.models.data_fields import (
+    AuthAsymIdField,
     ComplexAccessibleSurfaceAreaField,
     ComplexBuriedSurfaceAreaField,
     ComplexCompositionField,
@@ -23,8 +24,25 @@ from pisa_utils.models.data_fields import (
     ComplexInterfaceEnergyField,
     ComplexKeyField,
     ComplexNumberMacromoleculesField,
+    ComplexSignificanceScoreField,
     ComplexSymmetryNumberField,
+    ComponentIsolatedSolvationEnergyField,
+    ComponentNumSurfaceAtomsField,
+    ComponentNumSurfaceResiduesField,
+    ComponentTotalAtomsField,
+    ComponentTotalResiduesField,
+    ComponentTotalSurfaceAreaField,
+    InterfaceAreaField,
+    InterfaceIdField,
+    InterfaceNumAtomsField,
+    InterfaceNumResiduesField,
+    InterfaceSolvationEnergyField,
+    InterfaceTypeField,
+    MoleculeClassField,
     PQSSetIdField,
+    PValueField,
+    SymmetryIdField,
+    SymmetryOperationField,
     TotalInterfacesField,
 )
 from pisa_utils.models.labels import (
@@ -32,7 +50,6 @@ from pisa_utils.models.labels import (
     ATOM_LABEL,
     ATOM_LABEL_EXAMPLES,
     AUTH_ASYM_ID,
-    AUTH_ASYM_ID_EXAMPLES,
     AUTH_SEQ_ID,
     BOND_DISTANCES,
     CELL_I,
@@ -52,8 +69,6 @@ from pisa_utils.models.labels import (
     COMPLEXES_IN_PQS_SET,
     COMPONENT_ID,
     COMPONENT_NUMBER,
-    COMPONENT_TOTAL_ATOMS,
-    COMPONENT_TOTAL_RESIDUES,
     COMPONENT_TYPE_ID,
     DISS_AREA,
     FIXED_INTERFACE,
@@ -61,10 +76,11 @@ from pisa_utils.models.labels import (
     INSERTION_CODE,
     INTERFACE_AREA,
     INTERFACE_BOND_TYPES,
+    INTERFACE_COMPONENT_P_VALUE,
+    INTERFACE_COMPONENT_SOLVATION_ENERGY,
     INTERFACE_CONTAINS_COVALENT_LINKAGE,
     INTERFACE_COVALENT_BONDS,
     INTERFACE_CRYSTALLOGRAPHIC_CONTACT,
-    INTERFACE_CSS,
     INTERFACE_H_BONDS,
     INTERFACE_N_ATOMS,
     INTERFACE_N_BONDS,
@@ -72,22 +88,14 @@ from pisa_utils.models.labels import (
     INTERFACE_N_RESIDUES,
     INTERFACE_N_SALT_BRIDGES,
     INTERFACE_N_SS_BONDS,
-    INTERFACE_NUMBER,
     INTERFACE_OTHER_BONDS,
-    INTERFACE_P_VALUE,
     INTERFACE_SALT_BRIDGES,
-    INTERFACE_SOLVATION_ENERGY,
     INTERFACE_SS_BONDS,
     INTERFACE_TOTAL,
-    INTERFACE_TYPE,
-    ISOLATED_COMPONENT_ASA,
     JOB_STATUS,
     LABEL_ASYM_ID,
     LABEL_SEQ_ID,
-    MOLECULE_CLASS,
     MULTIMERIC_STATE,
-    N_COMPONENT_SURFACE_ATOMS,
-    N_COMPONENT_SURFACE_RESIDUES,
     N_DISS,
     N_PQS_SETS,
     NUM_COMPONENTS,
@@ -113,13 +121,10 @@ from pisa_utils.models.labels import (
     RZY,
     RZZ,
     SESSION_NAME,
-    SOLVATION_ENERGY_ISOLATED_STRUCTURE,
     STABILITY_DESCR,
     STATUS,
     STATUS_DESCRIPTION,
     STATUS_NOTE,
-    SYMMETRY_ID,
-    SYMMETRY_OPERATION,
     SYMMETRY_OPERATION_NUMBER,
     TX,
     TY,
@@ -185,10 +190,8 @@ class StrictModel(BaseModel):
 
 class Bond(StrictModel):
     # First chain info
-    auth_asym_id_1: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    auth_asym_id_1: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for first molecule in bond",
         validation_alias="chain-1",
     )
     label_asym_id_1: Optional[str] = Field(
@@ -241,10 +244,8 @@ class Bond(StrictModel):
     )
 
     # Second chain info
-    auth_asym_id_2: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    auth_asym_id_2: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for second molecule in bond",
         validation_alias="chain-2",
     )
     label_asym_id_2: Optional[str] = Field(
@@ -410,12 +411,7 @@ class Molecule(StrictModel):
         description=COMPONENT_ID,
         examples=["Protein"],
     )
-    auth_asym_id: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
-        validation_alias="chain_id",
-    )
+    auth_asym_id: str = AuthAsymIdField(validation_alias="chain_id")
     label_asym_id: Optional[str] = Field(None, description=LABEL_ASYM_ID, examples=[])
     ccd_id: Optional[str] = Field(None)
 
@@ -425,22 +421,16 @@ class Molecule(StrictModel):
     label_seq_id_start: Optional[int] = Field(None)
     label_seq_id_end: Optional[int] = Field(None)
 
-    molecule_class: str = Field(
-        ..., description=MOLECULE_CLASS, examples=["Protein"], validation_alias="class"
-    )
-    symmetry_id: Optional[str] = Field(
-        None, description=SYMMETRY_ID, examples=["0_555", "1_555"]
-    )
+    molecule_class: str = MoleculeClassField(validation_alias="class")
+    symmetry_id: Optional[str] = SymmetryIdField(default=None)
     symmetry_operation_number: Optional[int] = Field(
         None,
         description=SYMMETRY_OPERATION_NUMBER,
         examples=[1, 2, 3],
         validation_alias="symop_no",
     )
-    symmetry_operation: Optional[str] = Field(
-        None,
-        description=SYMMETRY_OPERATION,
-        examples=["x,y,z"],
+    symmetry_operation: Optional[str] = SymmetryOperationField(
+        default=None,
         validation_alias="symop",
     )
     cell_i: Optional[int] = Field(None, description=CELL_I, examples=[0, 1, 2])
@@ -460,22 +450,15 @@ class Molecule(StrictModel):
     rzz: float = Field(..., description=RZZ, examples=[1.0])
     tz: float = Field(..., description=TZ, examples=[0.0])
 
-    int_natoms: int = Field(
-        ..., description=INTERFACE_N_ATOMS, examples=[100, 200, 325]
-    )
-    int_nres: int = Field(..., description=INTERFACE_N_RESIDUES, examples=[10, 25, 50])
-    int_area: float = Field(
-        ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
-    )
-    int_solv_energy: float = Field(
-        ...,
-        description=INTERFACE_SOLVATION_ENERGY,
-        examples=[-5.5, -10.0, -2.3],
+    int_natoms: int = InterfaceNumAtomsField()
+    int_nres: int = InterfaceNumResiduesField()
+    int_area: float = InterfaceAreaField()
+    # FIXME: Change to component-specific name, avoid confusion with interface at large
+    int_solv_energy: float = InterfaceSolvationEnergyField(
+        description=INTERFACE_COMPONENT_SOLVATION_ENERGY,
         validation_alias="int_solv_en",
     )
-    pvalue: float = Field(
-        ..., description=INTERFACE_P_VALUE, examples=[0.01, 0.05, 0.1, 0.9]
-    )
+    pvalue: float = PValueField(description=INTERFACE_COMPONENT_P_VALUE)
     residues: Residues = Field(
         ...,
         description="List of residue information for residues at the interface",
@@ -573,28 +556,21 @@ class Molecule(StrictModel):
 
 
 class InterfaceInfo(StrictModel):
-    int_type: int = Field(..., description=INTERFACE_TYPE, validation_alias="type")
+    int_type: int = InterfaceTypeField(validation_alias="type")
     n_occ: int = Field(...)
     int_area: float = Field(
         ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
     )
-    int_solv_energy: float = Field(
-        ...,
-        description=INTERFACE_SOLVATION_ENERGY,
-        examples=[-5.5, -10.0, -2.3],
+    int_solv_energy: float = InterfaceSolvationEnergyField(
         validation_alias="int_solv_en",
     )
-    pvalue: float = Field(
-        ..., description=INTERFACE_P_VALUE, examples=[0.01, 0.05, 0.1, 0.9]
-    )
+    pvalue: float = PValueField()
     stab_energy: float = Field(
         ..., description=PISA_STABILISATION_ENERGY, validation_alias="stab_en"
     )
 
     # Present when --as-is set to false
-    css: Optional[float] = Field(
-        None, description=INTERFACE_CSS, examples=[1.0, 0.8, 0.5]
-    )
+    css: Optional[float] = ComplexSignificanceScoreField()
     overlap: Optional[str] = Field(None, description=None, examples=["No"])
     x_rel: Optional[bool] = Field(
         None, description=XRAY_RELATED, examples=[True, False], validation_alias="x-rel"
@@ -647,7 +623,7 @@ class InterfaceInfo(StrictModel):
 
 
 class Interface(StrictModel):
-    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3, 10])
+    interface_id: int = InterfaceIdField()
     n_interfaces: int = Field(..., description=INTERFACE_TOTAL, examples=[58, 100, 200])
 
     status: str = Field(..., description=STATUS, examples=["Ok"])
@@ -660,12 +636,7 @@ class Interface(StrictModel):
 
 
 class MoleculeLabels(StrictModel):
-    auth_asym_id: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
-        validation_alias="chain_id",
-    )
+    auth_asym_id: str = AuthAsymIdField(validation_alias="chain_id")
     label_asym_id: Optional[str] = Field(None, description=LABEL_ASYM_ID, examples=[])
     visual_id: Optional[str] = Field(
         None, description=VISUAL_ID, examples=["A", "B", "C", "a", "b", "c", "{-}"]
@@ -702,12 +673,7 @@ class MoleculeLabels(StrictModel):
     rzy_f: float = Field(..., validation_alias="rzy-f", examples=[0.0])
     rzz_f: float = Field(..., validation_alias="rzz-f", examples=[0.0])
     tz_f: float = Field(..., validation_alias="tz-f", examples=[0.0])
-    symmetry_id: str = Field(
-        ...,
-        description=SYMMETRY_ID,
-        examples=["0_555", "1_555"],
-        validation_alias="symId",
-    )
+    symmetry_id: str = SymmetryIdField(validation_alias="symId")
 
     @model_validator(mode="after")
     def extract_ligand_fields(self):
@@ -762,13 +728,9 @@ class MoleculeLabels(StrictModel):
 
 
 class InterfaceLabel(StrictModel):
-    interface_id: int = Field(
-        ..., description=INTERFACE_NUMBER, examples=[1, 2, 60], validation_alias="id"
-    )
+    interface_id: int = InterfaceIdField(validation_alias="id")
     dissociates: bool = Field(..., description=None, examples=[True, False])
-    css: Optional[float] = Field(
-        None, description=INTERFACE_CSS, examples=[0.0, 1.0, 0.8, 0.5]
-    )
+    css: Optional[float] = ComplexSignificanceScoreField()
 
     @field_validator("dissociates", mode="before")
     @classmethod
@@ -802,54 +764,35 @@ class InterfaceLabels(StrictModel):
 
 
 class InterfaceSummaryInfo(StrictModel):
-    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
-    auth_asym_id_1: str = Field(
-        ...,
+    interface_id: int = InterfaceIdField()
+    auth_asym_id_1: str = AuthAsymIdField(
         description=f"{AUTH_ASYM_ID} for first molecule in interface",
-        examples=AUTH_ASYM_ID_EXAMPLES,
     )
-    int_natoms_1: int = Field(
-        ...,
-        description=f"{INTERFACE_N_ATOMS} for first molecule in interface",
-        examples=[100, 200, 325],
+    int_natoms_1: int = InterfaceNumAtomsField(
+        description=f"{INTERFACE_N_ATOMS} for first molecule in interface"
     )
-    int_nres_1: int = Field(
-        ...,
-        description=f"{INTERFACE_N_RESIDUES} for first molecule in interface",
-        examples=[10, 25, 50],
+    int_nres_1: int = InterfaceNumResiduesField(
+        description=f"{INTERFACE_N_RESIDUES} for first molecule in interface"
     )
-    auth_asym_id_2: str = Field(
-        ...,
+    auth_asym_id_2: str = AuthAsymIdField(
         description=f"{AUTH_ASYM_ID} for second molecule in interface",
-        examples=AUTH_ASYM_ID_EXAMPLES,
         validation_alias="chain_id",
     )
-    int_natoms_2: int = Field(
-        ...,
+    int_natoms_2: int = InterfaceNumAtomsField(
         description=f"{INTERFACE_N_ATOMS} for second molecule in interface",
-        examples=[100, 200, 325],
     )
-    int_nres_2: int = Field(
-        ...,
+    int_nres_2: int = InterfaceNumResiduesField(
         description=f"{INTERFACE_N_RESIDUES} for second molecule in interface",
-        examples=[10, 25, 50],
     )
     int_area: float = Field(
         ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
     )
-    int_solv_energy: float = Field(
-        ...,
-        description=INTERFACE_SOLVATION_ENERGY,
-        examples=[-5.5, -10.0, -2.3],
+    int_solv_energy: float = InterfaceSolvationEnergyField(
         validation_alias="int_solv_en",
     )
-    pvalue: float = Field(
-        ..., description=INTERFACE_P_VALUE, examples=[0.01, 0.05, 0.1, 0.9]
-    )
+    pvalue: float = PValueField()
     # Present when --as-is set to false
-    css: Optional[float] = Field(
-        None, description=INTERFACE_CSS, examples=[1.0, 0.8, 0.5]
-    )
+    css: Optional[float] = ComplexSignificanceScoreField()
     complex_keys_with_interface: Optional[list[int]] = Field(
         None,
         description="List of complex keys where this interface is present",
@@ -870,7 +813,7 @@ class InterfaceSummaryInfo(StrictModel):
 
 
 class InterfaceTypeLabel(StrictModel):
-    int_type: int = Field(..., description=INTERFACE_TYPE)
+    int_type: int = InterfaceTypeField()
     interfaces: list[InterfaceSummaryInfo] = Field(
         ...,
         description="List of interface summaries for this interface type",
@@ -1243,44 +1186,28 @@ class Complex(StrictModel):
 
 
 class InterfaceExtensionLabels(StrictModel):
-    interface_id: int = Field(..., description=INTERFACE_NUMBER, examples=[1, 2, 3])
-    int_type: int = Field(
-        ...,
-        description=INTERFACE_TYPE,
-        examples=[1, 2, 5],
-        validation_alias="serial_number",
-    )
-    auth_asym_id_1: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    interface_id: int = InterfaceIdField()
+    int_type: int = InterfaceTypeField(validation_alias="serial_number")
+    auth_asym_id_1: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for first molecule in interface",
         validation_alias="monomer_1",
     )
     ccd_id_1: Optional[str] = Field(None)
     auth_seq_id_start_1: Optional[int] = Field(None)
     auth_seq_id_end_1: Optional[int] = Field(None)
-    auth_asym_id_2: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
+    auth_asym_id_2: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for second molecule in interface",
         validation_alias="monomer_2",
     )
     ccd_id_2: Optional[str] = Field(None)
     auth_seq_id_start_2: Optional[int] = Field(None)
     auth_seq_id_end_2: Optional[int] = Field(None)
-    symmetry_operation: str = Field(
-        ..., description=SYMMETRY_OPERATION, examples=["-X-1,Y,-Z+1/2"]
-    )
-    symmetry_id: str = Field(..., description=SYMMETRY_ID, examples=["3_455"])
+    symmetry_operation: str = SymmetryOperationField()
+    symmetry_id: str = SymmetryIdField()
     int_area: float = Field(
         ..., description=INTERFACE_AREA, examples=[1427.7], validation_alias="area"
     )
-    int_solv_energy: float = Field(
-        ...,
-        description=INTERFACE_SOLVATION_ENERGY,
-        examples=[-18.2],
-        validation_alias="delta_g",
-    )
+    int_solv_energy: float = InterfaceSolvationEnergyField(validation_alias="delta_g")
     nhb: int = Field(..., description=INTERFACE_N_H_BONDS, examples=[0, 1, 2, 20])
     nsb: int = Field(..., description=INTERFACE_N_SALT_BRIDGES, examples=[0, 1, 2, 4])
     nds: int = Field(..., description=INTERFACE_N_SS_BONDS, examples=[0, 1, 2, 4])
@@ -1535,47 +1462,22 @@ class Component(StrictModel):
         description=COMPONENT_ID,
         examples=["A", "[NA]A:301", "o7", "[GOL]A:302"],
     )
-    auth_asym_id: str = Field(
-        ...,
-        description=AUTH_ASYM_ID,
-        examples=AUTH_ASYM_ID_EXAMPLES,
-        validation_alias="chain_id",
-    )
+    auth_asym_id: str = AuthAsymIdField(validation_alias="chain_id")
     ccd_id: Optional[str] = Field(None)
     auth_seq_id_start: Optional[int] = Field(None)
     auth_seq_id_end: Optional[int] = Field(None)
-    molecule_class: str = Field(
-        ...,
-        description=MOLECULE_CLASS,
-        examples=["Protein"],
-        validation_alias="monomer_class",
-    )
-    total_atoms: int = Field(..., description=COMPONENT_TOTAL_ATOMS, examples=[1846])
-    total_residues: int = Field(
-        ..., description=COMPONENT_TOTAL_RESIDUES, examples=[248]
-    )
-    n_surface_atoms: int = Field(
-        ...,
-        description=N_COMPONENT_SURFACE_ATOMS,
-        examples=[1017],
+    molecule_class: str = MoleculeClassField(validation_alias="monomer_class")
+    total_atoms: int = ComponentTotalAtomsField()
+    total_residues: int = ComponentTotalResiduesField()
+    n_surface_atoms: int = ComponentNumSurfaceAtomsField(
         validation_alias="surface_atoms",
     )
-    n_surface_residues: int = Field(
-        ...,
-        description=N_COMPONENT_SURFACE_RESIDUES,
-        examples=[223],
+    n_surface_residues: int = ComponentNumSurfaceResiduesField(
         validation_alias="surface_residues",
     )
-    asa: float = Field(
-        ...,
-        description=ISOLATED_COMPONENT_ASA,
-        examples=[11112.6],
-        validation_alias="area",
-    )
-    solv_energy: Optional[float] = Field(
-        None,
-        description=SOLVATION_ENERGY_ISOLATED_STRUCTURE,
-        examples=[-220.0],
+    asa: float = ComponentTotalSurfaceAreaField(validation_alias="area")
+    solv_energy: Optional[float] = ComponentIsolatedSolvationEnergyField(
+        default=None,
         validation_alias="delta_g",
     )
 
