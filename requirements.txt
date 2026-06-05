@@ -5,7 +5,7 @@ elementpath==5.1.1
 gemmi==0.7.4
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
-lxml==6.0.2
+lxml==6.1.0
 numpy==2.2.6 ; python_full_version < '3.11'
 numpy==2.4.2 ; python_full_version >= '3.11'
 pandas==2.3.3 ; python_full_version < '3.11'
