@@ -1,4 +1,6 @@
 name: Build and publish the package to internal PDBe PyPi registry, Dockerhub and GitLab Container Registry
+permissions:
+  contents: read
 
 on:
   pull_request:
