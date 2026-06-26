@@ -1,4 +1,4 @@
-FROM pdbegroup/pisa AS base
+FROM pdbegroup/pisa:2.1.2 AS base
 
 # Copy pisa-analysis code
 FROM python:3.10-slim
