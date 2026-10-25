@@ -19,4 +19,4 @@ pyyaml==6.0.3
 ruff==0.15.0
 tomli==2.4.0 ; python_full_version <= '3.11'
 typing-extensions==4.15.0 ; python_full_version < '3.11'
-virtualenv==20.36.1
+virtualenv==21.14.13
