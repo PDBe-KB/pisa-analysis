@@ -11,7 +11,7 @@ requirements:
 	uv export --no-dev --no-hashes --format requirements.txt -o requirements.txt
 
 dev-requirements:
-	uv export --only-dev --no-hashes --format requirements.txt -o dev-requirements.txt
+	uv export --only-dev --no-hashes --format requirements.txt -o requirements-dev.txt
 
 all-requirements: requirements dev-requirements
 	@echo "All requirements files generated."
