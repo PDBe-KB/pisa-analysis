@@ -17,7 +17,8 @@ pytz==2025.2 ; python_full_version < '3.11'
 referencing==0.37.0
 rpds-py==0.30.0
 six==1.17.0
-typing-extensions==4.15.0
+typing-extensions==4.15.0 ; python_full_version >= '3.11'
+typing-extensions==4.16.0 ; python_full_version < '3.11'
 typing-inspection==0.4.2
 tzdata==2025.3 ; python_full_version < '3.11' or sys_platform == 'emscripten' or sys_platform == 'win32'
 xmlschema==4.3.1
