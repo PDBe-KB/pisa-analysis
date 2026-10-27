@@ -739,7 +739,7 @@ wheels = [
 
 [[package]]
 name = "pisa-analysis"
-version = "3.3.2"
+version = "3.3.3"
 source = { editable = "." }
 dependencies = [
     { name = "gemmi" },
