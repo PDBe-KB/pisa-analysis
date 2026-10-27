@@ -31,13 +31,13 @@ jobs:
             python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --dev
+          uv sync --locked --all-extras --no-dev --group test
       - name: Run pre-commit checks
         uses: pre-commit/action@v3.0.1
-        if: matrix.python-version == env.BASE_PYTHON_VERSION
+        if: matrix.python-version == '3.11'
       - name: Run Tests
         run: |
-          uv run make test
+          uv run --locked --no-dev --group test make test
 
   publish:
     name: Publish
