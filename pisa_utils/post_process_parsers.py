@@ -268,6 +268,8 @@ class PostProcessInterfaceTableParser(PostProcessor):
         Currently, this parser does not do much. However, the data it generates will
         is consumed by the frontend interfaces table, and this component is inevitably
         going to be subject to change.
+
+        The parser expects the interface_summary.json file as input.
         """
         super().parse()
 
