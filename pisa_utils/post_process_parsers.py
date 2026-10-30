@@ -262,7 +262,7 @@ class PostProcessInterfaceDetailsList(PostProcessor):
         self.save(self.output_json_path, interface_details_list)
 
 
-class PostProcessInterfaceTableParser(PostProcessor):
+class PostProcessInterfaceTable(PostProcessor):
     def parse(self):
         """
         Currently, this parser does not do much. However, the data it generates will
