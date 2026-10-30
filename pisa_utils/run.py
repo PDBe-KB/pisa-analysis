@@ -231,6 +231,3 @@ def service():
 
 if __name__ == "__main__":
     main()
-
-# status.json -- store job error meesage/code. Potential code mapping
-# Fix API handling of Slurm failure messages -- e.g. re-run if Slurm error, not PISA failure.
