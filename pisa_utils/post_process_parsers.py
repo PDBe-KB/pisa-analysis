@@ -270,10 +270,14 @@ class PostProcessInterfaceTableParser(PostProcessor):
         going to be subject to change.
 
         The parser expects the interface_summary.json file as input.
+        Output groups are ordered by int_type, with interfaces ordered by interface_id.
         """
         super().parse()
 
         LOGGER.debug("Parsing interface table")
-        interface_table_data = InterfaceTable(self.data).model_dump()
+        interface_table = InterfaceTable.model_validate(self.data)
+        interface_table.interface_types.sort(key=lambda group: group.int_type)
+        for group in interface_table.interface_types:
+            group.interfaces.sort(key=lambda interface: interface.interface_id)
 
-        self.save(self.output_json_path, interface_table_data)
+        self.save(self.output_json_path, interface_table.model_dump())
