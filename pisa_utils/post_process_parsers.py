@@ -8,10 +8,11 @@ from pisa_utils.models.post_process_models import (
     InterfaceDetails,
     InterfaceDetailsComponent,
     InterfaceDetailsList,
-    PQSSetRow,
+    PQSSetGroup,
     ComplexTableRow,
     ComplexTable,
     PISAAnalysisType,
+    InterfaceTable,
 )
 from pisa_utils.file_io import save_json, open_compressed
 
@@ -70,7 +71,7 @@ class PostProcessComplexTable(PostProcessor):
                 symmetry_number=asu_complex["symmetry_number"],
                 n_interfaces=asu_complex.get("interfaces", {}).get("n_interfaces"),
             )
-            asu_row = PQSSetRow(
+            asu_row = PQSSetGroup(
                 pisa_analysis_type=PISAAnalysisType.ASU, complexes=[asu_complex_row]
             )
             output.append(asu_row)
@@ -82,7 +83,7 @@ class PostProcessComplexTable(PostProcessor):
             LOGGER.info(
                 f"Processing PQS set ID: {pqs_set_id} with {len(complexes)} complexes"
             )
-            pqs_set_row = PQSSetRow(
+            pqs_set_row = PQSSetGroup(
                 pqs_set_id=int(pqs_set_id),
                 pisa_analysis_type=PISAAnalysisType.PQS,
                 complexes=[
@@ -259,3 +260,24 @@ class PostProcessInterfaceDetailsList(PostProcessor):
         interface_details_list = InterfaceDetailsList(output).model_dump()
 
         self.save(self.output_json_path, interface_details_list)
+
+
+class PostProcessInterfaceTable(PostProcessor):
+    def parse(self):
+        """
+        Currently, this parser does not do much. However, the data it generates will
+        is consumed by the frontend interfaces table, and this component is inevitably
+        going to be subject to change.
+
+        The parser expects the interface_summary.json file as input.
+        Output groups are ordered by int_type, with interfaces ordered by interface_id.
+        """
+        super().parse()
+
+        LOGGER.debug("Parsing interface table")
+        interface_table = InterfaceTable.model_validate(self.data)
+        interface_table.interface_types.sort(key=lambda group: group.int_type)
+        for group in interface_table.interface_types:
+            group.interfaces.sort(key=lambda interface: interface.interface_id)
+
+        self.save(self.output_json_path, interface_table.model_dump())

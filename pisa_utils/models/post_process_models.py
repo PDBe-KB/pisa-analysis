@@ -36,10 +36,16 @@ from pisa_utils.models.data_fields import (
     SymmetryOperationField,
     TotalInterfacesField,
 )
+from pisa_utils.models.data_models import StrictModel
 from pisa_utils.models.labels import (
+    AUTH_ASYM_ID,
     COMPLEXES_IN_PQS_SET_POST_PROC,
+    INTERFACE_AREA,
     INTERFACE_COMPONENT_P_VALUE,
     INTERFACE_COMPONENT_SOLVATION_ENERGY,
+    INTERFACE_N_ATOMS,
+    INTERFACE_N_RESIDUES,
+    INTERFACE_TOTAL,
 )
 
 
@@ -63,7 +69,7 @@ class ComplexTableRow(BaseModel):
     n_interfaces: Optional[int] = TotalInterfacesField(default=0)
 
 
-class PQSSetRow(BaseModel):
+class PQSSetGroup(BaseModel):
     pqs_set_id: Optional[int] = PQSSetIdField(default=None)
     pisa_analysis_type: PISAAnalysisType = Field(
         default=PISAAnalysisType.PQS, description="Type of complex from PISA analysis"
@@ -71,6 +77,10 @@ class PQSSetRow(BaseModel):
     complexes: list[ComplexTableRow] = Field(
         default=[], description=COMPLEXES_IN_PQS_SET_POST_PROC
     )
+
+
+class ComplexTable(RootModel[list[PQSSetGroup]]):
+    pass
 
 
 class InterfaceDetailsComponent(BaseModel):
@@ -126,9 +136,70 @@ class InterfaceDetails(BaseModel):
         return round(v, PRECISION_DP)
 
 
-class ComplexTable(RootModel[list[PQSSetRow]]):
-    pass
-
-
 class InterfaceDetailsList(RootModel[list[InterfaceDetails]]):
     pass
+
+
+class InterfaceTableRow(StrictModel):
+    interface_id: int = InterfaceIdField()
+    auth_asym_id_1: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for first molecule in interface",
+    )
+    int_natoms_1: int = InterfaceNumAtomsField(
+        description=f"{INTERFACE_N_ATOMS} for first molecule in interface"
+    )
+    int_nres_1: int = InterfaceNumResiduesField(
+        description=f"{INTERFACE_N_RESIDUES} for first molecule in interface"
+    )
+    auth_asym_id_2: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for second molecule in interface",
+        validation_alias="chain_id",
+    )
+    int_natoms_2: int = InterfaceNumAtomsField(
+        description=f"{INTERFACE_N_ATOMS} for second molecule in interface",
+    )
+    int_nres_2: int = InterfaceNumResiduesField(
+        description=f"{INTERFACE_N_RESIDUES} for second molecule in interface",
+    )
+    int_area: float = Field(
+        ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
+    )
+    int_solv_energy: float = InterfaceSolvationEnergyField(
+        validation_alias="int_solv_en",
+    )
+    pvalue: float = PValueField()
+    # Present when --as-is set to false
+    css: Optional[float] = ComplexSignificanceScoreField()
+    complex_keys_with_interface: Optional[list[int]] = Field(
+        None,
+        description="List of complex keys where this interface is present",
+        examples=[1, 2, 3],
+    )
+
+    @field_validator("pvalue", "css")
+    @classmethod
+    def precision_round(cls, v):
+        if v is None:
+            return v
+        return round(v, PRECISION_DP)
+
+    @field_validator("int_area", "int_solv_energy")
+    @classmethod
+    def standard_round(cls, v):
+        return round(v, STANDARD_DP)
+
+
+class InterfaceTableGroup(StrictModel):
+    int_type: int = InterfaceTypeField()
+    interfaces: list[InterfaceTableRow] = Field(
+        ...,
+        description="List of interface summaries for this interface type",
+    )
+
+
+class InterfaceTable(StrictModel):
+    n_interfaces: int = Field(..., description=INTERFACE_TOTAL, examples=[58, 100, 200])
+    interface_types: list[InterfaceTableGroup] = Field(
+        ...,
+        description="List of interface type summaries",
+    )
