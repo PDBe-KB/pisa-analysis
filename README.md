@@ -150,11 +150,15 @@ docker run -v <HOST_DIR>:/data_dir \
 
 ## Development
 
+The library supports Python 3.10 and later. The full development environment requires
+Python 3.11 or later because pre-commit's transitive `filelock` dependency requires it.
+
 We use Astral's [`uv` tool](https://docs.astral.sh/uv/) for setting up the project and
 managing dependencies:
 
 ```shell
 curl -LsSf https://astral.sh/uv/install.sh | sh
+uv python pin 3.11
 uv sync
 source .venv/bin/activate
 ```
@@ -165,6 +169,18 @@ lint the code with [Ruff](https://docs.astral.sh/ruff/).
 ```shell
 pre-commit install
 pre-commit run --all-files
+```
+
+To run the tests on Python 3.10 without installing the full development tooling:
+
+```shell
+uv run --python 3.10 --no-dev --group test make test
+```
+
+or defaulting to Python 3.11:
+
+```shell
+make test
 ```
 
 You can also build the Docker image locally and then run it as described above:

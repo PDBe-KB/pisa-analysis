@@ -7,6 +7,11 @@ test:
 	coverage xml -o coverage/cobertura-coverage.xml
 	coverage report -m
 
+lint:
+	uv run pre-commit run --all
+
+lest: lint test
+
 requirements:
 	uv export --no-dev --no-hashes --format requirements.txt -o requirements.txt
 
