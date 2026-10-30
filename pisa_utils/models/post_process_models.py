@@ -38,15 +38,20 @@ from pisa_utils.models.data_fields import (
 )
 from pisa_utils.models.data_models import StrictModel
 from pisa_utils.models.labels import (
+    ATOM_LABEL,
+    ATOM_LABEL_EXAMPLES,
+    AUTH_ASYM_ID,
     AUTH_SEQ_ID,
+    BOND_DISTANCES,
     COMPLEXES_IN_PQS_SET_POST_PROC,
-    INSERTION_CODE,
     INTERFACE_BOND_TYPES,
     INTERFACE_COMPONENT_P_VALUE,
     INTERFACE_COMPONENT_SOLVATION_ENERGY,
-    LABEL_SEQ_ID,
+    RESIDUE_3_LETTER_CODE,
+    RESIDUE_3_LETTER_EXAMPLES,
     RESIDUE_ASA,
     RESIDUE_BSA,
+    RESIDUE_SEQ_ID,
     RESIDUE_SOLVATION_ENERGY,
 )
 
@@ -145,10 +150,8 @@ class InterfaceDetailsList(RootModel[list[InterfaceDetails]]):
 class ResidueRow(StrictModel):
     # For building table's primary key
     auth_asym_id: str = AuthAsymIdField()
-    label_comp_id: str = Field(..., examples=["MET"])
+    label_comp_id: str = Field(..., examples=["MET"], validation_alias="auth_comp_id")
     auth_seq_id: int = Field(..., description=AUTH_SEQ_ID, examples=[1, 2, 5])
-    label_seq_id: Optional[int] = Field(None, description=LABEL_SEQ_ID)
-    ins_code: Optional[str] = Field(None, description=INSERTION_CODE)
 
     # Data
     bonds: Optional[str] = Field(
@@ -231,9 +234,78 @@ class ResidueRow(StrictModel):
 class InterfaceComponentResidueTable(StrictModel):
     structure_1_residues: list[ResidueRow] = Field(
         ...,
-        description="Structure 1's residues at the interface",
+        description=(
+            "Structure 1's residue interface properties (not all residues will be at "
+            "the interface)"
+        ),
     )
     structure_2_residues: list[ResidueRow] = Field(
         ...,
-        description="Structure 2's residues at the interface",
+        description=(
+            "Structure 2's residues interface properties (not all residues will be at "
+            "the interface)"
+        ),
+    )
+
+
+class InterfacingBondRow(StrictModel):
+    # First chain info
+    auth_asym_id_1: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for first molecule in bond",
+    )
+    label_comp_id_1: str = Field(
+        ...,
+        description=RESIDUE_3_LETTER_CODE,
+        examples=RESIDUE_3_LETTER_EXAMPLES,
+        validation_alias="auth_comp_id_1",
+    )
+    auth_seq_id_1: int = Field(..., description=RESIDUE_SEQ_ID, examples=["178"])
+    auth_atom_id_1: str = Field(
+        ...,
+        description=ATOM_LABEL,
+        examples=ATOM_LABEL_EXAMPLES,
+    )
+
+    # The actual metric
+    dist: float = Field(
+        ...,
+        description=BOND_DISTANCES,
+        examples=[2.8, 3.0, 3.5],
+    )
+
+    # Second chain info
+    auth_asym_id_2: str = AuthAsymIdField(
+        description=f"{AUTH_ASYM_ID} for second molecule in bond",
+    )
+    label_comp_id_2: str = Field(
+        ...,
+        description=RESIDUE_3_LETTER_CODE,
+        examples=RESIDUE_3_LETTER_EXAMPLES,
+        validation_alias="auth_comp_id_2",
+    )
+    auth_seq_id_2: int = Field(..., description=RESIDUE_SEQ_ID)
+    auth_atom_id_2: str = Field(
+        ...,
+        description=ATOM_LABEL,
+        examples=ATOM_LABEL_EXAMPLES,
+    )
+
+    @field_validator("dist")
+    @classmethod
+    def round_results(cls, v):
+        return round(v, PRECISION_DP)
+
+
+class InterfacingBondsTable(RootModel):
+    """
+    Object can be used for the hydrogen bond, salt bridge, disulfide bond, and covalent
+    bond tables.
+
+    Will need separate implementations if the bond type tables ever diverge in
+    structure.
+    """
+
+    root: list[InterfacingBondRow] = Field(
+        ...,
+        description="List of interfacing bonds",
     )
