@@ -10,7 +10,7 @@ from pydantic import ValidationError
 from pisa_utils.post_process_parsers import (
     PostProcessComplexTable,
     PostProcessInterfaceDetailsList,
-    PostProcessInterfaceTableParser,
+    PostProcessInterfaceTable,
 )
 
 
@@ -136,7 +136,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                 with open_json(input_json_path, "wt") as f:
                     json.dump(self.data, f)
 
-                parser = PostProcessInterfaceTableParser(
+                parser = PostProcessInterfaceTable(
                     input_json_path, output_json_path, compressed=compressed
                 )
                 parser.parse()
@@ -175,7 +175,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
             with open(input_json_path, "w") as f:
                 json.dump(data, f)
 
-            parser = PostProcessInterfaceTableParser(input_json_path, output_json_path)
+            parser = PostProcessInterfaceTable(input_json_path, output_json_path)
             parser.parse()
 
             with open(output_json_path, "r") as f:
@@ -208,9 +208,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                 with open(input_json_path, "w") as f:
                     json.dump(data, f)
 
-                parser = PostProcessInterfaceTableParser(
-                    input_json_path, output_json_path
-                )
+                parser = PostProcessInterfaceTable(input_json_path, output_json_path)
                 parser.parse()
 
                 with open(output_json_path, "r") as f:
@@ -240,9 +238,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                     with open(input_json_path, "w") as f:
                         f.write(contents)
 
-                parser = PostProcessInterfaceTableParser(
-                    input_json_path, output_json_path
-                )
+                parser = PostProcessInterfaceTable(input_json_path, output_json_path)
                 with self.assertRaises(expected_error):
                     parser.parse()
 
