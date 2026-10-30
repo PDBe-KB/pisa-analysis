@@ -1,4 +1,4 @@
-name: Build and publish the package to internal PDBe PyPi registry, Dockerhub and GitLab Container Registry
+name: Custom CI/CD
 permissions:
   contents: read
 
@@ -59,10 +59,6 @@ jobs:
       - name: Create distribution
         run: |
           uv build
-      - name: Publish to internal PyPi
-        run: |
-          pip install twine
-          TWINE_PASSWORD=${{ secrets.TWINE_PASSWORD }} TWINE_USERNAME=${{ secrets.TWINE_USERNAME }} python -m twine upload --repository-url ${{ secrets.PIP_INDEX_URL }} dist/*
       - name: Publish to public PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
 
