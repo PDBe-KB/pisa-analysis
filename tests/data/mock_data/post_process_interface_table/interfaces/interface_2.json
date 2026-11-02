@@ -1,0 +1,8 @@
+{
+    "interface_id": 2,
+    "interface": {
+        "h_bonds": {"n_bonds": 11},
+        "salt_bridges": {"n_bonds": 4},
+        "ss_bonds": {"n_bonds": 2}
+    }
+}

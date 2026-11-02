@@ -102,6 +102,7 @@ class TestInterfaceTable(PostProcessTestCase):
 
         Round interface area and solvation energy to one decimal place, and
         pvalue and CSS to three, preserving all other fields and the structure.
+        Keep explicit hydrogen bond, salt bridge, and disulfide bond counts.
         """
         interface_table = InterfaceTable.model_validate(self.data)
 
@@ -118,8 +119,9 @@ class TestInterfaceTable(PostProcessTestCase):
         """
         Accept input aliases with optional fields omitted or explicitly null.
 
-        Resolve chain_id and int_solv_en to the model's field names, keep CSS
-        and complex_keys_with_interface as None, and omit aliases from output.
+        Resolve chain_id and int_solv_en to the model's field names and omit
+        aliases from output. Default missing bond counts to zero and other
+        optional fields to None; preserve explicit null values for all of them.
         """
         for optional_fields in ("omitted", "null"):
             with self.subTest(optional_fields=optional_fields):
@@ -127,7 +129,8 @@ class TestInterfaceTable(PostProcessTestCase):
                 row = data["interface_types"][0]["interfaces"][0]
                 row["chain_id"] = row.pop("auth_asym_id_2")
                 row["int_solv_en"] = row.pop("int_solv_energy")
-                for field in ("css", "complex_keys_with_interface"):
+                bond_fields = ("n_h_bonds", "n_salt_bridges", "n_ss_bonds")
+                for field in ("css", "complex_keys_with_interface", *bond_fields):
                     if optional_fields == "omitted":
                         row.pop(field)
                     else:
@@ -140,6 +143,10 @@ class TestInterfaceTable(PostProcessTestCase):
                 self.assertEqual(interface.int_solv_energy, -23.1)
                 self.assertIsNone(interface.css)
                 self.assertIsNone(interface.complex_keys_with_interface)
+                expected_count = 0 if optional_fields == "omitted" else None
+                for field in bond_fields:
+                    self.assertEqual(getattr(interface, field), expected_count)
+                    self.assertEqual(interface.model_dump()[field], expected_count)
                 self.assertNotIn("chain_id", interface.model_dump())
                 self.assertNotIn("int_solv_en", interface.model_dump())
 
@@ -176,3 +183,20 @@ class TestInterfaceTable(PostProcessTestCase):
                 self.assertEqual(len(errors), 1)
                 self.assertEqual(errors[0]["loc"], path + (field,))
                 self.assertEqual(errors[0]["type"], error_type)
+
+    def test_interface_table_rejects_invalid_bond_counts(self):
+        """Reject nonnumeric bond counts and identify the invalid nested field."""
+        for field in ("n_h_bonds", "n_salt_bridges", "n_ss_bonds"):
+            with self.subTest(field=field):
+                data = deepcopy(self.data)
+                data["interface_types"][0]["interfaces"][0][field] = "invalid"
+
+                with self.assertRaises(ValidationError) as context:
+                    InterfaceTable.model_validate(data)
+
+                errors = context.exception.errors()
+                self.assertEqual(len(errors), 1)
+                self.assertEqual(
+                    errors[0]["loc"], ("interface_types", 0, "interfaces", 0, field)
+                )
+                self.assertEqual(errors[0]["type"], "int_parsing")
