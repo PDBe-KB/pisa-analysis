@@ -265,8 +265,8 @@ class PostProcessInterfaceDetailsList(PostProcessor):
 class PostProcessInterfaceTable(PostProcessor):
     def parse(self):
         """
-        Currently, this parser does not do much. However, the data it generates will
-        is consumed by the frontend interfaces table, and this component is inevitably
+        Currently, this parser does not do much. However, the data it generates is
+        consumed by the frontend interfaces table, and this component is inevitably
         going to be subject to change.
 
         The parser expects the interface_summary.json file as input.
