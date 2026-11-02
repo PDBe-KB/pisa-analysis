@@ -175,6 +175,21 @@ class InterfaceTableRow(StrictModel):
         description="List of complex keys where this interface is present",
         examples=[1, 2, 3],
     )
+    n_hbonds: Optional[int] = Field(
+        0,
+        description="Number of hydrogen bonds in the interface",
+        examples=[0, 2, 5],
+    )
+    n_salt_bridges: Optional[int] = Field(
+        0,
+        description="Number of salt bridges in the interface",
+        examples=[0, 1, 3],
+    )
+    n_ss_bonds: Optional[int] = Field(
+        0,
+        description="Number of disulfide bonds in the interface",
+        examples=[0, 1, 2],
+    )
 
     @field_validator("pvalue", "css")
     @classmethod
