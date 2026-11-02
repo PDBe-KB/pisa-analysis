@@ -16,7 +16,10 @@
                     "int_solv_energy": -23.08765,
                     "pvalue": 0.6608765,
                     "css": 0.3821234,
-                    "complex_keys_with_interface": [1, 2]
+                    "complex_keys_with_interface": [1, 2],
+                    "n_h_bonds": 7,
+                    "n_salt_bridges": 3,
+                    "n_ss_bonds": 2
                 }
             ]
         }
