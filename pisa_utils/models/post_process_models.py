@@ -210,8 +210,9 @@ class InterfaceTableRow(StrictModel):
         return round(v, PRECISION_DP)
 
     @field_validator("int_area", "int_solv_energy")
+    @classmethod
     def standard_round(cls, v):
-            return round(v, STANDARD_DP)
+        return round(v, STANDARD_DP)
 
 
 class InterfaceTableGroup(StrictModel):
@@ -228,8 +229,8 @@ class InterfaceTable(StrictModel):
         ...,
         description="List of interface type summaries",
     )
-    
-    
+
+
 class ResidueRow(StrictModel):
     # For building table's primary key
     auth_asym_id: str = AuthAsymIdField()
@@ -292,13 +293,6 @@ class ResidueRow(StrictModel):
     @classmethod
     def precision_round(cls, v):
         return round(v, PRECISION_DP)
-
-    @field_validator("label_seq_id", mode="after")
-    @classmethod
-    def convert_overflowed_int_to_none(cls, v):
-        if v == -2147483647:
-            return None
-        return v
 
     @model_validator(mode="after")
     def determine_residue_accessibility(self):
