@@ -16,6 +16,7 @@ from pisa_utils.parsers import (
 from pisa_utils.post_process_parsers import (
     PostProcessComplexTable,
     PostProcessInterfaceDetailsList,
+    PostProcessInterfaceTable,
 )
 from pisa_utils.run_pisa import run_pisa_service, run_pisalite
 from pisa_utils.cli_tools import validate_args
@@ -143,6 +144,7 @@ def service():
 
     if args.run_all_pisa_commands:
         data_parser = (
+            # Core data parsers
             ConvertInterfaceXMLToJSONs(
                 path_xml=interfaces_xml_file,
                 path_jsons=os.path.join(args.output_json, "interfaces"),
@@ -168,6 +170,7 @@ def service():
                 ),
                 compressed=args.compress_output,
             ),
+            # Ancillary data parsers
             ConvertAssemblyListToJSON(
                 path_txt=assemblies_extended_file,
                 path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
@@ -183,6 +186,7 @@ def service():
                 path_json=os.path.join(args.output_json, SUBDIR_EXTENDED_DATA),
                 compressed=args.compress_output,
             ),
+            # Post-processors for APIs feeding FE components
             PostProcessComplexTable(
                 input_json_path=os.path.join(
                     args.output_json,
@@ -207,6 +211,17 @@ def service():
                 ),
                 compressed=args.compress_output,
             ),
+            PostProcessInterfaceTable(
+                input_json_path=os.path.join(
+                    args.output_json,
+                    "interface_summary.json" + (".gz" if args.compress_output else ""),
+                ),
+                output_json_path=os.path.join(
+                    args.output_json,
+                    "interface_table.json" + (".gz" if args.compress_output else ""),
+                ),
+                compressed=args.compress_output,
+            ),
         )
 
         for parser in data_parser:
@@ -216,6 +231,3 @@ def service():
 
 if __name__ == "__main__":
     main()
-
-# status.json -- store job error meesage/code. Potential code mapping
-# Fix API handling of Slurm failure messages -- e.g. re-run if Slurm error, not PISA failure.
