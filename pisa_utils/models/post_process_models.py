@@ -175,7 +175,7 @@ class InterfaceTableRow(StrictModel):
         description="List of complex keys where this interface is present",
         examples=[1, 2, 3],
     )
-    n_hbonds: Optional[int] = Field(
+    n_h_bonds: Optional[int] = Field(
         0,
         description="Number of hydrogen bonds in the interface",
         examples=[0, 2, 5],

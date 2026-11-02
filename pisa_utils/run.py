@@ -212,10 +212,11 @@ def service():
                 compressed=args.compress_output,
             ),
             PostProcessInterfaceTable(
-                input_json_path=os.path.join(
+                input_summary_interfaces_path=os.path.join(
                     args.output_json,
                     "interface_summary.json" + (".gz" if args.compress_output else ""),
                 ),
+                path_interface_jsons=os.path.join(args.output_json, "interfaces"),
                 output_json_path=os.path.join(
                     args.output_json,
                     "interface_table.json" + (".gz" if args.compress_output else ""),

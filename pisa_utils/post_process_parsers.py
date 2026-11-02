@@ -263,21 +263,59 @@ class PostProcessInterfaceDetailsList(PostProcessor):
 
 
 class PostProcessInterfaceTable(PostProcessor):
+    data: InterfaceTable
+
+    def __init__(
+        self,
+        input_summary_interfaces_path: str,
+        path_interface_jsons: str,
+        output_json_path: str,
+        compressed: bool = False,
+    ):
+        super().__init__(input_summary_interfaces_path, output_json_path, compressed)
+
+        self.path_interface_jsons = path_interface_jsons
+
     def parse(self):
         """
-        Currently, this parser does not do much. However, the data it generates is
-        consumed by the frontend interfaces table, and this component is inevitably
-        going to be subject to change.
-
-        The parser expects the interface_summary.json file as input.
+        The parser expects the interface_summary.json file as input, alongside the
+        Bond counts are read from individual interface files in path_interface_jsons.
         Output groups are ordered by int_type, with interfaces ordered by interface_id.
         """
         super().parse()
 
         LOGGER.debug("Parsing interface table")
-        interface_table = InterfaceTable.model_validate(self.data)
-        interface_table.interface_types.sort(key=lambda group: group.int_type)
-        for group in interface_table.interface_types:
+
+        # Fetch counts of specific bond types.
+        extension = ".json.gz" if self.compressed else ".json"
+        for interface_type in self.data["interface_types"]:
+            for interface in interface_type["interfaces"]:
+                interface_id = interface["interface_id"]
+                path_interface_json = os.path.join(
+                    self.path_interface_jsons, f"interface_{interface_id}" + extension
+                )
+
+                with open_compressed(
+                    path_interface_json, compressed=self.compressed
+                ) as f:
+                    interface_obj = json.load(f)
+                    interface_data = interface_obj.get("interface", {})
+
+                    interface["n_h_bonds"] = interface_data.get("h_bonds", {}).get(
+                        "n_bonds", 0
+                    )
+                    interface["n_salt_bridges"] = interface_data.get(
+                        "salt_bridges", {}
+                    ).get("n_bonds", 0)
+                    interface["n_ss_bonds"] = interface_data.get("ss_bonds", {}).get(
+                        "n_bonds", 0
+                    )
+
+        self.data = InterfaceTable.model_validate(self.data)
+
+        # Sort interfaces by type and ID.
+        self.data.interface_types.sort(key=lambda group: group.int_type)
+        for group in self.data.interface_types:
             group.interfaces.sort(key=lambda interface: interface.interface_id)
 
-        self.save(self.output_json_path, interface_table.model_dump())
+        self.save(self.output_json_path, self.data.model_dump())
