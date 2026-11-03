@@ -15,6 +15,7 @@ from pisa_utils.parsers import (
 )
 from pisa_utils.post_process_parsers import (
     PostProcessComplexTable,
+    PostProcessComponentsTable,
     PostProcessInterfaceDetailsList,
     PostProcessInterfaceTable,
 )
@@ -220,6 +221,18 @@ def service():
                 output_json_path=os.path.join(
                     args.output_json,
                     "interface_table.json" + (".gz" if args.compress_output else ""),
+                ),
+                compressed=args.compress_output,
+            ),
+            PostProcessComponentsTable(
+                input_json_path=os.path.join(
+                    args.output_json,
+                    SUBDIR_EXTENDED_DATA,
+                    "monomers_extended.json" + (".gz" if args.compress_output else ""),
+                ),
+                output_json_path=os.path.join(
+                    args.output_json,
+                    "components_table.json" + (".gz" if args.compress_output else ""),
                 ),
                 compressed=args.compress_output,
             ),
