@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from pisa_utils.models.post_process_models import (
     ComplexTable,
+    ComponentsTable,
     InterfaceDetailsList,
     InterfaceTable,
 )
@@ -200,3 +201,83 @@ class TestInterfaceTable(PostProcessTestCase):
                     errors[0]["loc"], ("interface_types", 0, "interfaces", 0, field)
                 )
                 self.assertEqual(errors[0]["type"], "int_parsing")
+
+
+class TestComponentsTable(PostProcessTestCase):
+    def setUp(self):
+        super().setUp()
+        self.data = self._open_json(
+            os.path.join(self.path_input_stubs, "components_table.json")
+        )
+
+    def test_components_table_rounding(self):
+        """
+        Round surface area and solvation energy while preserving grouped rows.
+
+        Compare the complete serialized table, including ligand CCD identifiers,
+        residue ranges, and null solvation energies for RNA and ligands.
+        """
+        data = deepcopy(self.data)
+        data[1]["components"][0].update(asa=16502.54321, solv_energy=-356.236)
+        data[1]["components"][1].update(asa=5113.9876, solv_energy=-39.96)
+
+        components_table = ComponentsTable.model_validate(data)
+
+        self.assertListEqual(components_table.model_dump(), self.data)
+
+    def test_components_table_optional_fields(self):
+        """Default omitted optional fields to None and preserve explicit nulls."""
+        fields = ("ccd_id", "auth_seq_id_start", "auth_seq_id_end", "solv_energy")
+        for optional_fields in ("omitted", "null"):
+            with self.subTest(optional_fields=optional_fields):
+                data = deepcopy(self.data)
+                for group in data:
+                    for row in group["components"]:
+                        for field in fields:
+                            if optional_fields == "omitted":
+                                row.pop(field)
+                            else:
+                                row[field] = None
+
+                components_table = ComponentsTable.model_validate(data)
+
+                for group in components_table.root:
+                    for component in group.components:
+                        for field in fields:
+                            self.assertIsNone(getattr(component, field))
+
+    def test_components_table_empty(self):
+        """Accept an empty table and groups containing no component rows."""
+        for data in ([], [{"molecule_type_id": 1, "components": []}]):
+            with self.subTest(data=data):
+                self.assertEqual(
+                    ComponentsTable.model_validate(data).model_dump(), data
+                )
+
+    def test_components_table_rejects_invalid_data(self):
+        """Report missing, unexpected, and invalid fields at their nested locations."""
+        cases = (
+            ((0,), "molecule_type_id", "missing", None),
+            ((0, "components", 0), "component_id", "missing", None),
+            ((0,), "unexpected", "extra_forbidden", True),
+            ((0, "components", 0), "unexpected", "extra_forbidden", True),
+            ((0, "components", 0), "total_atoms", "int_parsing", "invalid"),
+        )
+        for path, field, error_type, value in cases:
+            with self.subTest(path=path, field=field, error_type=error_type):
+                data = deepcopy(self.data)
+                target = data
+                for key in path:
+                    target = target[key]
+                if error_type == "missing":
+                    target.pop(field)
+                else:
+                    target[field] = value
+
+                with self.assertRaises(ValidationError) as context:
+                    ComponentsTable.model_validate(data)
+
+                errors = context.exception.errors()
+                self.assertEqual(len(errors), 1)
+                self.assertEqual(errors[0]["loc"], path + (field,))
+                self.assertEqual(errors[0]["type"], error_type)

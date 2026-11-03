@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from pisa_utils.post_process_parsers import (
     PostProcessComplexTable,
+    PostProcessComponentsTable,
     PostProcessInterfaceDetailsList,
     PostProcessInterfaceTable,
 )
@@ -376,3 +377,96 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                 context.exception.filename, os.path.join(tmpdir, "interface_1.json")
             )
             self.assertFalse(os.path.exists(output_json_path))
+
+
+class TestPostProcessComponentsTable(PostProcessTestCase):
+    def setUp(self):
+        super().setUp()
+        input_json_path = os.path.join(
+            self.base_data_path,
+            "mock_data/post_process_components_table/monomers_extended.json",
+        )
+        expected_json_path = os.path.join(
+            self.base_data_path,
+            "mock_data/model_inputs/post_processor_models/components_table.json",
+        )
+        with open(input_json_path, "r") as f:
+            self.data = json.load(f)
+        with open(expected_json_path, "r") as f:
+            self.expected_data = json.load(f)
+
+    def test_parse_components_table(self):
+        """
+        Group shuffled monomers and write the complete table as JSON or gzip JSON.
+
+        Check numeric type ordering, component ID ordering within shared types,
+        rounding, ligand fields, and removal of type IDs from individual rows.
+        """
+        for compressed in (False, True):
+            with (
+                self.subTest(compressed=compressed),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                extension = ".json.gz" if compressed else ".json"
+                input_json_path = os.path.join(tmpdir, "monomers_extended" + extension)
+                output_json_path = os.path.join(tmpdir, "components_table" + extension)
+                open_json = gzip.open if compressed else open
+                with open_json(input_json_path, "wt") as f:
+                    json.dump(self.data, f)
+
+                parser = PostProcessComponentsTable(
+                    input_json_path, output_json_path, compressed=compressed
+                )
+                parser.parse()
+
+                with open_json(output_json_path, "rt") as f:
+                    output_data = json.load(f)
+                self.assertListEqual(output_data, self.expected_data)
+
+    def test_parse_components_table_empty(self):
+        """Write an empty JSON list when the monomer input contains no components."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            input_json_path = os.path.join(tmpdir, "monomers_extended.json")
+            output_json_path = os.path.join(tmpdir, "components_table.json")
+            with open(input_json_path, "w") as f:
+                json.dump({"components": []}, f)
+
+            parser = PostProcessComponentsTable(input_json_path, output_json_path)
+            parser.parse()
+
+            with open(output_json_path, "r") as f:
+                self.assertEqual(json.load(f), [])
+
+    def test_parse_components_table_invalid_input(self):
+        """Reject missing files, malformed JSON, and invalid monomers without output."""
+        missing_type = deepcopy(self.data)
+        missing_type["components"][0].pop("molecule_type_id")
+        invalid_area = deepcopy(self.data)
+        invalid_area["components"][0]["asa"] = "invalid"
+        unexpected_field = deepcopy(self.data)
+        unexpected_field["components"][0]["unexpected"] = True
+        cases = (
+            ("missing_file", None, FileNotFoundError),
+            ("malformed_json", "{", json.JSONDecodeError),
+            ("missing_components", "{}", ValidationError),
+            ("null_components", json.dumps({"components": None}), ValidationError),
+            ("missing_type", json.dumps(missing_type), ValidationError),
+            ("invalid_area", json.dumps(invalid_area), ValidationError),
+            ("unexpected_field", json.dumps(unexpected_field), ValidationError),
+        )
+        for case, contents, expected_error in cases:
+            with (
+                self.subTest(case=case),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                input_json_path = os.path.join(tmpdir, "monomers_extended.json")
+                output_json_path = os.path.join(tmpdir, "components_table.json")
+                if contents is not None:
+                    with open(input_json_path, "w") as f:
+                        f.write(contents)
+
+                parser = PostProcessComponentsTable(input_json_path, output_json_path)
+                with self.assertRaises(expected_error):
+                    parser.parse()
+
+                self.assertFalse(os.path.exists(output_json_path))
