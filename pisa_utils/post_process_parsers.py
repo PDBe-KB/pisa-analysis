@@ -4,7 +4,9 @@ import logging
 import os
 from typing import Optional
 
+from pisa_utils.models.data_models import Components
 from pisa_utils.models.post_process_models import (
+    ComponentsTable,
     InterfaceDetails,
     InterfaceDetailsComponent,
     InterfaceDetailsList,
@@ -284,7 +286,7 @@ class PostProcessInterfaceTable(PostProcessor):
         """
         super().parse()
 
-        LOGGER.debug("Parsing interface table")
+        LOGGER.info("Parsing interface table")
 
         # Fetch counts of specific bond types.
         extension = ".json.gz" if self.compressed else ".json"
@@ -319,3 +321,33 @@ class PostProcessInterfaceTable(PostProcessor):
             group.interfaces.sort(key=lambda interface: interface.interface_id)
 
         self.save(self.output_json_path, self.data.model_dump())
+
+
+class PostProcessComponentsTable(PostProcessor):
+    def parse(self):
+        """Group monomers by molecule type and sort their component summaries."""
+        super().parse()
+
+        LOGGER.info("Parsing components table")
+
+        components = Components.model_validate(self.data).components
+        grouped_components: dict[int, list[dict]] = {}
+        for component in components:
+            grouped_components.setdefault(component.molecule_type_id, []).append(
+                component.model_dump(exclude={"molecule_type_id"})
+            )
+
+        output = ComponentsTable.model_validate(
+            [
+                {"molecule_type_id": mol_type, "components": rows}
+                for mol_type, rows in grouped_components.items()
+            ]
+        )
+
+        # Sort components by molecule type ID and component ID.
+        output.root.sort(key=lambda group: group.molecule_type_id)
+        for group in output.root:
+            LOGGER.info("Found molecule type ID: %d", group.molecule_type_id)
+            group.components.sort(key=lambda component: component.component_id)
+
+        self.save(self.output_json_path, output.model_dump())
