@@ -281,7 +281,7 @@ class ResidueRow(StrictModel):
             self.pc_residue_buried = 0
         else:
             # Round to the nearest integer
-            self.pc_residue_buried = round((self.bsa / self.asa) * 100, None)
+            self.pc_residue_buried = round((self.bsa / self.asa) * 100, 0)
         return self
 
     @field_validator("asa", "bsa")
