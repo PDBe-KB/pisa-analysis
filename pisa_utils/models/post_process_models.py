@@ -373,7 +373,7 @@ class InterfacingBondRow(StrictModel):
         return round(v, PRECISION_DP)
 
 
-class InterfacingBondsTable(RootModel):
+class InterfacingBondsTable(RootModel[list[InterfacingBondRow]]):
     """
     Object can be used for the hydrogen bond, salt bridge, disulfide bond, and covalent
     bond tables.
