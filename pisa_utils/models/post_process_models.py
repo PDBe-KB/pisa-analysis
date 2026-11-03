@@ -246,7 +246,7 @@ class ResidueRow(StrictModel):
     asa: float = Field(..., description=RESIDUE_ASA, examples=[158.71])
     bsa: float = Field(..., description=RESIDUE_BSA, examples=[123.57])
     pc_residue_buried: float = Field(
-        ...,
+        0.0,
         description="Percentage of the residue that is buried by the interface only",
         examples=[77.86],
     )
