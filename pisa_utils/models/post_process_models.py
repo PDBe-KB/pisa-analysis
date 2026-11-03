@@ -40,6 +40,9 @@ from pisa_utils.models.data_models import StrictModel
 from pisa_utils.models.labels import (
     AUTH_ASYM_ID,
     COMPLEXES_IN_PQS_SET_POST_PROC,
+    COMPONENT_ID,
+    COMPONENT_NUMBER,
+    COMPONENT_TYPE_ID,
     INTERFACE_AREA,
     INTERFACE_COMPONENT_P_VALUE,
     INTERFACE_COMPONENT_SOLVATION_ENERGY,
@@ -218,3 +221,48 @@ class InterfaceTable(StrictModel):
         ...,
         description="List of interface type summaries",
     )
+
+
+class ComponentRow(StrictModel):
+    mol_id: int = Field(
+        ...,
+        description=COMPONENT_NUMBER,
+        examples=[1, 2, 10],
+    )
+    component_id: str = Field(
+        ...,
+        description=COMPONENT_ID,
+        examples=["A", "[NA]A:301", "o7", "[GOL]A:302"],
+    )
+    auth_asym_id: str = AuthAsymIdField()
+    ccd_id: Optional[str] = Field(None)
+    auth_seq_id_start: Optional[int] = Field(None)
+    auth_seq_id_end: Optional[int] = Field(None)
+    molecule_class: str = MoleculeClassField()
+    total_atoms: int = ComponentTotalAtomsField()
+    total_residues: int = ComponentTotalResiduesField()
+    n_surface_atoms: int = ComponentNumSurfaceAtomsField()
+    n_surface_residues: int = ComponentNumSurfaceResiduesField()
+    asa: float = ComponentTotalSurfaceAreaField()
+    solv_energy: Optional[float] = ComponentIsolatedSolvationEnergyField(
+        default=None,
+    )
+
+    @field_validator("asa", "solv_energy")
+    @classmethod
+    def round_results(cls, v):
+        if v is not None:
+            return round(v, STANDARD_DP)
+        return v
+
+
+class ComponentGroup(StrictModel):
+    molecule_type_id: int = Field(..., description=COMPONENT_TYPE_ID, examples=[1])
+    components: list[ComponentRow] = Field(
+        ...,
+        description="List of component summaries for this component type",
+    )
+
+
+class ComponentsTable(RootModel[list[ComponentGroup]]):
+    pass
