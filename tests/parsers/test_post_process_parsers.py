@@ -107,47 +107,147 @@ class TestPostProcessParsers(PostProcessTestCase):
 
 
 class TestPostProcessInterfaceDetailsList(PostProcessTestCase):
-    def test_parse_interface_details_list(self):
-        """
-        Test a parse with a set of real, truncated data from 3hax.
-        """
-
-        expected_output_path = os.path.join(
+    def setUp(self):
+        super().setUp()
+        self.path_expected = os.path.join(
             self.base_data_path,
-            "expected_output",
-            "post_processed_jsons",
-            "3hax_multi_interface_details_list.json",
+            "expected_output/post_processed_jsons/3hax_multi_interface_details",
+        )
+        self.path_interfaces = os.path.join(
+            self.base_data_path, "expected_output/interfaces/3hax_interfaces_multi"
+        )
+        self.path_monomers = os.path.join(
+            self.base_data_path, "mock_data/list_results/3hax/monomers_extended.json"
         )
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path_interfaces = os.path.join(
-                self.base_data_path,
-                "expected_output",
-                "interfaces",
-                "3hax_interfaces_multi",
-            )
-            path_monomers_json = os.path.join(
-                self.base_data_path,
-                "mock_data/list_results/3hax/monomers_extended.json",
-            )
+    def test_parse_interface_details_files(self):
+        """Join real data into individual JSON or gzip files, creating the folder."""
+        for compressed in (False, True):
+            with (
+                self.subTest(compressed=compressed),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                output_json_dir = os.path.join(tmpdir, "details", "individual")
+                os.makedirs(path_interfaces)
+                extension = ".json.gz" if compressed else ".json"
+                open_json = gzip.open if compressed else open
+                for interface_id in (3, 1, 2):
+                    filename = f"interface_{interface_id}.json"
+                    with open(os.path.join(self.path_interfaces, filename)) as source:
+                        with open_json(
+                            os.path.join(
+                                path_interfaces, f"interface_{interface_id}" + extension
+                            ),
+                            "wt",
+                        ) as target:
+                            target.write(source.read())
+                # Ignore unrelated files and directories resembling interface files.
+                for name in ("interface_notes", "interface_1_details"):
+                    with open(
+                        os.path.join(path_interfaces, name + extension), "w"
+                    ) as f:
+                        f.write("not JSON")
+                os.mkdir(os.path.join(path_interfaces, "interface_4" + extension))
 
-            output_json_path = os.path.join(tmpdir, "output.json")
+                path_monomers = self.path_monomers
+                if compressed:
+                    path_monomers = os.path.join(tmpdir, "monomers.json.gz")
+                    with open(self.path_monomers) as source:
+                        with gzip.open(path_monomers, "wt") as target:
+                            target.write(source.read())
 
-            # Run parser
-            parser = PostProcessInterfaceDetailsList(
-                path_interfaces=path_interfaces,
-                path_monomers_json=path_monomers_json,
-                output_json_path=output_json_path,
-            )
-            parser.parse()
+                parser = PostProcessInterfaceDetailsList(
+                    path_interfaces=path_interfaces,
+                    path_monomers_json=path_monomers,
+                    output_json_dir=output_json_dir,
+                    compressed=compressed,
+                )
+                parser.parse()
 
-            # Checks
-            with open(expected_output_path, "r") as f:
-                expected_data = json.load(f)
-            with open(output_json_path, "r") as f:
-                output_data = json.load(f)
+                self.assertEqual(
+                    set(os.listdir(output_json_dir)),
+                    {
+                        f"interface_{interface_id}" + extension
+                        for interface_id in (1, 2, 3)
+                    },
+                )
+                for interface_id in (1, 2, 3):
+                    with open(
+                        os.path.join(
+                            self.path_expected, f"interface_{interface_id}.json"
+                        )
+                    ) as f:
+                        expected = json.load(f)
+                    with open_json(
+                        os.path.join(
+                            output_json_dir, f"interface_{interface_id}" + extension
+                        ),
+                        "rt",
+                    ) as f:
+                        self.assertDictEqual(json.load(f), expected)
 
-            self.assertListEqual(expected_data, output_data)
+    def test_missing_or_empty_directory(self):
+        """Skip absent or empty interface directories without creating output."""
+        for missing in (False, True):
+            with self.subTest(missing=missing), tempfile.TemporaryDirectory() as tmpdir:
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                output_json_dir = os.path.join(tmpdir, "details")
+                if not missing:
+                    os.makedirs(path_interfaces)
+
+                parser = PostProcessInterfaceDetailsList(
+                    path_interfaces=path_interfaces,
+                    path_monomers_json=self.path_monomers,
+                    output_json_dir=output_json_dir,
+                )
+                with self.assertLogs(
+                    "pisa_utils.post_process_parsers", level="WARNING"
+                ):
+                    parser.parse()
+                self.assertFalse(os.path.exists(output_json_dir))
+
+    def test_invalid_monomer_data(self):
+        """Reject missing or mismatched monomers before writing the interface file."""
+        with open(os.path.join(self.path_interfaces, "interface_1.json")) as f:
+            interface = json.load(f)
+        component_id = interface["interface"]["molecules"][0]["component_id"]
+
+        for invalid in ("missing", "mismatched_chain"):
+            with self.subTest(invalid=invalid), tempfile.TemporaryDirectory() as tmpdir:
+                with open(self.path_monomers) as f:
+                    monomers = json.load(f)
+                if invalid == "missing":
+                    monomers["components"] = [
+                        component
+                        for component in monomers["components"]
+                        if component["component_id"] != component_id
+                    ]
+                else:
+                    next(
+                        component
+                        for component in monomers["components"]
+                        if component["component_id"] == component_id
+                    )["auth_asym_id"] = "other"
+
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                os.makedirs(path_interfaces)
+                with open(os.path.join(path_interfaces, "interface_1.json"), "w") as f:
+                    json.dump(interface, f)
+                path_monomers = os.path.join(tmpdir, "monomers.json")
+                with open(path_monomers, "w") as f:
+                    json.dump(monomers, f)
+                output_json_dir = os.path.join(tmpdir, "details")
+                parser = PostProcessInterfaceDetailsList(
+                    path_interfaces=path_interfaces,
+                    path_monomers_json=path_monomers,
+                    output_json_dir=output_json_dir,
+                )
+                with self.assertRaises(ValueError):
+                    parser.parse()
+                self.assertFalse(
+                    os.path.exists(os.path.join(output_json_dir, "interface_1.json"))
+                )
 
 
 class TestPostProcessInterfaceComponentResidueTable(PostProcessTestCase):

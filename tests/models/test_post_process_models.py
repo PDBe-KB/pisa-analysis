@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from pisa_utils.models.post_process_models import (
     ComplexTable,
-    InterfaceDetailsList,
+    InterfaceDetails,
     InterfaceTable,
 )
 
@@ -74,26 +74,29 @@ class TestComplexTable(PostProcessTestCase):
         self.assertEqual(complex_table[1].n_interfaces, 0)
 
 
-class TestInterfaceDetailsList(PostProcessTestCase):
-    def test_interface_details_list(self):
+class TestInterfaceDetails(PostProcessTestCase):
+    def test_interface_details(self):
         """
         Simple model validation. Optional values omitted from the input.
         """
 
-        input_json_path = os.path.join(
-            self.path_input_stubs, "interface_details_list.json"
-        )
-        data = self._open_json(input_json_path)
+        details = []
+        for interface_id in (1, 2, 3):
+            input_json_path = os.path.join(
+                self.path_input_stubs,
+                "interface_details",
+                f"interface_{interface_id}.json",
+            )
+            data = self._open_json(input_json_path)
+            detail = InterfaceDetails.model_validate(data)
+            self.assertEqual(detail.interface_id, interface_id)
+            details.append(detail)
 
-        interface_details_list = InterfaceDetailsList.model_validate(data).root
-
-        self.assertIsNone(interface_details_list[0].components[0].solv_energy)
-        self.assertEqual(interface_details_list[0].components[0].pvalue, 0.973)
-        self.assertEqual(
-            interface_details_list[0].components[0].int_solv_energy, -20.833
-        )
-        self.assertEqual(interface_details_list[0].components[0].surface_area, 11475.9)
-        self.assertEqual(interface_details_list[0].css, 0.661)
+        self.assertIsNone(details[0].components[0].solv_energy)
+        self.assertEqual(details[0].components[0].pvalue, 0.973)
+        self.assertEqual(details[0].components[0].int_solv_energy, -20.833)
+        self.assertEqual(details[0].components[0].surface_area, 11475.9)
+        self.assertEqual(details[0].css, 0.661)
 
 
 class TestInterfaceTable(PostProcessTestCase):
