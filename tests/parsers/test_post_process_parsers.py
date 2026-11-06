@@ -35,25 +35,75 @@ class TestPostProcessParsers(PostProcessTestCase):
             "3hax_assembly_multi_asmset_post_proc.json",
         )
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            input_json_path = os.path.join(
-                self.base_data_path,
-                "expected_output",
-                "3hax_assembly_multi_asmset.json",
+        input_json_path = os.path.join(
+            self.base_data_path,
+            "expected_output",
+            "3hax_assembly_multi_asmset.json",
+        )
+        with open(expected_output_path) as f:
+            expected_data = json.load(f)
+
+        for compressed in (False, True):
+            with (
+                self.subTest(compressed=compressed),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                source_path = input_json_path
+                output_json_path = os.path.join(tmpdir, "output.json")
+                open_json = gzip.open if compressed else open
+                if compressed:
+                    source_path = os.path.join(tmpdir, "assemblies.json.gz")
+                    output_json_path += ".gz"
+                    with open(input_json_path) as source:
+                        with gzip.open(source_path, "wt") as target:
+                            target.write(source.read())
+
+                parser = PostProcessComplexTable(
+                    source_path, output_json_path, compressed=compressed
+                )
+                parser.parse()
+
+                with open_json(output_json_path, "rt") as f:
+                    output_data = json.load(f)
+
+                self.assertListEqual(expected_data, output_data)
+
+    def test_parse_complex_table_with_missing_groups(self):
+        """Handle ASU-only, PQS-only, and empty results without nested groups."""
+        with open(
+            os.path.join(
+                self.base_data_path, "expected_output/3hax_assembly_multi_asmset.json"
             )
-            output_json_path = os.path.join(tmpdir, "output.json")
+        ) as f:
+            assemblies = json.load(f)
+        with open(
+            os.path.join(
+                self.base_data_path,
+                "expected_output/post_processed_jsons/3hax_assembly_multi_asmset_post_proc.json",
+            )
+        ) as f:
+            expected = json.load(f)
 
-            # Run parser
-            parser = PostProcessComplexTable(input_json_path, output_json_path)
-            parser.parse()
+        cases = (
+            ({"asu_complex": assemblies["asu_complex"]}, expected[:1]),
+            ({"pqs_sets": assemblies["pqs_sets"]}, expected[1:]),
+            ({"pqs_sets": [{"pqs_set_id": 1, "complexes": []}]}, []),
+            ({}, []),
+        )
+        for assemblies, expected in cases:
+            with (
+                self.subTest(assemblies=assemblies),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                input_path = os.path.join(tmpdir, "assemblies.json")
+                output_path = os.path.join(tmpdir, "complex_table.json")
+                with open(input_path, "w") as f:
+                    json.dump(assemblies, f)
 
-            # Checks
-            with open(expected_output_path, "r") as f:
-                expected_data = json.load(f)
-            with open(output_json_path, "r") as f:
-                output_data = json.load(f)
+                PostProcessComplexTable(input_path, output_path).parse()
 
-            self.assertListEqual(expected_data, output_data)
+                with open(output_path) as f:
+                    self.assertEqual(json.load(f), expected)
 
 
 class TestPostProcessInterfaceDetailsList(PostProcessTestCase):

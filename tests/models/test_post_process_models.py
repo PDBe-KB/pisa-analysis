@@ -35,7 +35,13 @@ class TestComplexTable(PostProcessTestCase):
         input_json_path = os.path.join(self.path_input_stubs, "multi_pqs.json")
         data = self._open_json(input_json_path)
 
-        ComplexTable.model_validate(data)
+        complex_table = ComplexTable.model_validate(data)
+
+        self.assertEqual(complex_table.model_dump(mode="json"), data)
+        self.assertEqual(
+            [row.pqs_set_id for row in complex_table.root],
+            [None, 1, 2, 2, 3, 3, 3],
+        )
 
     def test_complex_table_no_pqs_sets(self):
         """
@@ -58,14 +64,14 @@ class TestComplexTable(PostProcessTestCase):
         # Check ASU complex values
         self.assertEqual(complex_table[0].pisa_analysis_type.value, "Asymmetric unit")
         self.assertIsNone(complex_table[0].pqs_set_id)
-        self.assertIsNone(complex_table[0].complexes[0].formula)
-        self.assertEqual(complex_table[0].complexes[0].n_interfaces, 0)
+        self.assertIsNone(complex_table[0].formula)
+        self.assertEqual(complex_table[0].n_interfaces, 0)
 
         # Check PQS set values
         self.assertEqual(complex_table[1].pisa_analysis_type.value, "PQS set")
         self.assertEqual(complex_table[1].pqs_set_id, 1)
-        self.assertIsNone(complex_table[1].complexes[0].formula)
-        self.assertEqual(complex_table[1].complexes[0].n_interfaces, 0)
+        self.assertIsNone(complex_table[1].formula)
+        self.assertEqual(complex_table[1].n_interfaces, 0)
 
 
 class TestInterfaceDetailsList(PostProcessTestCase):
