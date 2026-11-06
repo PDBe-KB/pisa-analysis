@@ -15,6 +15,7 @@ from pisa_utils.parsers import (
 )
 from pisa_utils.post_process_parsers import (
     PostProcessComplexTable,
+    PostProcessInterfaceComponentResidueTable,
     PostProcessInterfaceDetailsList,
     PostProcessInterfaceTable,
 )
@@ -221,6 +222,11 @@ def service():
                     args.output_json,
                     "interface_table.json" + (".gz" if args.compress_output else ""),
                 ),
+                compressed=args.compress_output,
+            ),
+            PostProcessInterfaceComponentResidueTable(
+                path_interfaces=os.path.join(args.output_json, "interfaces"),
+                output_json_dir=os.path.join(args.output_json, "residue_tables"),
                 compressed=args.compress_output,
             ),
         )

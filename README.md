@@ -211,6 +211,7 @@ The JSON output directory contains:
 | `complex_table.json` | Complex table grouped by asymmetric unit and PQS set. |
 | `interface_details.json` | Interface details joined to component/monomer data. |
 | `interface_table.json` | Interface summary table with hydrogen-bond, salt-bridge, and disulfide-bond counts. |
+| `residue_tables/interface_<id>_residue_table.json` | Per-interface residue tables for both components, including buried percentages and accessibility flags. |
 
 With `--compress_output`, these paths have an additional `.gz` suffix. Interface
 files and some derived outputs are omitted when there are no interfaces; the
@@ -376,8 +377,9 @@ directory and writes one `interface_<id>_residue_table.json` per interface. Each
 file follows `InterfaceComponentResidueTable`, with `structure_1_residues` and
 `structure_2_residues`, including buried percentages and accessibility flags.
 It preserves component and residue order and includes residues outside the
-interface. Pass `compressed=True` for gzip input and output. This parser is
-available through the library; neither CLI currently invokes it automatically.
+interface. Pass `compressed=True` for gzip input and output. The
+`pisa_analysis_service` CLI runs this parser automatically and creates the
+`residue_tables/` output directory when interface files are present.
 
 Additional parsers can be used independently:
 

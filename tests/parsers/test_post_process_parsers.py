@@ -11,6 +11,7 @@ from pisa_utils.post_process_parsers import (
     PostProcessComplexTable,
     PostProcessInterfaceDetailsList,
     PostProcessInterfaceTable,
+    PostProcessInterfaceComponentResidueTable,
 )
 
 
@@ -97,6 +98,245 @@ class TestPostProcessInterfaceDetailsList(PostProcessTestCase):
                 output_data = json.load(f)
 
             self.assertListEqual(expected_data, output_data)
+
+
+class TestPostProcessInterfaceComponentResidueTable(PostProcessTestCase):
+    def setUp(self):
+        super().setUp()
+        self.data = {
+            "interface_id": 2,
+            "interface": {
+                "molecules": [
+                    {
+                        "auth_asym_id": "A",
+                        "residues": {
+                            "residues": [
+                                {
+                                    "residue_serial_number": 1,
+                                    "auth_comp_id": "ARG",
+                                    "auth_seq_id": 11,
+                                    "label_seq_id": 8,
+                                    "ins_code": None,
+                                    "bonds": "HS",
+                                    "asa": 158.712,
+                                    "bsa": 123.567,
+                                    "solv_energy": -1.23456,
+                                },
+                                {
+                                    "auth_comp_id": "GLY",
+                                    "auth_seq_id": -2,
+                                    "asa": 100.0,
+                                    "bsa": 0.0,
+                                    "solv_energy": 0.0,
+                                },
+                            ]
+                        },
+                    },
+                    {
+                        "auth_asym_id": "A",
+                        "residues": {
+                            "residues": [
+                                {
+                                    "auth_comp_id": "CYS",
+                                    "auth_seq_id": 11,
+                                    "bonds": None,
+                                    "asa": 0.0,
+                                    "bsa": 0.0,
+                                    "solv_energy": 0.0,
+                                }
+                            ]
+                        },
+                    },
+                ]
+            },
+        }
+
+    def test_parse_residue_tables(self):
+        """Keep both sides, order, and all accessibility classes in JSON or gzip."""
+        expected = {
+            "structure_1_residues": [
+                {
+                    "auth_asym_id": "A",
+                    "label_comp_id": "ARG",
+                    "auth_seq_id": 11,
+                    "bonds": "HS",
+                    "asa": 158.7,
+                    "bsa": 123.6,
+                    "pc_residue_buried": 78.0,
+                    "solv_energy": -1.235,
+                    "is_interfacing_residue": True,
+                    "is_solvent_accessible_residue": False,
+                    "is_inaccessible_residue": False,
+                },
+                {
+                    "auth_asym_id": "A",
+                    "label_comp_id": "GLY",
+                    "auth_seq_id": -2,
+                    "bonds": None,
+                    "asa": 100.0,
+                    "bsa": 0.0,
+                    "pc_residue_buried": 0.0,
+                    "solv_energy": 0.0,
+                    "is_interfacing_residue": False,
+                    "is_solvent_accessible_residue": True,
+                    "is_inaccessible_residue": False,
+                },
+            ],
+            "structure_2_residues": [
+                {
+                    "auth_asym_id": "A",
+                    "label_comp_id": "CYS",
+                    "auth_seq_id": 11,
+                    "bonds": None,
+                    "asa": 0.0,
+                    "bsa": 0.0,
+                    "pc_residue_buried": 0.0,
+                    "solv_energy": 0.0,
+                    "is_interfacing_residue": False,
+                    "is_solvent_accessible_residue": False,
+                    "is_inaccessible_residue": True,
+                }
+            ],
+        }
+
+        for compressed in (False, True):
+            with (
+                self.subTest(compressed=compressed),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                output_json_dir = os.path.join(tmpdir, "tables")
+                os.makedirs(path_interfaces)
+                extension = ".json.gz" if compressed else ".json"
+                open_json = gzip.open if compressed else open
+                empty_interface = {
+                    "interface_id": 10,
+                    "interface": {
+                        "molecules": [
+                            {"auth_asym_id": "B", "residues": {"residues": []}},
+                            {"auth_asym_id": "C", "residues": {"residues": []}},
+                        ]
+                    },
+                }
+                for data in (self.data, empty_interface):
+                    with open_json(
+                        os.path.join(
+                            path_interfaces,
+                            f"interface_{data['interface_id']}" + extension,
+                        ),
+                        "wt",
+                    ) as f:
+                        json.dump(data, f)
+                # Ignore unrelated files and directories resembling interface files.
+                for name in ("summary", "interface_notes", "interface_2_residue_table"):
+                    with open(
+                        os.path.join(path_interfaces, name + extension), "w"
+                    ) as f:
+                        f.write("not JSON")
+                os.mkdir(os.path.join(path_interfaces, "interface_3" + extension))
+
+                parser = PostProcessInterfaceComponentResidueTable(
+                    path_interfaces=path_interfaces,
+                    output_json_dir=output_json_dir,
+                    compressed=compressed,
+                )
+                parser.parse()
+
+                self.assertEqual(
+                    set(os.listdir(output_json_dir)),
+                    {
+                        "interface_2_residue_table" + extension,
+                        "interface_10_residue_table" + extension,
+                    },
+                )
+                for interface_id, expected_data in (
+                    (2, expected),
+                    (10, {"structure_1_residues": [], "structure_2_residues": []}),
+                ):
+                    with open_json(
+                        os.path.join(
+                            output_json_dir,
+                            f"interface_{interface_id}_residue_table" + extension,
+                        ),
+                        "rt",
+                    ) as f:
+                        self.assertDictEqual(json.load(f), expected_data)
+
+    def test_parse_real_interfaces(self):
+        """Read existing interface JSONs, including a single-residue ligand."""
+        path_interfaces = os.path.join(
+            self.base_data_path, "expected_output/interfaces/af3_heterodimer_with_atp"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            parser = PostProcessInterfaceComponentResidueTable(path_interfaces, tmpdir)
+            parser.parse()
+
+            self.assertEqual(len(os.listdir(tmpdir)), 3)
+            with open(os.path.join(tmpdir, "interface_3_residue_table.json")) as f:
+                table = json.load(f)
+            self.assertEqual(len(table["structure_1_residues"]), 30)
+            self.assertEqual(len(table["structure_2_residues"]), 1)
+            ligand = table["structure_2_residues"][0]
+            self.assertEqual(ligand["auth_asym_id"], "C")
+            self.assertEqual(ligand["label_comp_id"], "ATP")
+            self.assertEqual(ligand["bonds"], "H")
+            self.assertEqual(ligand["pc_residue_buried"], 14.0)
+            self.assertTrue(ligand["is_interfacing_residue"])
+
+    def test_missing_or_empty_directory(self):
+        """Match other directory parsers by skipping absent or empty inputs."""
+        for missing in (False, True):
+            with self.subTest(missing=missing), tempfile.TemporaryDirectory() as tmpdir:
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                output_json_dir = os.path.join(tmpdir, "tables")
+                if not missing:
+                    os.makedirs(path_interfaces)
+
+                parser = PostProcessInterfaceComponentResidueTable(
+                    path_interfaces, output_json_dir
+                )
+                with self.assertLogs(
+                    "pisa_utils.post_process_parsers", level="WARNING"
+                ):
+                    parser.parse()
+                self.assertFalse(os.path.exists(output_json_dir))
+
+    def test_invalid_interface(self):
+        """Reject incorrect component counts and invalid residue metrics."""
+        for molecule_count in (0, 1, 3):
+            with (
+                self.subTest(molecule_count=molecule_count),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                data = deepcopy(self.data)
+                data["interface"]["molecules"] = [
+                    data["interface"]["molecules"][0]
+                ] * molecule_count
+                with open(os.path.join(tmpdir, "interface_2.json"), "w") as f:
+                    json.dump(data, f)
+
+                parser = PostProcessInterfaceComponentResidueTable(tmpdir, tmpdir)
+                with self.assertRaisesRegex(ValueError, "exactly two molecules"):
+                    parser.parse()
+                self.assertFalse(
+                    os.path.exists(
+                        os.path.join(tmpdir, "interface_2_residue_table.json")
+                    )
+                )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.data["interface"]["molecules"][0]["residues"]["residues"][0]["asa"] = (
+                "bad"
+            )
+            with open(os.path.join(tmpdir, "interface_2.json"), "w") as f:
+                json.dump(self.data, f)
+
+            parser = PostProcessInterfaceComponentResidueTable(tmpdir, tmpdir)
+            with self.assertRaises(ValidationError):
+                parser.parse()
+            self.assertFalse(
+                os.path.exists(os.path.join(tmpdir, "interface_2_residue_table.json"))
+            )
 
 
 class TestPostProcessInterfaceTableParser(PostProcessTestCase):

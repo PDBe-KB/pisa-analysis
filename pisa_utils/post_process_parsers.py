@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import json
 import logging
 import os
+import re
 from typing import Optional
 
 from pisa_utils.models.post_process_models import (
@@ -13,6 +14,8 @@ from pisa_utils.models.post_process_models import (
     ComplexTable,
     PISAAnalysisType,
     InterfaceTable,
+    InterfaceComponentResidueTable,
+    ResidueRow,
 )
 from pisa_utils.file_io import save_json, open_compressed
 
@@ -319,3 +322,97 @@ class PostProcessInterfaceTable(PostProcessor):
             group.interfaces.sort(key=lambda interface: interface.interface_id)
 
         self.save(self.output_json_path, self.data.model_dump())
+
+
+class PostProcessInterfaceComponentResidueTable(PostProcessor):
+    """Write one component residue table for each interface JSON in a directory.
+
+    Input files must be named interface_<id>.json (or .json.gz when compressed).
+    Output files are named interface_<id>_residue_table.json, with the same
+    compression setting. Molecule and residue order are preserved.
+    """
+
+    def __init__(
+        self,
+        path_interfaces: str,
+        output_json_dir: str,
+        compressed: bool = False,
+    ):
+        super().__init__(path_interfaces, output_json_dir, compressed)
+        self.path_interfaces = path_interfaces
+        self.output_json_dir = output_json_dir
+
+    def _parse_residues(self, molecule: dict) -> list[ResidueRow]:
+        """Project molecule residues onto the table's fields and derive metrics."""
+        return [
+            ResidueRow(
+                auth_asym_id=molecule["auth_asym_id"],
+                label_comp_id=residue["auth_comp_id"],
+                auth_seq_id=residue["auth_seq_id"],
+                bonds=residue.get("bonds"),
+                asa=residue["asa"],
+                bsa=residue["bsa"],
+                solv_energy=residue["solv_energy"],
+                # Required inputs; the model derives these from rounded ASA/BSA.
+                is_interfacing_residue=False,
+                is_solvent_accessible_residue=False,
+                is_inaccessible_residue=False,
+            )
+            for residue in molecule["residues"]["residues"]
+        ]
+
+    def parse(self) -> None:
+        if not os.path.isdir(self.path_interfaces):
+            LOGGER.warning(
+                f"Interface JSON directory not found: {self.path_interfaces}. "
+                "No residue table JSON files will be created."
+            )
+            return
+
+        extension = ".json.gz" if self.compressed else ".json"
+        interface_files = [
+            filename
+            for filename in sorted(os.listdir(self.path_interfaces))
+            if re.fullmatch(r"interface_\d+" + re.escape(extension), filename)
+            and os.path.isfile(os.path.join(self.path_interfaces, filename))
+        ]
+        if not interface_files:
+            LOGGER.warning(
+                f"No interface JSON files found in directory: {self.path_interfaces}. "
+                "No residue table JSON files will be created."
+            )
+            return
+
+        os.makedirs(self.output_json_dir, exist_ok=True)
+
+        for filename in interface_files:
+            with open_compressed(
+                os.path.join(self.path_interfaces, filename),
+                compressed=self.compressed,
+            ) as f:
+                interface_data = json.load(f)
+
+            file_interface_id = int(filename[len("interface_") : -len(extension)])
+            interface_id = int(interface_data["interface_id"])
+            if interface_id != file_interface_id:
+                raise ValueError(
+                    f"Interface ID mismatch: filename has {file_interface_id}, JSON has {interface_id}"
+                )
+            molecules = interface_data["interface"]["molecules"]
+            if len(molecules) != 2:
+                raise ValueError(
+                    f"Interface {interface_id} must contain exactly two molecules; "
+                    f"found {len(molecules)}"
+                )
+
+            table = InterfaceComponentResidueTable(
+                structure_1_residues=self._parse_residues(molecules[0]),
+                structure_2_residues=self._parse_residues(molecules[1]),
+            )
+            self.save(
+                os.path.join(
+                    self.output_json_dir,
+                    f"interface_{interface_id}_residue_table" + extension,
+                ),
+                table.model_dump(),
+            )
