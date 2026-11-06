@@ -9,7 +9,6 @@ from pisa_utils.models.post_process_models import (
     InterfaceDetails,
     InterfaceDetailsComponent,
     InterfaceDetailsList,
-    PQSSetGroup,
     ComplexTableRow,
     ComplexTable,
     PISAAnalysisType,
@@ -51,6 +50,8 @@ class PostProcessor(ABC):
 
 
 class PostProcessComplexTable(PostProcessor):
+    """Write a flat table of ASU and PQS complexes with per-row provenance."""
+
     def parse(self):
         super().parse()
 
@@ -61,6 +62,8 @@ class PostProcessComplexTable(PostProcessor):
         if asu_complex:
             LOGGER.info("Processing ASU complex")
             asu_complex_row = ComplexTableRow(
+                pqs_set_id=None,
+                pisa_analysis_type=PISAAnalysisType.ASU,
                 complex_key=asu_complex["complex_key"],
                 formula=asu_complex["formula"],
                 composition=asu_complex["composition"],
@@ -74,10 +77,7 @@ class PostProcessComplexTable(PostProcessor):
                 symmetry_number=asu_complex["symmetry_number"],
                 n_interfaces=asu_complex.get("interfaces", {}).get("n_interfaces"),
             )
-            asu_row = PQSSetGroup(
-                pisa_analysis_type=PISAAnalysisType.ASU, complexes=[asu_complex_row]
-            )
-            output.append(asu_row)
+            output.append(asu_complex_row)
 
         # Add PQS sets
         for pqs_set in self.data.get("pqs_sets", []):
@@ -86,28 +86,25 @@ class PostProcessComplexTable(PostProcessor):
             LOGGER.info(
                 f"Processing PQS set ID: {pqs_set_id} with {len(complexes)} complexes"
             )
-            pqs_set_row = PQSSetGroup(
-                pqs_set_id=int(pqs_set_id),
-                pisa_analysis_type=PISAAnalysisType.PQS,
-                complexes=[
-                    ComplexTableRow(
-                        complex_key=complex["complex_key"],
-                        formula=complex["formula"],
-                        composition=complex["composition"],
-                        asa=complex["asa"],
-                        bsa=complex["bsa"],
-                        int_energy=complex["int_energy"],
-                        diss_energy=complex["diss_energy"],
-                        entropy=complex["entropy"],
-                        mmsize=complex["mmsize"],
-                        n_uc=complex["n_uc"],
-                        symmetry_number=complex["symmetry_number"],
-                        n_interfaces=complex.get("interfaces", {}).get("n_interfaces"),
-                    )
-                    for complex in complexes
-                ],
+            output.extend(
+                ComplexTableRow(
+                    pqs_set_id=int(pqs_set_id),
+                    pisa_analysis_type=PISAAnalysisType.PQS,
+                    complex_key=complex["complex_key"],
+                    formula=complex["formula"],
+                    composition=complex["composition"],
+                    asa=complex["asa"],
+                    bsa=complex["bsa"],
+                    int_energy=complex["int_energy"],
+                    diss_energy=complex["diss_energy"],
+                    entropy=complex["entropy"],
+                    mmsize=complex["mmsize"],
+                    n_uc=complex["n_uc"],
+                    symmetry_number=complex["symmetry_number"],
+                    n_interfaces=complex.get("interfaces", {}).get("n_interfaces"),
+                )
+                for complex in complexes
             )
-            output.append(pqs_set_row)
 
         complex_table = ComplexTable(output).model_dump()
 

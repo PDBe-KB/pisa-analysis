@@ -39,7 +39,6 @@ from pisa_utils.models.data_fields import (
 from pisa_utils.models.data_models import StrictModel
 from pisa_utils.models.labels import (
     AUTH_ASYM_ID,
-    COMPLEXES_IN_PQS_SET_POST_PROC,
     INTERFACE_AREA,
     INTERFACE_COMPONENT_P_VALUE,
     INTERFACE_COMPONENT_SOLVATION_ENERGY,
@@ -66,6 +65,10 @@ class PISAAnalysisType(str, Enum):
 
 
 class ComplexTableRow(BaseModel):
+    pqs_set_id: Optional[int] = PQSSetIdField(default=None)
+    pisa_analysis_type: PISAAnalysisType = Field(
+        default=PISAAnalysisType.PQS, description="Type of complex from PISA analysis"
+    )
     complex_key: int = ComplexKeyField()
     formula: Optional[str] = ComplexFormulaField()
     composition: str = ComplexCompositionField()
@@ -80,17 +83,7 @@ class ComplexTableRow(BaseModel):
     n_interfaces: Optional[int] = TotalInterfacesField(default=0)
 
 
-class PQSSetGroup(BaseModel):
-    pqs_set_id: Optional[int] = PQSSetIdField(default=None)
-    pisa_analysis_type: PISAAnalysisType = Field(
-        default=PISAAnalysisType.PQS, description="Type of complex from PISA analysis"
-    )
-    complexes: list[ComplexTableRow] = Field(
-        default=[], description=COMPLEXES_IN_PQS_SET_POST_PROC
-    )
-
-
-class ComplexTable(RootModel[list[PQSSetGroup]]):
+class ComplexTable(RootModel[list[ComplexTableRow]]):
     pass
 
 
