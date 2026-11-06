@@ -212,10 +212,14 @@ The JSON output directory contains:
 | `interface_details/interface_<id>.json` | One interface details object per file, joined to component/monomer data. |
 | `interface_table.json` | Flat list of interfaces, with `int_type` and hydrogen-bond, salt-bridge, and disulfide-bond counts on each row, ordered by type and interface ID. |
 | `residue_tables/interface_<id>_residue_table.json` | Per-interface residue tables for both components, including buried percentages and accessibility flags. |
+| `bond_tables/interface_<id>_h_bonds.json` | Hydrogen bonds for one interface, with chain, residue, atom, and distance fields. |
+| `bond_tables/interface_<id>_salt_bridges.json` | Salt bridges for one interface, using the same bond-row format. |
+| `bond_tables/interface_<id>_ss_bonds.json` | Disulfide bonds for one interface, using the same bond-row format. |
 
 With `--compress_output`, these paths have an additional `.gz` suffix. Interface
 files and some derived outputs are omitted when there are no interfaces; the
 full output listing assumes interfaces are present.
+Each interface has all three bond-table files; absent bond types contain `[]`.
 
 ## Expected JSON formats
 
@@ -389,6 +393,7 @@ Additional parsers can be used independently:
 | `ConvertInterfaceListToJSON` | Converts extended interface text using `path_txt` and `path_json`. |
 | `ConvertComponentsListToJSON` | Converts extended monomer text using `path_txt` and `path_json`. |
 | `PostProcessInterfaceDetailsList` | Joins `path_interfaces` to `path_monomers_json` and writes one `InterfaceDetails` object per interface to `output_json_dir`. |
+| `PostProcessInterfacingBondsTable` | Reads `path_interfaces` and writes three `InterfacingBondsTable` files per interface to `output_json_dir`, for hydrogen bonds, salt bridges, and disulfides. |
 
 The list-text parsers are in `pisa_utils.parsers`; the details parser is in
 `pisa_utils.post_process_parsers`. For the list parsers, `path_json` may be an
@@ -397,6 +402,11 @@ pass the `.json` filename and `compressed=True`; the writer appends `.gz`.
 The details parser creates `output_json_dir` when interfaces are present and
 writes `interface_<id>.json` files, or `interface_<id>.json.gz` with
 `compressed=True`.
+
+The bond parser also creates `output_json_dir` when interfaces are present.
+It preserves bond order, writes residue names as `label_comp_id_1` and
+`label_comp_id_2`, and rounds distances to three decimal places. The service
+runs it automatically with `bond_tables/` as the output directory.
 
 ### Overlay covariation data
 
