@@ -113,13 +113,13 @@ class TestInterfaceTable(PostProcessTestCase):
         interface_table = InterfaceTable.model_validate(self.data)
 
         expected_data = deepcopy(self.data)
-        expected_data["interface_types"][0]["interfaces"][0].update(
+        expected_data[0].update(
             int_area=1617.4,
             int_solv_energy=-23.1,
             pvalue=0.661,
             css=0.382,
         )
-        self.assertDictEqual(interface_table.model_dump(), expected_data)
+        self.assertListEqual(interface_table.model_dump(), expected_data)
 
     def test_interface_table_aliases_and_optional_fields(self):
         """
@@ -132,7 +132,7 @@ class TestInterfaceTable(PostProcessTestCase):
         for optional_fields in ("omitted", "null"):
             with self.subTest(optional_fields=optional_fields):
                 data = deepcopy(self.data)
-                row = data["interface_types"][0]["interfaces"][0]
+                row = data[0]
                 row["chain_id"] = row.pop("auth_asym_id_2")
                 row["int_solv_en"] = row.pop("int_solv_energy")
                 bond_fields = ("n_h_bonds", "n_salt_bridges", "n_ss_bonds")
@@ -143,7 +143,7 @@ class TestInterfaceTable(PostProcessTestCase):
                         row[field] = None
 
                 interface_table = InterfaceTable.model_validate(data)
-                interface = interface_table.interface_types[0].interfaces[0]
+                interface = interface_table.root[0]
 
                 self.assertEqual(interface.auth_asym_id_2, "A")
                 self.assertEqual(interface.int_solv_energy, -23.1)
@@ -158,18 +158,14 @@ class TestInterfaceTable(PostProcessTestCase):
 
     def test_interface_table_rejects_invalid_data(self):
         """
-        Reject missing required fields and unexpected fields at each level.
+        Reject missing required fields and unexpected fields on each row.
 
-        Check table, interface type group, and interface row validation errors,
-        asserting that each reports the expected field location and error type.
+        Check that each error identifies the row index, field, and error type.
         """
         cases = (
-            ((), "n_interfaces", "missing"),
-            (("interface_types", 0), "int_type", "missing"),
-            (("interface_types", 0, "interfaces", 0), "interface_id", "missing"),
-            ((), "unexpected", "extra_forbidden"),
-            (("interface_types", 0), "unexpected", "extra_forbidden"),
-            (("interface_types", 0, "interfaces", 0), "unexpected", "extra_forbidden"),
+            ((0,), "int_type", "missing"),
+            ((0,), "interface_id", "missing"),
+            ((0,), "unexpected", "extra_forbidden"),
         )
         for path, field, error_type in cases:
             with self.subTest(path=path, field=field, error_type=error_type):
@@ -191,18 +187,26 @@ class TestInterfaceTable(PostProcessTestCase):
                 self.assertEqual(errors[0]["type"], error_type)
 
     def test_interface_table_rejects_invalid_bond_counts(self):
-        """Reject nonnumeric bond counts and identify the invalid nested field."""
+        """Reject nonnumeric bond counts and identify the invalid row field."""
         for field in ("n_h_bonds", "n_salt_bridges", "n_ss_bonds"):
             with self.subTest(field=field):
                 data = deepcopy(self.data)
-                data["interface_types"][0]["interfaces"][0][field] = "invalid"
+                data[0][field] = "invalid"
 
                 with self.assertRaises(ValidationError) as context:
                     InterfaceTable.model_validate(data)
 
                 errors = context.exception.errors()
                 self.assertEqual(len(errors), 1)
-                self.assertEqual(
-                    errors[0]["loc"], ("interface_types", 0, "interfaces", 0, field)
-                )
+                self.assertEqual(errors[0]["loc"], (0, field))
                 self.assertEqual(errors[0]["type"], "int_parsing")
+
+    def test_interface_table_rejects_grouped_input(self):
+        """The table's root must be a list rather than the old grouped object."""
+        with self.assertRaises(ValidationError) as context:
+            InterfaceTable.model_validate({"n_interfaces": 0, "interface_types": []})
+
+        errors = context.exception.errors()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0]["loc"], ())
+        self.assertEqual(errors[0]["type"], "list_type")

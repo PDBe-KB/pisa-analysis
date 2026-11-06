@@ -394,10 +394,17 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
         super().setUp()
         input_json_path = os.path.join(
             self.base_data_path,
-            "mock_data/model_inputs/post_processor_models/interface_table.json",
+            "mock_data/post_process_interface_table/interface_summary.json",
         )
         with open(input_json_path, "r") as f:
             self.data = json.load(f)
+
+        expected_json_path = os.path.join(
+            self.base_data_path,
+            "mock_data/model_inputs/post_processor_models/interface_table.json",
+        )
+        with open(expected_json_path) as f:
+            self.expected_data = json.load(f)
 
         self.path_interface_jsons = os.path.join(
             self.base_data_path, "mock_data/post_process_interface_table/interfaces"
@@ -430,8 +437,8 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
         Extract all three bond counts, replacing stale summary counts, and
         compare the complete output including rounded area, energy, and scores.
         """
-        expected_data = deepcopy(self.data)
-        expected_data["interface_types"][0]["interfaces"][0].update(
+        expected_data = deepcopy(self.expected_data)
+        expected_data[0].update(
             int_area=1617.4,
             int_solv_energy=-23.1,
             pvalue=0.661,
@@ -467,7 +474,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
 
                 with open_json(output_json_path, "rt") as f:
                     output_data = json.load(f)
-                self.assertDictEqual(output_data, expected_data)
+                self.assertListEqual(output_data, expected_data)
 
     def test_parse_interface_table_bond_counts(self):
         """
@@ -508,7 +515,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
             with open(output_json_path, "r") as f:
                 output_data = json.load(f)
 
-            self.assertEqual(output_data["n_interfaces"], 4)
+            self.assertEqual(len(output_data), 4)
             self.assertDictEqual(
                 {
                     row["interface_id"]: (
@@ -516,14 +523,14 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                         row["n_salt_bridges"],
                         row["n_ss_bonds"],
                     )
-                    for row in output_data["interface_types"][0]["interfaces"]
+                    for row in output_data
                 },
                 {1: (5, 2, 1), 2: (11, 4, 2), 3: (0, 0, 0), 4: (0, 0, 0)},
             )
 
     def test_parse_interface_table_ordering(self):
         """
-        Order groups by int_type and interfaces within each group by interface_id.
+        Order flat rows by int_type, then interface_id.
 
         Start with shuffled groups and rows, including IDs above nine, to check
         ascending numeric ordering and keep bond counts with the correct rows.
@@ -572,27 +579,30 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
             with open(output_json_path, "r") as f:
                 output_data = json.load(f)
 
-            self.assertEqual(output_data["n_interfaces"], 9)
+            self.assertEqual(len(output_data), 9)
             self.assertListEqual(
+                [(row["int_type"], row["interface_id"]) for row in output_data],
                 [
-                    (
-                        group["int_type"],
-                        [row["interface_id"] for row in group["interfaces"]],
-                    )
-                    for group in output_data["interface_types"]
+                    (1, 2),
+                    (1, 6),
+                    (1, 10),
+                    (2, 3),
+                    (2, 7),
+                    (2, 12),
+                    (10, 5),
+                    (10, 8),
+                    (10, 11),
                 ],
-                [(1, [2, 6, 10]), (2, [3, 7, 12]), (10, [5, 8, 11])],
             )
-            for group in output_data["interface_types"]:
-                for row in group["interfaces"]:
-                    self.assertEqual(row["n_h_bonds"], row["interface_id"])
+            for row in output_data:
+                self.assertEqual(row["n_h_bonds"], row["interface_id"])
 
     def test_parse_interface_table_empty(self):
         """
         Write valid summaries containing no interfaces without adding rows.
 
         Cover both an empty interface_types list and a group with an empty
-        interfaces list, preserving the input structure and zero count.
+        interfaces list, writing an empty JSON list in both cases.
         """
         for groups in ([], [{"int_type": 1, "interfaces": []}]):
             with self.subTest(groups=groups), tempfile.TemporaryDirectory() as tmpdir:
@@ -611,19 +621,21 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
 
                 with open(output_json_path, "r") as f:
                     output_data = json.load(f)
-                self.assertDictEqual(output_data, data)
+                self.assertListEqual(output_data, [])
 
     def test_parse_interface_table_invalid_input(self):
         """
         Propagate input errors without creating an output file.
 
-        Cover a missing input file, malformed JSON, and a summary missing the
-        required n_interfaces field, checking the corresponding exception type.
+        Cover a missing input file, malformed JSON, and a summary row missing a
+        required field, checking the corresponding exception type.
         """
+        invalid_summary = deepcopy(self.data)
+        del invalid_summary["interface_types"][0]["interfaces"][0]["auth_asym_id_1"]
         cases = (
             (None, FileNotFoundError),
             ("{", json.JSONDecodeError),
-            (json.dumps({"interface_types": []}), ValidationError),
+            (json.dumps(invalid_summary), ValidationError),
         )
         for contents, expected_error in cases:
             with (
