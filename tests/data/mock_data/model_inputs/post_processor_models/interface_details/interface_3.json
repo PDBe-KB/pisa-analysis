@@ -1,0 +1,40 @@
+{
+    "interface_id": 3,
+    "int_type": 3,
+    "css": 0.213,
+    "components": [
+        {
+            "auth_asym_id": "F",
+            "molecule_class": "Ligand",
+            "symmetry_operation": "x,y,z",
+            "symmetry_id": "1_555",
+            "int_natoms": 21,
+            "surface_natoms": 21,
+            "total_atoms": 22,
+            "int_nres": 1,
+            "surface_nres": 1,
+            "total_residues": 1,
+            "int_area": 355.4,
+            "surface_area": 455.3,
+            "int_solv_energy": -2.247,
+            "pvalue": 0.518
+        },
+        {
+            "auth_asym_id": "A",
+            "molecule_class": "Protein",
+            "symmetry_operation": "X,Y,Z",
+            "symmetry_id": "1_555",
+            "int_natoms": 49,
+            "surface_natoms": 1423,
+            "total_atoms": 2621,
+            "int_nres": 19,
+            "surface_nres": 287,
+            "total_residues": 329,
+            "int_area": 203.6,
+            "surface_area": 16502.5,
+            "solv_energy": -356.2,
+            "int_solv_energy": 0.746,
+            "pvalue": 0.752
+        }
+    ]
+}

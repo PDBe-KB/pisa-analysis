@@ -1,0 +1,41 @@
+{
+    "interface_id": 3,
+    "int_type": 3,
+    "css": 0.382,
+    "components": [
+        {
+            "auth_asym_id": "F",
+            "molecule_class": "RNA",
+            "symmetry_operation": "x,y,z",
+            "symmetry_id": "1_555",
+            "int_natoms": 82,
+            "surface_natoms": 233,
+            "total_atoms": 272,
+            "int_nres": 13,
+            "surface_nres": 13,
+            "total_residues": 13,
+            "int_area": 782.2,
+            "surface_area": 3331.9,
+            "solv_energy": null,
+            "int_solv_energy": 3.467,
+            "pvalue": 0.991
+        },
+        {
+            "auth_asym_id": "E",
+            "molecule_class": "RNA",
+            "symmetry_operation": "X,Y,Z",
+            "symmetry_id": "1_555",
+            "int_natoms": 98,
+            "surface_natoms": 916,
+            "total_atoms": 1246,
+            "int_nres": 17,
+            "surface_nres": 60,
+            "total_residues": 60,
+            "int_area": 708.4,
+            "surface_area": 11475.9,
+            "solv_energy": null,
+            "int_solv_energy": -3.001,
+            "pvalue": 0.994
+        }
+    ]
+}

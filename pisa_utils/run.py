@@ -18,6 +18,7 @@ from pisa_utils.post_process_parsers import (
     PostProcessInterfaceComponentResidueTable,
     PostProcessInterfaceDetailsList,
     PostProcessInterfaceTable,
+    PostProcessInterfacingBondsTable,
 )
 from pisa_utils.run_pisa import run_pisa_service, run_pisalite
 from pisa_utils.cli_tools import validate_args
@@ -206,10 +207,7 @@ def service():
                     SUBDIR_EXTENDED_DATA,
                     "monomers_extended.json" + (".gz" if args.compress_output else ""),
                 ),
-                output_json_path=os.path.join(
-                    args.output_json,
-                    "interface_details.json" + (".gz" if args.compress_output else ""),
-                ),
+                output_json_dir=os.path.join(args.output_json, "interface_details"),
                 compressed=args.compress_output,
             ),
             PostProcessInterfaceTable(
@@ -227,6 +225,11 @@ def service():
             PostProcessInterfaceComponentResidueTable(
                 path_interfaces=os.path.join(args.output_json, "interfaces"),
                 output_json_dir=os.path.join(args.output_json, "residue_tables"),
+                compressed=args.compress_output,
+            ),
+            PostProcessInterfacingBondsTable(
+                path_interfaces=os.path.join(args.output_json, "interfaces"),
+                output_json_dir=os.path.join(args.output_json, "bond_tables"),
                 compressed=args.compress_output,
             ),
         )

@@ -8,13 +8,13 @@ from typing import Optional
 from pisa_utils.models.post_process_models import (
     InterfaceDetails,
     InterfaceDetailsComponent,
-    InterfaceDetailsList,
-    PQSSetGroup,
     ComplexTableRow,
     ComplexTable,
     PISAAnalysisType,
     InterfaceTable,
     InterfaceComponentResidueTable,
+    InterfacingBondRow,
+    InterfacingBondsTable,
     ResidueRow,
 )
 from pisa_utils.file_io import save_json, open_compressed
@@ -51,6 +51,8 @@ class PostProcessor(ABC):
 
 
 class PostProcessComplexTable(PostProcessor):
+    """Write a flat table of ASU and PQS complexes with per-row provenance."""
+
     def parse(self):
         super().parse()
 
@@ -61,6 +63,8 @@ class PostProcessComplexTable(PostProcessor):
         if asu_complex:
             LOGGER.info("Processing ASU complex")
             asu_complex_row = ComplexTableRow(
+                pqs_set_id=None,
+                pisa_analysis_type=PISAAnalysisType.ASU,
                 complex_key=asu_complex["complex_key"],
                 formula=asu_complex["formula"],
                 composition=asu_complex["composition"],
@@ -74,10 +78,7 @@ class PostProcessComplexTable(PostProcessor):
                 symmetry_number=asu_complex["symmetry_number"],
                 n_interfaces=asu_complex.get("interfaces", {}).get("n_interfaces"),
             )
-            asu_row = PQSSetGroup(
-                pisa_analysis_type=PISAAnalysisType.ASU, complexes=[asu_complex_row]
-            )
-            output.append(asu_row)
+            output.append(asu_complex_row)
 
         # Add PQS sets
         for pqs_set in self.data.get("pqs_sets", []):
@@ -86,28 +87,25 @@ class PostProcessComplexTable(PostProcessor):
             LOGGER.info(
                 f"Processing PQS set ID: {pqs_set_id} with {len(complexes)} complexes"
             )
-            pqs_set_row = PQSSetGroup(
-                pqs_set_id=int(pqs_set_id),
-                pisa_analysis_type=PISAAnalysisType.PQS,
-                complexes=[
-                    ComplexTableRow(
-                        complex_key=complex["complex_key"],
-                        formula=complex["formula"],
-                        composition=complex["composition"],
-                        asa=complex["asa"],
-                        bsa=complex["bsa"],
-                        int_energy=complex["int_energy"],
-                        diss_energy=complex["diss_energy"],
-                        entropy=complex["entropy"],
-                        mmsize=complex["mmsize"],
-                        n_uc=complex["n_uc"],
-                        symmetry_number=complex["symmetry_number"],
-                        n_interfaces=complex.get("interfaces", {}).get("n_interfaces"),
-                    )
-                    for complex in complexes
-                ],
+            output.extend(
+                ComplexTableRow(
+                    pqs_set_id=int(pqs_set_id),
+                    pisa_analysis_type=PISAAnalysisType.PQS,
+                    complex_key=complex["complex_key"],
+                    formula=complex["formula"],
+                    composition=complex["composition"],
+                    asa=complex["asa"],
+                    bsa=complex["bsa"],
+                    int_energy=complex["int_energy"],
+                    diss_energy=complex["diss_energy"],
+                    entropy=complex["entropy"],
+                    mmsize=complex["mmsize"],
+                    n_uc=complex["n_uc"],
+                    symmetry_number=complex["symmetry_number"],
+                    n_interfaces=complex.get("interfaces", {}).get("n_interfaces"),
+                )
+                for complex in complexes
             )
-            output.append(pqs_set_row)
 
         complex_table = ComplexTable(output).model_dump()
 
@@ -115,19 +113,25 @@ class PostProcessComplexTable(PostProcessor):
 
 
 class PostProcessInterfaceDetailsList(PostProcessor):
+    """Join interface and monomer data and write one InterfaceDetails file per ID.
+
+    Output files are named interface_<id>.json, or .json.gz when compressed.
+    """
+
     def __init__(
         self,
         path_interfaces: str,
         path_monomers_json: str,
-        output_json_path: str,
+        output_json_dir: str,
         compressed: bool = False,
     ):
         super().__init__(
             input_json_path=path_monomers_json,
-            output_json_path=output_json_path,
+            output_json_path=output_json_dir,
             compressed=compressed,
         )
         self.path_interfaces = path_interfaces
+        self.output_json_dir = output_json_dir
 
     def _extract_monomer_data(
         self, component_id: str, interface_auth_asym_id: Optional[str] = None
@@ -173,9 +177,7 @@ class PostProcessInterfaceDetailsList(PostProcessor):
 
     def parse(self):
         super().parse()
-        LOGGER.info("Generating interface details file for all interfaces")
-
-        output = []
+        LOGGER.info("Generating individual interface details files")
 
         if not os.path.isdir(self.path_interfaces):
             LOGGER.warning(
@@ -187,9 +189,8 @@ class PostProcessInterfaceDetailsList(PostProcessor):
         ext = ".json.gz" if self.compressed else ".json"
         interface_files = [
             f
-            for f in os.listdir(self.path_interfaces)
-            if f.startswith("interface_")
-            and f.endswith(ext)
+            for f in sorted(os.listdir(self.path_interfaces))
+            if re.fullmatch(r"interface_\d+" + re.escape(ext), f)
             and os.path.isfile(os.path.join(self.path_interfaces, f))
         ]
 
@@ -199,6 +200,8 @@ class PostProcessInterfaceDetailsList(PostProcessor):
                 f"{self.path_interfaces}. No interface details JSON will be created."
             )
             return
+
+        os.makedirs(self.output_json_dir, exist_ok=True)
 
         # Iterate over interfaces JSONs
         for interface_json_file in interface_files:
@@ -248,21 +251,19 @@ class PostProcessInterfaceDetailsList(PostProcessor):
                 )
                 components.append(component)
 
-            # Add interface details to ordered list
             interface_details = InterfaceDetails(
                 interface_id=interface_id,
                 int_type=int_type,
                 css=css,
                 components=components,
             )
-            output.append(interface_details)
-
-        # Order output list by interface ID for consistency
-        output.sort(key=lambda x: x.interface_id)
-
-        interface_details_list = InterfaceDetailsList(output).model_dump()
-
-        self.save(self.output_json_path, interface_details_list)
+            self.save(
+                os.path.join(
+                    self.output_json_dir,
+                    f"interface_{interface_details.interface_id}" + ext,
+                ),
+                interface_details.model_dump(),
+            )
 
 
 class PostProcessInterfaceTable(PostProcessor):
@@ -281,18 +282,20 @@ class PostProcessInterfaceTable(PostProcessor):
 
     def parse(self):
         """
-        The parser expects the interface_summary.json file as input, alongside the
+        Read the grouped interface_summary.json file and write a flat table.
         Bond counts are read from individual interface files in path_interface_jsons.
-        Output groups are ordered by int_type, with interfaces ordered by interface_id.
+        Each row includes int_type and is ordered by int_type, then interface_id.
         """
         super().parse()
 
         LOGGER.debug("Parsing interface table")
 
         # Fetch counts of specific bond types.
+        rows = []
         extension = ".json.gz" if self.compressed else ".json"
         for interface_type in self.data["interface_types"]:
             for interface in interface_type["interfaces"]:
+                row = {**interface, "int_type": interface_type["int_type"]}
                 interface_id = interface["interface_id"]
                 path_interface_json = os.path.join(
                     self.path_interface_jsons, f"interface_{interface_id}" + extension
@@ -304,22 +307,21 @@ class PostProcessInterfaceTable(PostProcessor):
                     interface_obj = json.load(f)
                     interface_data = interface_obj.get("interface", {})
 
-                    interface["n_h_bonds"] = interface_data.get("h_bonds", {}).get(
+                    row["n_h_bonds"] = interface_data.get("h_bonds", {}).get(
                         "n_bonds", 0
                     )
-                    interface["n_salt_bridges"] = interface_data.get(
-                        "salt_bridges", {}
-                    ).get("n_bonds", 0)
-                    interface["n_ss_bonds"] = interface_data.get("ss_bonds", {}).get(
+                    row["n_salt_bridges"] = interface_data.get("salt_bridges", {}).get(
                         "n_bonds", 0
                     )
+                    row["n_ss_bonds"] = interface_data.get("ss_bonds", {}).get(
+                        "n_bonds", 0
+                    )
+                rows.append(row)
 
-        self.data = InterfaceTable.model_validate(self.data)
+        self.data = InterfaceTable.model_validate(rows)
 
         # Sort interfaces by type and ID.
-        self.data.interface_types.sort(key=lambda group: group.int_type)
-        for group in self.data.interface_types:
-            group.interfaces.sort(key=lambda interface: interface.interface_id)
+        self.data.root.sort(key=lambda row: (row.int_type, row.interface_id))
 
         self.save(self.output_json_path, self.data.model_dump())
 
@@ -416,3 +418,97 @@ class PostProcessInterfaceComponentResidueTable(PostProcessor):
                 ),
                 table.model_dump(),
             )
+
+
+class PostProcessInterfacingBondsTable(PostProcessor):
+    """Write separate hydrogen bond, salt bridge, and disulfide tables per interface.
+
+    Read interface_<id>.json files and write interface_<id>_<bond_type>.json
+    for h_bonds, salt_bridges, and ss_bonds. Empty bond types produce empty lists.
+    With compression enabled, both input and output filenames end in .json.gz.
+    """
+
+    BOND_TYPES = ("h_bonds", "salt_bridges", "ss_bonds")
+
+    def __init__(
+        self,
+        path_interfaces: str,
+        output_json_dir: str,
+        compressed: bool = False,
+    ):
+        super().__init__(path_interfaces, output_json_dir, compressed)
+        self.path_interfaces = path_interfaces
+        self.output_json_dir = output_json_dir
+
+    def _parse_bonds(self, bonds: list[dict]) -> InterfacingBondsTable:
+        """Keep the table fields and let the model round bond distances."""
+        return InterfacingBondsTable(
+            [
+                InterfacingBondRow(
+                    auth_asym_id_1=bond["auth_asym_id_1"],
+                    label_comp_id_1=bond["auth_comp_id_1"],
+                    auth_seq_id_1=bond["auth_seq_id_1"],
+                    auth_atom_id_1=bond["auth_atom_id_1"],
+                    dist=bond["dist"],
+                    auth_asym_id_2=bond["auth_asym_id_2"],
+                    label_comp_id_2=bond["auth_comp_id_2"],
+                    auth_seq_id_2=bond["auth_seq_id_2"],
+                    auth_atom_id_2=bond["auth_atom_id_2"],
+                )
+                for bond in bonds
+            ]
+        )
+
+    def parse(self) -> None:
+        if not os.path.isdir(self.path_interfaces):
+            LOGGER.warning(
+                f"Interface JSON directory not found: {self.path_interfaces}. "
+                "No bond table JSON files will be created."
+            )
+            return
+
+        extension = ".json.gz" if self.compressed else ".json"
+        interface_files = [
+            filename
+            for filename in sorted(os.listdir(self.path_interfaces))
+            if re.fullmatch(r"interface_\d+" + re.escape(extension), filename)
+            and os.path.isfile(os.path.join(self.path_interfaces, filename))
+        ]
+        if not interface_files:
+            LOGGER.warning(
+                f"No interface JSON files found in directory: {self.path_interfaces}. "
+                "No bond table JSON files will be created."
+            )
+            return
+
+        os.makedirs(self.output_json_dir, exist_ok=True)
+
+        for filename in interface_files:
+            with open_compressed(
+                os.path.join(self.path_interfaces, filename),
+                compressed=self.compressed,
+            ) as f:
+                interface_data = json.load(f)
+
+            file_interface_id = int(filename[len("interface_") : -len(extension)])
+            interface_id = int(interface_data["interface_id"])
+            if interface_id != file_interface_id:
+                raise ValueError(
+                    f"Interface ID mismatch: filename has {file_interface_id}, "
+                    f"JSON has {interface_id}"
+                )
+
+            interface = interface_data["interface"]
+            tables = {}
+            for bond_type in self.BOND_TYPES:
+                bond_data = interface.get(bond_type) or {}
+                tables[bond_type] = self._parse_bonds(bond_data.get("bonds") or [])
+
+            for bond_type, table in tables.items():
+                self.save(
+                    os.path.join(
+                        self.output_json_dir,
+                        f"interface_{interface_id}_{bond_type}" + extension,
+                    ),
+                    table.model_dump(),
+                )

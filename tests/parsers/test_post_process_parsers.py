@@ -35,69 +35,219 @@ class TestPostProcessParsers(PostProcessTestCase):
             "3hax_assembly_multi_asmset_post_proc.json",
         )
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            input_json_path = os.path.join(
-                self.base_data_path,
-                "expected_output",
-                "3hax_assembly_multi_asmset.json",
+        input_json_path = os.path.join(
+            self.base_data_path,
+            "expected_output",
+            "3hax_assembly_multi_asmset.json",
+        )
+        with open(expected_output_path) as f:
+            expected_data = json.load(f)
+
+        for compressed in (False, True):
+            with (
+                self.subTest(compressed=compressed),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                source_path = input_json_path
+                output_json_path = os.path.join(tmpdir, "output.json")
+                open_json = gzip.open if compressed else open
+                if compressed:
+                    source_path = os.path.join(tmpdir, "assemblies.json.gz")
+                    output_json_path += ".gz"
+                    with open(input_json_path) as source:
+                        with gzip.open(source_path, "wt") as target:
+                            target.write(source.read())
+
+                parser = PostProcessComplexTable(
+                    source_path, output_json_path, compressed=compressed
+                )
+                parser.parse()
+
+                with open_json(output_json_path, "rt") as f:
+                    output_data = json.load(f)
+
+                self.assertListEqual(expected_data, output_data)
+
+    def test_parse_complex_table_with_missing_groups(self):
+        """Handle ASU-only, PQS-only, and empty results without nested groups."""
+        with open(
+            os.path.join(
+                self.base_data_path, "expected_output/3hax_assembly_multi_asmset.json"
             )
-            output_json_path = os.path.join(tmpdir, "output.json")
+        ) as f:
+            assemblies = json.load(f)
+        with open(
+            os.path.join(
+                self.base_data_path,
+                "expected_output/post_processed_jsons/3hax_assembly_multi_asmset_post_proc.json",
+            )
+        ) as f:
+            expected = json.load(f)
 
-            # Run parser
-            parser = PostProcessComplexTable(input_json_path, output_json_path)
-            parser.parse()
+        cases = (
+            ({"asu_complex": assemblies["asu_complex"]}, expected[:1]),
+            ({"pqs_sets": assemblies["pqs_sets"]}, expected[1:]),
+            ({"pqs_sets": [{"pqs_set_id": 1, "complexes": []}]}, []),
+            ({}, []),
+        )
+        for assemblies, expected in cases:
+            with (
+                self.subTest(assemblies=assemblies),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                input_path = os.path.join(tmpdir, "assemblies.json")
+                output_path = os.path.join(tmpdir, "complex_table.json")
+                with open(input_path, "w") as f:
+                    json.dump(assemblies, f)
 
-            # Checks
-            with open(expected_output_path, "r") as f:
-                expected_data = json.load(f)
-            with open(output_json_path, "r") as f:
-                output_data = json.load(f)
+                PostProcessComplexTable(input_path, output_path).parse()
 
-            self.assertListEqual(expected_data, output_data)
+                with open(output_path) as f:
+                    self.assertEqual(json.load(f), expected)
 
 
 class TestPostProcessInterfaceDetailsList(PostProcessTestCase):
-    def test_parse_interface_details_list(self):
-        """
-        Test a parse with a set of real, truncated data from 3hax.
-        """
-
-        expected_output_path = os.path.join(
+    def setUp(self):
+        super().setUp()
+        self.path_expected = os.path.join(
             self.base_data_path,
-            "expected_output",
-            "post_processed_jsons",
-            "3hax_multi_interface_details_list.json",
+            "expected_output/post_processed_jsons/3hax_multi_interface_details",
+        )
+        self.path_interfaces = os.path.join(
+            self.base_data_path, "expected_output/interfaces/3hax_interfaces_multi"
+        )
+        self.path_monomers = os.path.join(
+            self.base_data_path, "mock_data/list_results/3hax/monomers_extended.json"
         )
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            path_interfaces = os.path.join(
-                self.base_data_path,
-                "expected_output",
-                "interfaces",
-                "3hax_interfaces_multi",
-            )
-            path_monomers_json = os.path.join(
-                self.base_data_path,
-                "mock_data/list_results/3hax/monomers_extended.json",
-            )
+    def test_parse_interface_details_files(self):
+        """Join real data into individual JSON or gzip files, creating the folder."""
+        for compressed in (False, True):
+            with (
+                self.subTest(compressed=compressed),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                output_json_dir = os.path.join(tmpdir, "details", "individual")
+                os.makedirs(path_interfaces)
+                extension = ".json.gz" if compressed else ".json"
+                open_json = gzip.open if compressed else open
+                for interface_id in (3, 1, 2):
+                    filename = f"interface_{interface_id}.json"
+                    with open(os.path.join(self.path_interfaces, filename)) as source:
+                        with open_json(
+                            os.path.join(
+                                path_interfaces, f"interface_{interface_id}" + extension
+                            ),
+                            "wt",
+                        ) as target:
+                            target.write(source.read())
+                # Ignore unrelated files and directories resembling interface files.
+                for name in ("interface_notes", "interface_1_details"):
+                    with open(
+                        os.path.join(path_interfaces, name + extension), "w"
+                    ) as f:
+                        f.write("not JSON")
+                os.mkdir(os.path.join(path_interfaces, "interface_4" + extension))
 
-            output_json_path = os.path.join(tmpdir, "output.json")
+                path_monomers = self.path_monomers
+                if compressed:
+                    path_monomers = os.path.join(tmpdir, "monomers.json.gz")
+                    with open(self.path_monomers) as source:
+                        with gzip.open(path_monomers, "wt") as target:
+                            target.write(source.read())
 
-            # Run parser
-            parser = PostProcessInterfaceDetailsList(
-                path_interfaces=path_interfaces,
-                path_monomers_json=path_monomers_json,
-                output_json_path=output_json_path,
-            )
-            parser.parse()
+                parser = PostProcessInterfaceDetailsList(
+                    path_interfaces=path_interfaces,
+                    path_monomers_json=path_monomers,
+                    output_json_dir=output_json_dir,
+                    compressed=compressed,
+                )
+                parser.parse()
 
-            # Checks
-            with open(expected_output_path, "r") as f:
-                expected_data = json.load(f)
-            with open(output_json_path, "r") as f:
-                output_data = json.load(f)
+                self.assertEqual(
+                    set(os.listdir(output_json_dir)),
+                    {
+                        f"interface_{interface_id}" + extension
+                        for interface_id in (1, 2, 3)
+                    },
+                )
+                for interface_id in (1, 2, 3):
+                    with open(
+                        os.path.join(
+                            self.path_expected, f"interface_{interface_id}.json"
+                        )
+                    ) as f:
+                        expected = json.load(f)
+                    with open_json(
+                        os.path.join(
+                            output_json_dir, f"interface_{interface_id}" + extension
+                        ),
+                        "rt",
+                    ) as f:
+                        self.assertDictEqual(json.load(f), expected)
 
-            self.assertListEqual(expected_data, output_data)
+    def test_missing_or_empty_directory(self):
+        """Skip absent or empty interface directories without creating output."""
+        for missing in (False, True):
+            with self.subTest(missing=missing), tempfile.TemporaryDirectory() as tmpdir:
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                output_json_dir = os.path.join(tmpdir, "details")
+                if not missing:
+                    os.makedirs(path_interfaces)
+
+                parser = PostProcessInterfaceDetailsList(
+                    path_interfaces=path_interfaces,
+                    path_monomers_json=self.path_monomers,
+                    output_json_dir=output_json_dir,
+                )
+                with self.assertLogs(
+                    "pisa_utils.post_process_parsers", level="WARNING"
+                ):
+                    parser.parse()
+                self.assertFalse(os.path.exists(output_json_dir))
+
+    def test_invalid_monomer_data(self):
+        """Reject missing or mismatched monomers before writing the interface file."""
+        with open(os.path.join(self.path_interfaces, "interface_1.json")) as f:
+            interface = json.load(f)
+        component_id = interface["interface"]["molecules"][0]["component_id"]
+
+        for invalid in ("missing", "mismatched_chain"):
+            with self.subTest(invalid=invalid), tempfile.TemporaryDirectory() as tmpdir:
+                with open(self.path_monomers) as f:
+                    monomers = json.load(f)
+                if invalid == "missing":
+                    monomers["components"] = [
+                        component
+                        for component in monomers["components"]
+                        if component["component_id"] != component_id
+                    ]
+                else:
+                    next(
+                        component
+                        for component in monomers["components"]
+                        if component["component_id"] == component_id
+                    )["auth_asym_id"] = "other"
+
+                path_interfaces = os.path.join(tmpdir, "interfaces")
+                os.makedirs(path_interfaces)
+                with open(os.path.join(path_interfaces, "interface_1.json"), "w") as f:
+                    json.dump(interface, f)
+                path_monomers = os.path.join(tmpdir, "monomers.json")
+                with open(path_monomers, "w") as f:
+                    json.dump(monomers, f)
+                output_json_dir = os.path.join(tmpdir, "details")
+                parser = PostProcessInterfaceDetailsList(
+                    path_interfaces=path_interfaces,
+                    path_monomers_json=path_monomers,
+                    output_json_dir=output_json_dir,
+                )
+                with self.assertRaises(ValueError):
+                    parser.parse()
+                self.assertFalse(
+                    os.path.exists(os.path.join(output_json_dir, "interface_1.json"))
+                )
 
 
 class TestPostProcessInterfaceComponentResidueTable(PostProcessTestCase):
@@ -344,10 +494,17 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
         super().setUp()
         input_json_path = os.path.join(
             self.base_data_path,
-            "mock_data/model_inputs/post_processor_models/interface_table.json",
+            "mock_data/post_process_interface_table/interface_summary.json",
         )
         with open(input_json_path, "r") as f:
             self.data = json.load(f)
+
+        expected_json_path = os.path.join(
+            self.base_data_path,
+            "mock_data/model_inputs/post_processor_models/interface_table.json",
+        )
+        with open(expected_json_path) as f:
+            self.expected_data = json.load(f)
 
         self.path_interface_jsons = os.path.join(
             self.base_data_path, "mock_data/post_process_interface_table/interfaces"
@@ -380,8 +537,8 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
         Extract all three bond counts, replacing stale summary counts, and
         compare the complete output including rounded area, energy, and scores.
         """
-        expected_data = deepcopy(self.data)
-        expected_data["interface_types"][0]["interfaces"][0].update(
+        expected_data = deepcopy(self.expected_data)
+        expected_data[0].update(
             int_area=1617.4,
             int_solv_energy=-23.1,
             pvalue=0.661,
@@ -417,7 +574,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
 
                 with open_json(output_json_path, "rt") as f:
                     output_data = json.load(f)
-                self.assertDictEqual(output_data, expected_data)
+                self.assertListEqual(output_data, expected_data)
 
     def test_parse_interface_table_bond_counts(self):
         """
@@ -458,7 +615,7 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
             with open(output_json_path, "r") as f:
                 output_data = json.load(f)
 
-            self.assertEqual(output_data["n_interfaces"], 4)
+            self.assertEqual(len(output_data), 4)
             self.assertDictEqual(
                 {
                     row["interface_id"]: (
@@ -466,14 +623,14 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                         row["n_salt_bridges"],
                         row["n_ss_bonds"],
                     )
-                    for row in output_data["interface_types"][0]["interfaces"]
+                    for row in output_data
                 },
                 {1: (5, 2, 1), 2: (11, 4, 2), 3: (0, 0, 0), 4: (0, 0, 0)},
             )
 
     def test_parse_interface_table_ordering(self):
         """
-        Order groups by int_type and interfaces within each group by interface_id.
+        Order flat rows by int_type, then interface_id.
 
         Start with shuffled groups and rows, including IDs above nine, to check
         ascending numeric ordering and keep bond counts with the correct rows.
@@ -522,27 +679,30 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
             with open(output_json_path, "r") as f:
                 output_data = json.load(f)
 
-            self.assertEqual(output_data["n_interfaces"], 9)
+            self.assertEqual(len(output_data), 9)
             self.assertListEqual(
+                [(row["int_type"], row["interface_id"]) for row in output_data],
                 [
-                    (
-                        group["int_type"],
-                        [row["interface_id"] for row in group["interfaces"]],
-                    )
-                    for group in output_data["interface_types"]
+                    (1, 2),
+                    (1, 6),
+                    (1, 10),
+                    (2, 3),
+                    (2, 7),
+                    (2, 12),
+                    (10, 5),
+                    (10, 8),
+                    (10, 11),
                 ],
-                [(1, [2, 6, 10]), (2, [3, 7, 12]), (10, [5, 8, 11])],
             )
-            for group in output_data["interface_types"]:
-                for row in group["interfaces"]:
-                    self.assertEqual(row["n_h_bonds"], row["interface_id"])
+            for row in output_data:
+                self.assertEqual(row["n_h_bonds"], row["interface_id"])
 
     def test_parse_interface_table_empty(self):
         """
         Write valid summaries containing no interfaces without adding rows.
 
         Cover both an empty interface_types list and a group with an empty
-        interfaces list, preserving the input structure and zero count.
+        interfaces list, writing an empty JSON list in both cases.
         """
         for groups in ([], [{"int_type": 1, "interfaces": []}]):
             with self.subTest(groups=groups), tempfile.TemporaryDirectory() as tmpdir:
@@ -561,19 +721,21 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
 
                 with open(output_json_path, "r") as f:
                     output_data = json.load(f)
-                self.assertDictEqual(output_data, data)
+                self.assertListEqual(output_data, [])
 
     def test_parse_interface_table_invalid_input(self):
         """
         Propagate input errors without creating an output file.
 
-        Cover a missing input file, malformed JSON, and a summary missing the
-        required n_interfaces field, checking the corresponding exception type.
+        Cover a missing input file, malformed JSON, and a summary row missing a
+        required field, checking the corresponding exception type.
         """
+        invalid_summary = deepcopy(self.data)
+        del invalid_summary["interface_types"][0]["interfaces"][0]["auth_asym_id_1"]
         cases = (
             (None, FileNotFoundError),
             ("{", json.JSONDecodeError),
-            (json.dumps({"interface_types": []}), ValidationError),
+            (json.dumps(invalid_summary), ValidationError),
         )
         for contents, expected_error in cases:
             with (

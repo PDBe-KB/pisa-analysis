@@ -1,0 +1,41 @@
+{
+    "interface_id": 2,
+    "int_type": 2,
+    "css": 1.0,
+    "components": [
+        {
+            "auth_asym_id": "C",
+            "molecule_class": "Protein",
+            "symmetry_operation": "x,y,z",
+            "symmetry_id": "1_555",
+            "int_natoms": 125,
+            "surface_natoms": 338,
+            "total_atoms": 444,
+            "int_nres": 25,
+            "surface_nres": 53,
+            "total_residues": 53,
+            "int_area": 1378.9,
+            "surface_area": 5113.9,
+            "solv_energy": -39.9,
+            "int_solv_energy": -6.529,
+            "pvalue": 0.236
+        },
+        {
+            "auth_asym_id": "A",
+            "molecule_class": "Protein",
+            "symmetry_operation": "X,Y,Z",
+            "symmetry_id": "1_555",
+            "int_natoms": 153,
+            "surface_natoms": 1423,
+            "total_atoms": 2621,
+            "int_nres": 38,
+            "surface_nres": 287,
+            "total_residues": 329,
+            "int_area": 1341.2,
+            "surface_area": 16502.5,
+            "solv_energy": -356.2,
+            "int_solv_energy": -5.336,
+            "pvalue": 0.173
+        }
+    ]
+}
