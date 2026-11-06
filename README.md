@@ -209,7 +209,7 @@ The JSON output directory contains:
 | `extended_data/interfaces_extended.json` | Parsed extended interface data. |
 | `extended_data/monomers_extended.json` | Parsed component/monomer data, including surface and total atom/residue counts. |
 | `complex_table.json` | Flat list of complexes, with `pisa_analysis_type` and `pqs_set_id` on each row; ASU rows have a null `pqs_set_id`. |
-| `interface_details.json` | Interface details joined to component/monomer data. |
+| `interface_details/interface_<id>.json` | One interface details object per file, joined to component/monomer data. |
 | `interface_table.json` | Flat list of interfaces, with `int_type` and hydrogen-bond, salt-bridge, and disulfide-bond counts on each row, ordered by type and interface ID. |
 | `residue_tables/interface_<id>_residue_table.json` | Per-interface residue tables for both components, including buried percentages and accessibility flags. |
 
@@ -388,12 +388,15 @@ Additional parsers can be used independently:
 | `ConvertAssemblyListToJSON` | Converts PISA's extended assembly text using `path_txt` and `path_json`. |
 | `ConvertInterfaceListToJSON` | Converts extended interface text using `path_txt` and `path_json`. |
 | `ConvertComponentsListToJSON` | Converts extended monomer text using `path_txt` and `path_json`. |
-| `PostProcessInterfaceDetailsList` | Joins `path_interfaces` to `path_monomers_json` and writes combined details to `output_json_path`. |
+| `PostProcessInterfaceDetailsList` | Joins `path_interfaces` to `path_monomers_json` and writes one `InterfaceDetails` object per interface to `output_json_dir`. |
 
 The list-text parsers are in `pisa_utils.parsers`; the details parser is in
 `pisa_utils.post_process_parsers`. For the list parsers, `path_json` may be an
 existing output directory or a filename ending in `.json`. With compression,
 pass the `.json` filename and `compressed=True`; the writer appends `.gz`.
+The details parser creates `output_json_dir` when interfaces are present and
+writes `interface_<id>.json` files, or `interface_<id>.json.gz` with
+`compressed=True`.
 
 ### Overlay covariation data
 
