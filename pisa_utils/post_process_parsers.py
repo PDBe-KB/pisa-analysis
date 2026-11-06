@@ -278,18 +278,20 @@ class PostProcessInterfaceTable(PostProcessor):
 
     def parse(self):
         """
-        The parser expects the interface_summary.json file as input, alongside the
+        Read the grouped interface_summary.json file and write a flat table.
         Bond counts are read from individual interface files in path_interface_jsons.
-        Output groups are ordered by int_type, with interfaces ordered by interface_id.
+        Each row includes int_type and is ordered by int_type, then interface_id.
         """
         super().parse()
 
         LOGGER.debug("Parsing interface table")
 
         # Fetch counts of specific bond types.
+        rows = []
         extension = ".json.gz" if self.compressed else ".json"
         for interface_type in self.data["interface_types"]:
             for interface in interface_type["interfaces"]:
+                row = {**interface, "int_type": interface_type["int_type"]}
                 interface_id = interface["interface_id"]
                 path_interface_json = os.path.join(
                     self.path_interface_jsons, f"interface_{interface_id}" + extension
@@ -301,22 +303,21 @@ class PostProcessInterfaceTable(PostProcessor):
                     interface_obj = json.load(f)
                     interface_data = interface_obj.get("interface", {})
 
-                    interface["n_h_bonds"] = interface_data.get("h_bonds", {}).get(
+                    row["n_h_bonds"] = interface_data.get("h_bonds", {}).get(
                         "n_bonds", 0
                     )
-                    interface["n_salt_bridges"] = interface_data.get(
-                        "salt_bridges", {}
-                    ).get("n_bonds", 0)
-                    interface["n_ss_bonds"] = interface_data.get("ss_bonds", {}).get(
+                    row["n_salt_bridges"] = interface_data.get("salt_bridges", {}).get(
                         "n_bonds", 0
                     )
+                    row["n_ss_bonds"] = interface_data.get("ss_bonds", {}).get(
+                        "n_bonds", 0
+                    )
+                rows.append(row)
 
-        self.data = InterfaceTable.model_validate(self.data)
+        self.data = InterfaceTable.model_validate(rows)
 
         # Sort interfaces by type and ID.
-        self.data.interface_types.sort(key=lambda group: group.int_type)
-        for group in self.data.interface_types:
-            group.interfaces.sort(key=lambda interface: interface.interface_id)
+        self.data.root.sort(key=lambda row: (row.int_type, row.interface_id))
 
         self.save(self.output_json_path, self.data.model_dump())
 

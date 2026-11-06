@@ -44,7 +44,6 @@ from pisa_utils.models.labels import (
     INTERFACE_COMPONENT_SOLVATION_ENERGY,
     INTERFACE_N_ATOMS,
     INTERFACE_N_RESIDUES,
-    INTERFACE_TOTAL,
     ATOM_LABEL,
     ATOM_LABEL_EXAMPLES,
     AUTH_SEQ_ID,
@@ -87,64 +86,8 @@ class ComplexTable(RootModel[list[ComplexTableRow]]):
     pass
 
 
-class InterfaceDetailsComponent(BaseModel):
-    auth_asym_id: str = AuthAsymIdField()
-    molecule_class: str = MoleculeClassField()
-    symmetry_operation: str = SymmetryOperationField()
-    symmetry_id: str = SymmetryIdField()
-
-    int_natoms: int = InterfaceNumAtomsField()
-    surface_natoms: int = ComponentNumSurfaceAtomsField()
-    total_atoms: int = ComponentTotalAtomsField()
-
-    int_nres: int = InterfaceNumResiduesField()
-    surface_nres: int = ComponentNumSurfaceResiduesField()
-    total_residues: int = ComponentTotalResiduesField()
-
-    int_area: float = InterfaceAreaField()
-    surface_area: float = ComponentTotalSurfaceAreaField()
-
-    solv_energy: Optional[float] = ComponentIsolatedSolvationEnergyField(default=None)
-    # FIXME: Change to component-specific name, avoid confusion with interface at large
-    int_solv_energy: float = InterfaceSolvationEnergyField(
-        description=INTERFACE_COMPONENT_SOLVATION_ENERGY
-    )
-    pvalue: float = PValueField(description=INTERFACE_COMPONENT_P_VALUE)
-
-    @field_validator("int_area", "surface_area", "solv_energy")
-    @classmethod
-    def standard_round(cls, v):
-        if v is None:
-            return v
-        return round(v, STANDARD_DP)
-
-    @field_validator("int_solv_energy", "pvalue")
-    @classmethod
-    def prevision_round(cls, v):
-        return round(v, PRECISION_DP)
-
-
-class InterfaceDetails(BaseModel):
-    interface_id: int = InterfaceIdField()
-    int_type: int = InterfaceTypeField()
-    css: Optional[float] = ComplexSignificanceScoreField()
-    components: list[InterfaceDetailsComponent] = Field(
-        description="List of data on the two components that form the interface",
-    )
-
-    @field_validator("css")
-    @classmethod
-    def prevision_round(cls, v):
-        if v is None:
-            return v
-        return round(v, PRECISION_DP)
-
-
-class InterfaceDetailsList(RootModel[list[InterfaceDetails]]):
-    pass
-
-
 class InterfaceTableRow(StrictModel):
+    int_type: int = InterfaceTypeField()
     interface_id: int = InterfaceIdField()
     auth_asym_id_1: str = AuthAsymIdField(
         description=f"{AUTH_ASYM_ID} for first molecule in interface",
@@ -208,20 +151,65 @@ class InterfaceTableRow(StrictModel):
         return round(v, STANDARD_DP)
 
 
-class InterfaceTableGroup(StrictModel):
+class InterfaceTable(RootModel[list[InterfaceTableRow]]):
+    pass
+
+
+class InterfaceDetailsComponent(BaseModel):
+    auth_asym_id: str = AuthAsymIdField()
+    molecule_class: str = MoleculeClassField()
+    symmetry_operation: str = SymmetryOperationField()
+    symmetry_id: str = SymmetryIdField()
+
+    int_natoms: int = InterfaceNumAtomsField()
+    surface_natoms: int = ComponentNumSurfaceAtomsField()
+    total_atoms: int = ComponentTotalAtomsField()
+
+    int_nres: int = InterfaceNumResiduesField()
+    surface_nres: int = ComponentNumSurfaceResiduesField()
+    total_residues: int = ComponentTotalResiduesField()
+
+    int_area: float = InterfaceAreaField()
+    surface_area: float = ComponentTotalSurfaceAreaField()
+
+    solv_energy: Optional[float] = ComponentIsolatedSolvationEnergyField(default=None)
+
+    int_solv_energy: float = InterfaceSolvationEnergyField(
+        description=INTERFACE_COMPONENT_SOLVATION_ENERGY
+    )
+    pvalue: float = PValueField(description=INTERFACE_COMPONENT_P_VALUE)
+
+    @field_validator("int_area", "surface_area", "solv_energy")
+    @classmethod
+    def standard_round(cls, v):
+        if v is None:
+            return v
+        return round(v, STANDARD_DP)
+
+    @field_validator("int_solv_energy", "pvalue")
+    @classmethod
+    def prevision_round(cls, v):
+        return round(v, PRECISION_DP)
+
+
+class InterfaceDetails(BaseModel):
+    interface_id: int = InterfaceIdField()
     int_type: int = InterfaceTypeField()
-    interfaces: list[InterfaceTableRow] = Field(
-        ...,
-        description="List of interface summaries for this interface type",
+    css: Optional[float] = ComplexSignificanceScoreField()
+    components: list[InterfaceDetailsComponent] = Field(
+        description="List of data on the two components that form the interface",
     )
 
+    @field_validator("css")
+    @classmethod
+    def prevision_round(cls, v):
+        if v is None:
+            return v
+        return round(v, PRECISION_DP)
 
-class InterfaceTable(StrictModel):
-    n_interfaces: int = Field(..., description=INTERFACE_TOTAL, examples=[58, 100, 200])
-    interface_types: list[InterfaceTableGroup] = Field(
-        ...,
-        description="List of interface type summaries",
-    )
+
+class InterfaceDetailsList(RootModel[list[InterfaceDetails]]):
+    pass
 
 
 class ResidueRow(StrictModel):
