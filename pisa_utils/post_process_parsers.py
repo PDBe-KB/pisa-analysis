@@ -13,6 +13,8 @@ from pisa_utils.models.post_process_models import (
     PISAAnalysisType,
     InterfaceTable,
     InterfaceComponentResidueTable,
+    InterfacingBondRow,
+    InterfacingBondsTable,
     ResidueRow,
 )
 from pisa_utils.file_io import save_json, open_compressed
@@ -416,3 +418,97 @@ class PostProcessInterfaceComponentResidueTable(PostProcessor):
                 ),
                 table.model_dump(),
             )
+
+
+class PostProcessInterfacingBondsTable(PostProcessor):
+    """Write separate hydrogen bond, salt bridge, and disulfide tables per interface.
+
+    Read interface_<id>.json files and write interface_<id>_<bond_type>.json
+    for h_bonds, salt_bridges, and ss_bonds. Empty bond types produce empty lists.
+    With compression enabled, both input and output filenames end in .json.gz.
+    """
+
+    BOND_TYPES = ("h_bonds", "salt_bridges", "ss_bonds")
+
+    def __init__(
+        self,
+        path_interfaces: str,
+        output_json_dir: str,
+        compressed: bool = False,
+    ):
+        super().__init__(path_interfaces, output_json_dir, compressed)
+        self.path_interfaces = path_interfaces
+        self.output_json_dir = output_json_dir
+
+    def _parse_bonds(self, bonds: list[dict]) -> InterfacingBondsTable:
+        """Keep the table fields and let the model round bond distances."""
+        return InterfacingBondsTable(
+            [
+                InterfacingBondRow(
+                    auth_asym_id_1=bond["auth_asym_id_1"],
+                    label_comp_id_1=bond["auth_comp_id_1"],
+                    auth_seq_id_1=bond["auth_seq_id_1"],
+                    auth_atom_id_1=bond["auth_atom_id_1"],
+                    dist=bond["dist"],
+                    auth_asym_id_2=bond["auth_asym_id_2"],
+                    label_comp_id_2=bond["auth_comp_id_2"],
+                    auth_seq_id_2=bond["auth_seq_id_2"],
+                    auth_atom_id_2=bond["auth_atom_id_2"],
+                )
+                for bond in bonds
+            ]
+        )
+
+    def parse(self) -> None:
+        if not os.path.isdir(self.path_interfaces):
+            LOGGER.warning(
+                f"Interface JSON directory not found: {self.path_interfaces}. "
+                "No bond table JSON files will be created."
+            )
+            return
+
+        extension = ".json.gz" if self.compressed else ".json"
+        interface_files = [
+            filename
+            for filename in sorted(os.listdir(self.path_interfaces))
+            if re.fullmatch(r"interface_\d+" + re.escape(extension), filename)
+            and os.path.isfile(os.path.join(self.path_interfaces, filename))
+        ]
+        if not interface_files:
+            LOGGER.warning(
+                f"No interface JSON files found in directory: {self.path_interfaces}. "
+                "No bond table JSON files will be created."
+            )
+            return
+
+        os.makedirs(self.output_json_dir, exist_ok=True)
+
+        for filename in interface_files:
+            with open_compressed(
+                os.path.join(self.path_interfaces, filename),
+                compressed=self.compressed,
+            ) as f:
+                interface_data = json.load(f)
+
+            file_interface_id = int(filename[len("interface_") : -len(extension)])
+            interface_id = int(interface_data["interface_id"])
+            if interface_id != file_interface_id:
+                raise ValueError(
+                    f"Interface ID mismatch: filename has {file_interface_id}, "
+                    f"JSON has {interface_id}"
+                )
+
+            interface = interface_data["interface"]
+            tables = {}
+            for bond_type in self.BOND_TYPES:
+                bond_data = interface.get(bond_type) or {}
+                tables[bond_type] = self._parse_bonds(bond_data.get("bonds") or [])
+
+            for bond_type, table in tables.items():
+                self.save(
+                    os.path.join(
+                        self.output_json_dir,
+                        f"interface_{interface_id}_{bond_type}" + extension,
+                    ),
+                    table.model_dump(),
+                )

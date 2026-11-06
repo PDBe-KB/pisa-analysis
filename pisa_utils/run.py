@@ -18,6 +18,7 @@ from pisa_utils.post_process_parsers import (
     PostProcessInterfaceComponentResidueTable,
     PostProcessInterfaceDetailsList,
     PostProcessInterfaceTable,
+    PostProcessInterfacingBondsTable,
 )
 from pisa_utils.run_pisa import run_pisa_service, run_pisalite
 from pisa_utils.cli_tools import validate_args
@@ -224,6 +225,11 @@ def service():
             PostProcessInterfaceComponentResidueTable(
                 path_interfaces=os.path.join(args.output_json, "interfaces"),
                 output_json_dir=os.path.join(args.output_json, "residue_tables"),
+                compressed=args.compress_output,
+            ),
+            PostProcessInterfacingBondsTable(
+                path_interfaces=os.path.join(args.output_json, "interfaces"),
+                output_json_dir=os.path.join(args.output_json, "bond_tables"),
                 compressed=args.compress_output,
             ),
         )

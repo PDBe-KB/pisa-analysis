@@ -359,7 +359,4 @@ class InterfacingBondsTable(RootModel[list[InterfacingBondRow]]):
     structure.
     """
 
-    root: list[InterfacingBondRow] = Field(
-        ...,
-        description="List of interfacing bonds",
-    )
+    pass
