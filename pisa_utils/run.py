@@ -206,10 +206,7 @@ def service():
                     SUBDIR_EXTENDED_DATA,
                     "monomers_extended.json" + (".gz" if args.compress_output else ""),
                 ),
-                output_json_path=os.path.join(
-                    args.output_json,
-                    "interface_details.json" + (".gz" if args.compress_output else ""),
-                ),
+                output_json_dir=os.path.join(args.output_json, "interface_details"),
                 compressed=args.compress_output,
             ),
             PostProcessInterfaceTable(

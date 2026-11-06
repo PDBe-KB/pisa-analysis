@@ -8,7 +8,6 @@ from typing import Optional
 from pisa_utils.models.post_process_models import (
     InterfaceDetails,
     InterfaceDetailsComponent,
-    InterfaceDetailsList,
     ComplexTableRow,
     ComplexTable,
     PISAAnalysisType,
@@ -112,19 +111,25 @@ class PostProcessComplexTable(PostProcessor):
 
 
 class PostProcessInterfaceDetailsList(PostProcessor):
+    """Join interface and monomer data and write one InterfaceDetails file per ID.
+
+    Output files are named interface_<id>.json, or .json.gz when compressed.
+    """
+
     def __init__(
         self,
         path_interfaces: str,
         path_monomers_json: str,
-        output_json_path: str,
+        output_json_dir: str,
         compressed: bool = False,
     ):
         super().__init__(
             input_json_path=path_monomers_json,
-            output_json_path=output_json_path,
+            output_json_path=output_json_dir,
             compressed=compressed,
         )
         self.path_interfaces = path_interfaces
+        self.output_json_dir = output_json_dir
 
     def _extract_monomer_data(
         self, component_id: str, interface_auth_asym_id: Optional[str] = None
@@ -170,9 +175,7 @@ class PostProcessInterfaceDetailsList(PostProcessor):
 
     def parse(self):
         super().parse()
-        LOGGER.info("Generating interface details file for all interfaces")
-
-        output = []
+        LOGGER.info("Generating individual interface details files")
 
         if not os.path.isdir(self.path_interfaces):
             LOGGER.warning(
@@ -184,9 +187,8 @@ class PostProcessInterfaceDetailsList(PostProcessor):
         ext = ".json.gz" if self.compressed else ".json"
         interface_files = [
             f
-            for f in os.listdir(self.path_interfaces)
-            if f.startswith("interface_")
-            and f.endswith(ext)
+            for f in sorted(os.listdir(self.path_interfaces))
+            if re.fullmatch(r"interface_\d+" + re.escape(ext), f)
             and os.path.isfile(os.path.join(self.path_interfaces, f))
         ]
 
@@ -196,6 +198,8 @@ class PostProcessInterfaceDetailsList(PostProcessor):
                 f"{self.path_interfaces}. No interface details JSON will be created."
             )
             return
+
+        os.makedirs(self.output_json_dir, exist_ok=True)
 
         # Iterate over interfaces JSONs
         for interface_json_file in interface_files:
@@ -245,21 +249,19 @@ class PostProcessInterfaceDetailsList(PostProcessor):
                 )
                 components.append(component)
 
-            # Add interface details to ordered list
             interface_details = InterfaceDetails(
                 interface_id=interface_id,
                 int_type=int_type,
                 css=css,
                 components=components,
             )
-            output.append(interface_details)
-
-        # Order output list by interface ID for consistency
-        output.sort(key=lambda x: x.interface_id)
-
-        interface_details_list = InterfaceDetailsList(output).model_dump()
-
-        self.save(self.output_json_path, interface_details_list)
+            self.save(
+                os.path.join(
+                    self.output_json_dir,
+                    f"interface_{interface_details.interface_id}" + ext,
+                ),
+                interface_details.model_dump(),
+            )
 
 
 class PostProcessInterfaceTable(PostProcessor):

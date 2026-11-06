@@ -208,10 +208,6 @@ class InterfaceDetails(BaseModel):
         return round(v, PRECISION_DP)
 
 
-class InterfaceDetailsList(RootModel[list[InterfaceDetails]]):
-    pass
-
-
 class ResidueRow(StrictModel):
     # For building table's primary key
     auth_asym_id: str = AuthAsymIdField()
