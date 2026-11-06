@@ -210,7 +210,7 @@ The JSON output directory contains:
 | `extended_data/monomers_extended.json` | Parsed component/monomer data, including surface and total atom/residue counts. |
 | `complex_table.json` | Flat list of complexes, with `pisa_analysis_type` and `pqs_set_id` on each row; ASU rows have a null `pqs_set_id`. |
 | `interface_details.json` | Interface details joined to component/monomer data. |
-| `interface_table.json` | Interface summary table with hydrogen-bond, salt-bridge, and disulfide-bond counts. |
+| `interface_table.json` | Flat list of interfaces, with `int_type` and hydrogen-bond, salt-bridge, and disulfide-bond counts on each row, ordered by type and interface ID. |
 | `residue_tables/interface_<id>_residue_table.json` | Per-interface residue tables for both components, including buried percentages and accessibility flags. |
 
 With `--compress_output`, these paths have an additional `.gz` suffix. Interface
