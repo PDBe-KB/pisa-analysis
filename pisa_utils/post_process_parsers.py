@@ -392,7 +392,12 @@ class PostProcessInterfaceComponentResidueTable(PostProcessor):
             ) as f:
                 interface_data = json.load(f)
 
-            interface_id = interface_data["interface_id"]
+            file_interface_id = int(filename[len("interface_") : -len(extension)])
+            interface_id = int(interface_data["interface_id"])
+            if interface_id != file_interface_id:
+                raise ValueError(
+                    f"Interface ID mismatch: filename has {file_interface_id}, JSON has {interface_id}"
+                )
             molecules = interface_data["interface"]["molecules"]
             if len(molecules) != 2:
                 raise ValueError(
