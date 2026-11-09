@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from pisa_utils.models.post_process_models import (
     ComplexTable,
-    InterfaceDetailsList,
+    InterfaceDetails,
     InterfaceTable,
 )
 
@@ -35,7 +35,13 @@ class TestComplexTable(PostProcessTestCase):
         input_json_path = os.path.join(self.path_input_stubs, "multi_pqs.json")
         data = self._open_json(input_json_path)
 
-        ComplexTable.model_validate(data)
+        complex_table = ComplexTable.model_validate(data)
+
+        self.assertEqual(complex_table.model_dump(mode="json"), data)
+        self.assertEqual(
+            [row.pqs_set_id for row in complex_table.root],
+            [None, 1, 2, 2, 3, 3, 3],
+        )
 
     def test_complex_table_no_pqs_sets(self):
         """
@@ -58,36 +64,39 @@ class TestComplexTable(PostProcessTestCase):
         # Check ASU complex values
         self.assertEqual(complex_table[0].pisa_analysis_type.value, "Asymmetric unit")
         self.assertIsNone(complex_table[0].pqs_set_id)
-        self.assertIsNone(complex_table[0].complexes[0].formula)
-        self.assertEqual(complex_table[0].complexes[0].n_interfaces, 0)
+        self.assertIsNone(complex_table[0].formula)
+        self.assertEqual(complex_table[0].n_interfaces, 0)
 
         # Check PQS set values
         self.assertEqual(complex_table[1].pisa_analysis_type.value, "PQS set")
         self.assertEqual(complex_table[1].pqs_set_id, 1)
-        self.assertIsNone(complex_table[1].complexes[0].formula)
-        self.assertEqual(complex_table[1].complexes[0].n_interfaces, 0)
+        self.assertIsNone(complex_table[1].formula)
+        self.assertEqual(complex_table[1].n_interfaces, 0)
 
 
-class TestInterfaceDetailsList(PostProcessTestCase):
-    def test_interface_details_list(self):
+class TestInterfaceDetails(PostProcessTestCase):
+    def test_interface_details(self):
         """
         Simple model validation. Optional values omitted from the input.
         """
 
-        input_json_path = os.path.join(
-            self.path_input_stubs, "interface_details_list.json"
-        )
-        data = self._open_json(input_json_path)
+        details = []
+        for interface_id in (1, 2, 3):
+            input_json_path = os.path.join(
+                self.path_input_stubs,
+                "interface_details",
+                f"interface_{interface_id}.json",
+            )
+            data = self._open_json(input_json_path)
+            detail = InterfaceDetails.model_validate(data)
+            self.assertEqual(detail.interface_id, interface_id)
+            details.append(detail)
 
-        interface_details_list = InterfaceDetailsList.model_validate(data).root
-
-        self.assertIsNone(interface_details_list[0].components[0].solv_energy)
-        self.assertEqual(interface_details_list[0].components[0].pvalue, 0.973)
-        self.assertEqual(
-            interface_details_list[0].components[0].int_solv_energy, -20.833
-        )
-        self.assertEqual(interface_details_list[0].components[0].surface_area, 11475.9)
-        self.assertEqual(interface_details_list[0].css, 0.661)
+        self.assertIsNone(details[0].components[0].solv_energy)
+        self.assertEqual(details[0].components[0].pvalue, 0.973)
+        self.assertEqual(details[0].components[0].int_solv_energy, -20.833)
+        self.assertEqual(details[0].components[0].surface_area, 11475.9)
+        self.assertEqual(details[0].css, 0.661)
 
 
 class TestInterfaceTable(PostProcessTestCase):
@@ -107,13 +116,13 @@ class TestInterfaceTable(PostProcessTestCase):
         interface_table = InterfaceTable.model_validate(self.data)
 
         expected_data = deepcopy(self.data)
-        expected_data["interface_types"][0]["interfaces"][0].update(
+        expected_data[0].update(
             int_area=1617.4,
             int_solv_energy=-23.1,
             pvalue=0.661,
             css=0.382,
         )
-        self.assertDictEqual(interface_table.model_dump(), expected_data)
+        self.assertListEqual(interface_table.model_dump(), expected_data)
 
     def test_interface_table_aliases_and_optional_fields(self):
         """
@@ -126,7 +135,7 @@ class TestInterfaceTable(PostProcessTestCase):
         for optional_fields in ("omitted", "null"):
             with self.subTest(optional_fields=optional_fields):
                 data = deepcopy(self.data)
-                row = data["interface_types"][0]["interfaces"][0]
+                row = data[0]
                 row["chain_id"] = row.pop("auth_asym_id_2")
                 row["int_solv_en"] = row.pop("int_solv_energy")
                 bond_fields = ("n_h_bonds", "n_salt_bridges", "n_ss_bonds")
@@ -137,7 +146,7 @@ class TestInterfaceTable(PostProcessTestCase):
                         row[field] = None
 
                 interface_table = InterfaceTable.model_validate(data)
-                interface = interface_table.interface_types[0].interfaces[0]
+                interface = interface_table.root[0]
 
                 self.assertEqual(interface.auth_asym_id_2, "A")
                 self.assertEqual(interface.int_solv_energy, -23.1)
@@ -152,18 +161,14 @@ class TestInterfaceTable(PostProcessTestCase):
 
     def test_interface_table_rejects_invalid_data(self):
         """
-        Reject missing required fields and unexpected fields at each level.
+        Reject missing required fields and unexpected fields on each row.
 
-        Check table, interface type group, and interface row validation errors,
-        asserting that each reports the expected field location and error type.
+        Check that each error identifies the row index, field, and error type.
         """
         cases = (
-            ((), "n_interfaces", "missing"),
-            (("interface_types", 0), "int_type", "missing"),
-            (("interface_types", 0, "interfaces", 0), "interface_id", "missing"),
-            ((), "unexpected", "extra_forbidden"),
-            (("interface_types", 0), "unexpected", "extra_forbidden"),
-            (("interface_types", 0, "interfaces", 0), "unexpected", "extra_forbidden"),
+            ((0,), "int_type", "missing"),
+            ((0,), "interface_id", "missing"),
+            ((0,), "unexpected", "extra_forbidden"),
         )
         for path, field, error_type in cases:
             with self.subTest(path=path, field=field, error_type=error_type):
@@ -185,18 +190,26 @@ class TestInterfaceTable(PostProcessTestCase):
                 self.assertEqual(errors[0]["type"], error_type)
 
     def test_interface_table_rejects_invalid_bond_counts(self):
-        """Reject nonnumeric bond counts and identify the invalid nested field."""
+        """Reject nonnumeric bond counts and identify the invalid row field."""
         for field in ("n_h_bonds", "n_salt_bridges", "n_ss_bonds"):
             with self.subTest(field=field):
                 data = deepcopy(self.data)
-                data["interface_types"][0]["interfaces"][0][field] = "invalid"
+                data[0][field] = "invalid"
 
                 with self.assertRaises(ValidationError) as context:
                     InterfaceTable.model_validate(data)
 
                 errors = context.exception.errors()
                 self.assertEqual(len(errors), 1)
-                self.assertEqual(
-                    errors[0]["loc"], ("interface_types", 0, "interfaces", 0, field)
-                )
+                self.assertEqual(errors[0]["loc"], (0, field))
                 self.assertEqual(errors[0]["type"], "int_parsing")
+
+    def test_interface_table_rejects_grouped_input(self):
+        """The table's root must be a list rather than the old grouped object."""
+        with self.assertRaises(ValidationError) as context:
+            InterfaceTable.model_validate({"n_interfaces": 0, "interface_types": []})
+
+        errors = context.exception.errors()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0]["loc"], ())
+        self.assertEqual(errors[0]["type"], "list_type")
