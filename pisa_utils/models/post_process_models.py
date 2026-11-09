@@ -1,6 +1,6 @@
 from typing import Optional
 from enum import Enum
-from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
+from pydantic import Field, RootModel, field_validator, model_validator
 
 from pisa_utils.constants import PRECISION_DP, STANDARD_DP
 from pisa_utils.models.data_fields import (
@@ -63,7 +63,7 @@ class PISAAnalysisType(str, Enum):
     ASU = "Asymmetric unit"
 
 
-class ComplexTableRow(BaseModel):
+class ComplexTableRow(StrictModel):
     pqs_set_id: Optional[int] = PQSSetIdField(default=None)
     pisa_analysis_type: PISAAnalysisType = Field(
         default=PISAAnalysisType.PQS, description="Type of complex from PISA analysis"
@@ -152,7 +152,7 @@ class InterfaceTable(RootModel[list[InterfaceTableRow]]):
     pass
 
 
-class InterfaceDetailsComponent(BaseModel):
+class InterfaceDetailsComponent(StrictModel):
     auth_asym_id: str = AuthAsymIdField()
     molecule_class: str = MoleculeClassField()
     symmetry_operation: str = SymmetryOperationField()
@@ -189,7 +189,7 @@ class InterfaceDetailsComponent(BaseModel):
         return round(v, PRECISION_DP)
 
 
-class InterfaceDetails(BaseModel):
+class InterfaceDetails(StrictModel):
     interface_id: int = InterfaceIdField()
     int_type: int = InterfaceTypeField()
     css: Optional[float] = ComplexSignificanceScoreField()
