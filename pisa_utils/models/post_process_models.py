@@ -100,7 +100,6 @@ class InterfaceTableRow(StrictModel):
     )
     auth_asym_id_2: str = AuthAsymIdField(
         description=f"{AUTH_ASYM_ID} for second molecule in interface",
-        validation_alias="chain_id",
     )
     int_natoms_2: int = InterfaceNumAtomsField(
         description=f"{INTERFACE_N_ATOMS} for second molecule in interface",
@@ -111,9 +110,7 @@ class InterfaceTableRow(StrictModel):
     int_area: float = Field(
         ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
     )
-    int_solv_energy: float = InterfaceSolvationEnergyField(
-        validation_alias="int_solv_en",
-    )
+    int_solv_energy: float = InterfaceSolvationEnergyField()
     pvalue: float = PValueField()
     # Present when --as-is set to false
     css: Optional[float] = ComplexSignificanceScoreField()
@@ -231,7 +228,6 @@ class ResidueRow(StrictModel):
         ...,
         description=RESIDUE_SOLVATION_ENERGY,
         examples=[-1.23],
-        validation_alias="solv_en",
     )
 
     # For filtering
