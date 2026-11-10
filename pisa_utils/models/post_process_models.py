@@ -1,6 +1,6 @@
 from typing import Optional
 from enum import Enum
-from pydantic import BaseModel, Field, RootModel, field_validator, model_validator
+from pydantic import Field, RootModel, field_validator, model_validator
 
 from pisa_utils.constants import PRECISION_DP, STANDARD_DP
 from pisa_utils.models.data_fields import (
@@ -63,7 +63,7 @@ class PISAAnalysisType(str, Enum):
     ASU = "Asymmetric unit"
 
 
-class ComplexTableRow(BaseModel):
+class ComplexTableRow(StrictModel):
     pqs_set_id: Optional[int] = PQSSetIdField(default=None)
     pisa_analysis_type: PISAAnalysisType = Field(
         default=PISAAnalysisType.PQS, description="Type of complex from PISA analysis"
@@ -100,7 +100,6 @@ class InterfaceTableRow(StrictModel):
     )
     auth_asym_id_2: str = AuthAsymIdField(
         description=f"{AUTH_ASYM_ID} for second molecule in interface",
-        validation_alias="chain_id",
     )
     int_natoms_2: int = InterfaceNumAtomsField(
         description=f"{INTERFACE_N_ATOMS} for second molecule in interface",
@@ -111,9 +110,7 @@ class InterfaceTableRow(StrictModel):
     int_area: float = Field(
         ..., description=INTERFACE_AREA, examples=[150.5, 300.75, 12.0]
     )
-    int_solv_energy: float = InterfaceSolvationEnergyField(
-        validation_alias="int_solv_en",
-    )
+    int_solv_energy: float = InterfaceSolvationEnergyField()
     pvalue: float = PValueField()
     # Present when --as-is set to false
     css: Optional[float] = ComplexSignificanceScoreField()
@@ -155,7 +152,7 @@ class InterfaceTable(RootModel[list[InterfaceTableRow]]):
     pass
 
 
-class InterfaceDetailsComponent(BaseModel):
+class InterfaceDetailsComponent(StrictModel):
     auth_asym_id: str = AuthAsymIdField()
     molecule_class: str = MoleculeClassField()
     symmetry_operation: str = SymmetryOperationField()
@@ -192,7 +189,7 @@ class InterfaceDetailsComponent(BaseModel):
         return round(v, PRECISION_DP)
 
 
-class InterfaceDetails(BaseModel):
+class InterfaceDetails(StrictModel):
     interface_id: int = InterfaceIdField()
     int_type: int = InterfaceTypeField()
     css: Optional[float] = ComplexSignificanceScoreField()
@@ -231,7 +228,6 @@ class ResidueRow(StrictModel):
         ...,
         description=RESIDUE_SOLVATION_ENERGY,
         examples=[-1.23],
-        validation_alias="solv_en",
     )
 
     # For filtering

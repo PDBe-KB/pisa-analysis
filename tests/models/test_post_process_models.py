@@ -9,6 +9,7 @@ from pisa_utils.models.post_process_models import (
     ComplexTable,
     InterfaceDetails,
     InterfaceTable,
+    ResidueRow,
 )
 
 
@@ -124,20 +125,17 @@ class TestInterfaceTable(PostProcessTestCase):
         )
         self.assertListEqual(interface_table.model_dump(), expected_data)
 
-    def test_interface_table_aliases_and_optional_fields(self):
+    def test_interface_table_optional_fields(self):
         """
-        Accept input aliases with optional fields omitted or explicitly null.
+        Accept canonical field names with optional fields omitted or null.
 
-        Resolve chain_id and int_solv_en to the model's field names and omit
-        aliases from output. Default missing bond counts to zero and other
-        optional fields to None; preserve explicit null values for all of them.
+        Default missing bond counts to zero and other optional fields to None;
+        preserve explicit null values for all of them.
         """
         for optional_fields in ("omitted", "null"):
             with self.subTest(optional_fields=optional_fields):
                 data = deepcopy(self.data)
                 row = data[0]
-                row["chain_id"] = row.pop("auth_asym_id_2")
-                row["int_solv_en"] = row.pop("int_solv_energy")
                 bond_fields = ("n_h_bonds", "n_salt_bridges", "n_ss_bonds")
                 for field in ("css", "complex_keys_with_interface", *bond_fields):
                     if optional_fields == "omitted":
@@ -158,6 +156,33 @@ class TestInterfaceTable(PostProcessTestCase):
                     self.assertEqual(interface.model_dump()[field], expected_count)
                 self.assertNotIn("chain_id", interface.model_dump())
                 self.assertNotIn("int_solv_en", interface.model_dump())
+
+    def test_interface_table_rejects_removed_aliases(self):
+        """Reject old aliases alone and alongside their canonical field names."""
+        for field, alias in (
+            ("auth_asym_id_2", "chain_id"),
+            ("int_solv_energy", "int_solv_en"),
+        ):
+            for keep_canonical in (False, True):
+                with self.subTest(alias=alias, keep_canonical=keep_canonical):
+                    data = deepcopy(self.data)
+                    data[0][alias] = data[0][field]
+                    if not keep_canonical:
+                        data[0].pop(field)
+
+                    with self.assertRaises(ValidationError) as context:
+                        InterfaceTable.model_validate(data)
+
+                    expected_errors = {((0, alias), "extra_forbidden")}
+                    if not keep_canonical:
+                        expected_errors.add(((0, field), "missing"))
+                    self.assertEqual(
+                        {
+                            (error["loc"], error["type"])
+                            for error in context.exception.errors()
+                        },
+                        expected_errors,
+                    )
 
     def test_interface_table_rejects_invalid_data(self):
         """
@@ -213,3 +238,50 @@ class TestInterfaceTable(PostProcessTestCase):
         self.assertEqual(len(errors), 1)
         self.assertEqual(errors[0]["loc"], ())
         self.assertEqual(errors[0]["type"], "list_type")
+
+
+class TestResidueRow(PostProcessTestCase):
+    def setUp(self):
+        super().setUp()
+        self.data = {
+            "auth_asym_id": "A",
+            "label_comp_id": "ARG",
+            "auth_seq_id": 11,
+            "asa": 158.712,
+            "bsa": 123.567,
+            "solv_energy": -1.23456,
+            "is_interfacing_residue": False,
+            "is_solvent_accessible_residue": False,
+            "is_inaccessible_residue": False,
+        }
+
+    def test_residue_row_uses_solv_energy(self):
+        """Validate and serialize the canonical energy field with rounding."""
+        residue = ResidueRow.model_validate(self.data)
+
+        self.assertEqual(residue.solv_energy, -1.235)
+        self.assertEqual(residue.model_dump()["solv_energy"], -1.235)
+        self.assertNotIn("solv_en", residue.model_dump())
+
+    def test_residue_row_rejects_removed_alias(self):
+        """Reject solv_en alone and alongside solv_energy."""
+        for keep_canonical in (False, True):
+            with self.subTest(keep_canonical=keep_canonical):
+                data = deepcopy(self.data)
+                data["solv_en"] = data["solv_energy"]
+                if not keep_canonical:
+                    data.pop("solv_energy")
+
+                with self.assertRaises(ValidationError) as context:
+                    ResidueRow.model_validate(data)
+
+                expected_errors = {(("solv_en",), "extra_forbidden")}
+                if not keep_canonical:
+                    expected_errors.add((("solv_energy",), "missing"))
+                self.assertEqual(
+                    {
+                        (error["loc"], error["type"])
+                        for error in context.exception.errors()
+                    },
+                    expected_errors,
+                )

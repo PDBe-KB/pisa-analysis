@@ -412,6 +412,24 @@ class TestPostProcessInterfaceComponentResidueTable(PostProcessTestCase):
                     ) as f:
                         self.assertDictEqual(json.load(f), expected_data)
 
+    def test_parse_residue_tables_rejects_removed_energy_alias(self):
+        """Require solv_energy in input residues without writing invalid tables."""
+        residue = self.data["interface"]["molecules"][0]["residues"]["residues"][0]
+        residue["solv_en"] = residue.pop("solv_energy")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with open(os.path.join(tmpdir, "interface_2.json"), "w") as f:
+                json.dump(self.data, f)
+
+            parser = PostProcessInterfaceComponentResidueTable(tmpdir, tmpdir)
+            with self.assertRaises(KeyError) as context:
+                parser.parse()
+
+            self.assertEqual(context.exception.args, ("solv_energy",))
+            self.assertFalse(
+                os.path.exists(os.path.join(tmpdir, "interface_2_residue_table.json"))
+            )
+
     def test_parse_real_interfaces(self):
         """Read existing interface JSONs, including a single-residue ligand."""
         path_interfaces = os.path.join(
@@ -575,6 +593,38 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                 with open_json(output_json_path, "rt") as f:
                     output_data = json.load(f)
                 self.assertListEqual(output_data, expected_data)
+
+    def test_parse_interface_table_rejects_removed_aliases(self):
+        """Reject summary rows using removed aliases without writing output."""
+        for field, alias in (
+            ("auth_asym_id_2", "chain_id"),
+            ("int_solv_energy", "int_solv_en"),
+        ):
+            with self.subTest(alias=alias), tempfile.TemporaryDirectory() as tmpdir:
+                data = deepcopy(self.data)
+                row = data["interface_types"][0]["interfaces"][0]
+                row[alias] = row.pop(field)
+                input_json_path = os.path.join(tmpdir, "interface_summary.json")
+                output_json_path = os.path.join(tmpdir, "output.json")
+                with open(input_json_path, "w") as f:
+                    json.dump(data, f)
+
+                parser = PostProcessInterfaceTable(
+                    input_summary_interfaces_path=input_json_path,
+                    path_interface_jsons=self.path_interface_jsons,
+                    output_json_path=output_json_path,
+                )
+                with self.assertRaises(ValidationError) as context:
+                    parser.parse()
+
+                self.assertEqual(
+                    {
+                        (error["loc"], error["type"])
+                        for error in context.exception.errors()
+                    },
+                    {((0, field), "missing"), ((0, alias), "extra_forbidden")},
+                )
+                self.assertFalse(os.path.exists(output_json_path))
 
     def test_parse_interface_table_bond_counts(self):
         """
