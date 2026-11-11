@@ -64,12 +64,17 @@ class TestPostProcessInterfacingBondsTable(TestCase):
                         }
                     ],
                 },
-                "cov_bonds": {"bonds": [{"unused": True}]},
+                "cov_bonds": {
+                    "n_bonds": 1,
+                    "bonds": [{**self.bond, "dist": 1.54321}],
+                },
+                "other_bonds": {"bonds": [{"unused": True}]},
             },
         }
         self.expected_tables = {
             "h_bonds": [{**self.expected_bond, "dist": 3.988}, self.expected_bond],
             "salt_bridges": [{**self.expected_bond, "dist": 4.322}],
+            "cov_bonds": [{**self.expected_bond, "dist": 1.543}],
             "ss_bonds": [
                 {
                     **self.expected_bond,
@@ -91,7 +96,7 @@ class TestPostProcessInterfacingBondsTable(TestCase):
             json.dump(data, f)
 
     def test_parse_bond_tables(self):
-        """Write three lists per interface with correct fields, order, and rounding."""
+        """Write four lists per interface with correct fields, order, and rounding."""
         for compressed in (False, True):
             with (
                 self.subTest(compressed=compressed),
@@ -139,7 +144,7 @@ class TestPostProcessInterfacingBondsTable(TestCase):
                             )
 
     def test_empty_bond_sections(self):
-        """Missing or null bond lists still produce all three empty table files."""
+        """Missing or null bond lists still produce all four empty table files."""
         for section in (None, {}, {"n_bonds": 0}, {"bonds": None}, {"bonds": []}):
             with self.subTest(section=section), tempfile.TemporaryDirectory() as tmpdir:
                 inputs = os.path.join(tmpdir, "interfaces")
@@ -154,7 +159,7 @@ class TestPostProcessInterfacingBondsTable(TestCase):
 
                 PostProcessInterfacingBondsTable(inputs, output).parse()
 
-                self.assertEqual(len(os.listdir(output)), 3)
+                self.assertEqual(len(os.listdir(output)), 4)
                 for bond_type in self.expected_tables:
                     with open(
                         os.path.join(output, f"interface_1_{bond_type}.json")
@@ -178,7 +183,7 @@ class TestPostProcessInterfacingBondsTable(TestCase):
                 self.assertFalse(os.path.exists(output))
 
     def test_invalid_bonds(self):
-        """Validate all three tables before writing any file for the interface."""
+        """Validate all four tables before writing any file for the interface."""
         for bond_type in self.expected_tables:
             with (
                 self.subTest(bond_type=bond_type),
@@ -212,12 +217,12 @@ class TestPostProcessInterfacingBondsTable(TestCase):
             self.assertEqual(os.listdir(output), [])
 
     def test_parse_real_interfaces(self):
-        """Project real PISA bond data and keep empty disulfide tables."""
+        """Project real PISA bond data and keep empty disulfide/covalent tables."""
         inputs = "tests/data/expected_output/interfaces/3hax_interfaces_multi"
         with tempfile.TemporaryDirectory() as output:
             PostProcessInterfacingBondsTable(inputs, output).parse()
 
-            self.assertEqual(len(os.listdir(output)), 9)
+            self.assertEqual(len(os.listdir(output)), 12)
             with open(os.path.join(output, "interface_1_h_bonds.json")) as f:
                 bonds = json.load(f)
             self.assertEqual(len(bonds), 35)
@@ -238,7 +243,10 @@ class TestPostProcessInterfacingBondsTable(TestCase):
             with open(os.path.join(output, "interface_2_salt_bridges.json")) as f:
                 self.assertEqual(len(json.load(f)), 18)
             for interface_id in (1, 2, 3):
-                with open(
-                    os.path.join(output, f"interface_{interface_id}_ss_bonds.json")
-                ) as f:
-                    self.assertEqual(json.load(f), [])
+                for bond_type in ("ss_bonds", "cov_bonds"):
+                    with open(
+                        os.path.join(
+                            output, f"interface_{interface_id}_{bond_type}.json"
+                        )
+                    ) as f:
+                        self.assertEqual(json.load(f), [])

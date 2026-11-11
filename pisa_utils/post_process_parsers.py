@@ -421,14 +421,14 @@ class PostProcessInterfaceComponentResidueTable(PostProcessor):
 
 
 class PostProcessInterfacingBondsTable(PostProcessor):
-    """Write separate hydrogen bond, salt bridge, and disulfide tables per interface.
+    """Write hydrogen bond, salt bridge, disulfide, and covalent tables per interface.
 
     Read interface_<id>.json files and write interface_<id>_<bond_type>.json
-    for h_bonds, salt_bridges, and ss_bonds. Empty bond types produce empty lists.
+    for h_bonds, salt_bridges, ss_bonds, and cov_bonds. Empty types produce empty lists.
     With compression enabled, both input and output filenames end in .json.gz.
     """
 
-    BOND_TYPES = ("h_bonds", "salt_bridges", "ss_bonds")
+    BOND_TYPES = ("h_bonds", "salt_bridges", "ss_bonds", "cov_bonds")
 
     def __init__(
         self,
