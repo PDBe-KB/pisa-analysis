@@ -215,11 +215,12 @@ The JSON output directory contains:
 | `bond_tables/interface_<id>_h_bonds.json` | Hydrogen bonds for one interface, with chain, residue, atom, and distance fields. |
 | `bond_tables/interface_<id>_salt_bridges.json` | Salt bridges for one interface, using the same bond-row format. |
 | `bond_tables/interface_<id>_ss_bonds.json` | Disulfide bonds for one interface, using the same bond-row format. |
+| `bond_tables/interface_<id>_cov_bonds.json` | Covalent bonds for one interface, using the same bond-row format. |
 
 With `--compress_output`, these paths have an additional `.gz` suffix. Interface
 files and some derived outputs are omitted when there are no interfaces; the
 full output listing assumes interfaces are present.
-Each interface has all three bond-table files; absent bond types contain `[]`.
+Each interface has all four bond-table files; absent bond types contain `[]`.
 
 ## Expected JSON formats
 
@@ -393,7 +394,7 @@ Additional parsers can be used independently:
 | `ConvertInterfaceListToJSON` | Converts extended interface text using `path_txt` and `path_json`. |
 | `ConvertComponentsListToJSON` | Converts extended monomer text using `path_txt` and `path_json`. |
 | `PostProcessInterfaceDetailsList` | Joins `path_interfaces` to `path_monomers_json` and writes one `InterfaceDetails` object per interface to `output_json_dir`. |
-| `PostProcessInterfacingBondsTable` | Reads `path_interfaces` and writes three `InterfacingBondsTable` files per interface to `output_json_dir`, for hydrogen bonds, salt bridges, and disulfides. |
+| `PostProcessInterfacingBondsTable` | Reads `path_interfaces` and writes four `InterfacingBondsTable` files per interface to `output_json_dir`, for hydrogen bonds, salt bridges, disulfides, and covalent bonds. |
 
 The list-text parsers are in `pisa_utils.parsers`; the details parser is in
 `pisa_utils.post_process_parsers`. For the list parsers, `path_json` may be an
