@@ -288,6 +288,14 @@ class PostProcessInterfaceTable(PostProcessor):
         """
         super().parse()
 
+        if not self.data:
+            LOGGER.warning(
+                f"No interface summary data found in: {self.input_json_path}. "
+                "Empty interface table will be created."
+            )
+            self.save(self.output_json_path, [])
+            return
+
         LOGGER.debug("Parsing interface table")
 
         # Fetch counts of specific bond types.

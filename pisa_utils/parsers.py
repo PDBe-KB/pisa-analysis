@@ -1056,6 +1056,7 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
                 f"No interfaces found in interface list file: {self.path_txt}. "
                 "Not writing interfaces extended JSON file."
             )
+            self.save({})
             return
 
         # Parse table
@@ -1445,8 +1446,12 @@ class CompileInterfaceSummaryJSON:
         if not os.path.isdir(self.path_interface_jsons):
             LOGGER.warning(
                 f"Interface JSON directory not found: {self.path_interface_jsons}. "
-                "No summary JSON will be created."
+                "Empty summary JSON will be created."
             )
+
+            with open_compressed(self.path_output_json, self.compressed, "w") as f:
+                json.dump({}, f)
+
             return
 
         ext = ".json.gz" if self.compressed else ".json"
