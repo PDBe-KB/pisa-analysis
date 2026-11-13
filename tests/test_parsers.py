@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest import TestCase
 import gzip
 
+from pisa_utils.models.data_models import InterfaceExtendedOutput
 from pisa_utils.parsers import (
     CompileInterfaceSummaryJSON,
     ConvertAssemblyListToJSON,
@@ -829,7 +830,7 @@ class TestConvertInterfaceListToJSON(TestCase):
         )
 
     def test_parse_no_interfaces(self):
-        """Write an empty JSON object when the interface list has no interfaces."""
+        """Write a model-valid empty interface list when no interfaces are found."""
         input_path = self.base_input_dir / "interfaces_extended_no_interfaces.txt"
         for compressed in (False, True):
             with (
@@ -850,7 +851,11 @@ class TestConvertInterfaceListToJSON(TestCase):
                     output = output.with_suffix(".json.gz")
                 open_json = gzip.open if compressed else open
                 with open_json(output, "rt") as f:
-                    self.assertEqual(json.load(f), {})
+                    data = json.load(f)
+                self.assertEqual(data, {"interfaces": []})
+                self.assertEqual(
+                    InterfaceExtendedOutput.model_validate(data).model_dump(), data
+                )
 
 
 class TestConvertAssemblyListToJSON(TestCase):

@@ -1056,7 +1056,7 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
                 f"No interfaces found in interface list file: {self.path_txt}. "
                 "Writing empty interfaces extended JSON file."
             )
-            self.save({})
+            self.save({"interfaces": []})
             return
 
         # Parse table
