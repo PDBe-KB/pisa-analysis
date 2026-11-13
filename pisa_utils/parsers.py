@@ -1449,8 +1449,8 @@ class CompileInterfaceSummaryJSON:
                 "Empty summary JSON will be created."
             )
 
-            with open_compressed(self.path_output_json, self.compressed, "w") as f:
-                json.dump({}, f)
+            with open_compressed(self.path_output_json, self.compressed, "wt") as f:
+                json.dump({"n_interfaces": 0, "interface_types": []}, f, indent=4)
 
             return
 
