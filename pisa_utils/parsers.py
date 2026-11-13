@@ -1439,9 +1439,6 @@ class CompileInterfaceSummaryJSON:
         return assembly_to_interface_map
 
     def _write_empty_summary(self) -> None:
-        """
-        Writes an empty summary JSON file.
-        """
         with open_compressed(self.path_output_json, self.compressed, "wt") as f:
             json.dump({"n_interfaces": 0, "interface_types": []}, f, indent=4)
 
