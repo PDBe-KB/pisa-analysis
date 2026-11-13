@@ -1054,7 +1054,7 @@ class ConvertInterfaceListToJSON(ConvertListTextToJSON):
         if lines and lines[-1] == "NO INTERFACES FOUND":
             LOGGER.warning(
                 f"No interfaces found in interface list file: {self.path_txt}. "
-                "Not writing interfaces extended JSON file."
+                "Writing empty interfaces extended JSON file."
             )
             self.save({})
             return
@@ -1438,6 +1438,13 @@ class CompileInterfaceSummaryJSON:
 
         return assembly_to_interface_map
 
+    def _write_empty_summary(self) -> None:
+        """
+        Writes an empty summary JSON file.
+        """
+        with open_compressed(self.path_output_json, self.compressed, "wt") as f:
+            json.dump({"n_interfaces": 0, "interface_types": []}, f, indent=4)
+
     def parse(self) -> None:
         """
         Converts individual interface JSON files into a summary JSON file.
@@ -1449,8 +1456,7 @@ class CompileInterfaceSummaryJSON:
                 "Empty summary JSON will be created."
             )
 
-            with open_compressed(self.path_output_json, self.compressed, "wt") as f:
-                json.dump({"n_interfaces": 0, "interface_types": []}, f, indent=4)
+            self._write_empty_summary()
 
             return
 
@@ -1466,6 +1472,9 @@ class CompileInterfaceSummaryJSON:
                 "No interface JSON files found in directory: "
                 f"{self.path_interface_jsons}. No summary JSON will be created."
             )
+
+            self._write_empty_summary()
+
             return
 
         # Load assembly data
