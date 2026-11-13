@@ -748,30 +748,37 @@ class TestPostProcessInterfaceTableParser(PostProcessTestCase):
                 self.assertEqual(row["n_h_bonds"], row["interface_id"])
 
     def test_parse_interface_table_empty(self):
-        """
-        Write valid summaries containing no interfaces without adding rows.
+        """Write an empty table for empty and zero-interface summaries."""
+        summaries = (
+            {},
+            {"n_interfaces": 0, "interface_types": []},
+            {"n_interfaces": 0, "interface_types": [{"int_type": 1, "interfaces": []}]},
+        )
+        for compressed in (False, True):
+            for data in summaries:
+                with (
+                    self.subTest(compressed=compressed, summary=data),
+                    tempfile.TemporaryDirectory() as tmpdir,
+                ):
+                    extension = ".json.gz" if compressed else ".json"
+                    input_json_path = os.path.join(
+                        tmpdir, "interface_summary" + extension
+                    )
+                    output_json_path = os.path.join(tmpdir, "output" + extension)
+                    open_json = gzip.open if compressed else open
+                    with open_json(input_json_path, "wt") as f:
+                        json.dump(data, f)
 
-        Cover both an empty interface_types list and a group with an empty
-        interfaces list, writing an empty JSON list in both cases.
-        """
-        for groups in ([], [{"int_type": 1, "interfaces": []}]):
-            with self.subTest(groups=groups), tempfile.TemporaryDirectory() as tmpdir:
-                data = {"n_interfaces": 0, "interface_types": groups}
-                input_json_path = os.path.join(tmpdir, "interface_summary.json")
-                output_json_path = os.path.join(tmpdir, "output.json")
-                with open(input_json_path, "w") as f:
-                    json.dump(data, f)
+                    parser = PostProcessInterfaceTable(
+                        input_summary_interfaces_path=input_json_path,
+                        path_interface_jsons=os.path.join(tmpdir, "missing_interfaces"),
+                        output_json_path=output_json_path,
+                        compressed=compressed,
+                    )
+                    parser.parse()
 
-                parser = PostProcessInterfaceTable(
-                    input_summary_interfaces_path=input_json_path,
-                    path_interface_jsons=self.path_interface_jsons,
-                    output_json_path=output_json_path,
-                )
-                parser.parse()
-
-                with open(output_json_path, "r") as f:
-                    output_data = json.load(f)
-                self.assertListEqual(output_data, [])
+                    with open_json(output_json_path, "rt") as f:
+                        self.assertEqual(json.load(f), [])
 
     def test_parse_interface_table_invalid_input(self):
         """
