@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest import TestCase
 import gzip
 
+from pisa_utils.models.data_models import InterfaceExtendedOutput
 from pisa_utils.parsers import (
     CompileInterfaceSummaryJSON,
     ConvertAssemblyListToJSON,
@@ -829,25 +830,32 @@ class TestConvertInterfaceListToJSON(TestCase):
         )
 
     def test_parse_no_interfaces(self):
-        """
-        Test interface list XML file with no interfaces present.
-        """
-        path_output = self.base_output_dir.joinpath("interfaces_extended.json")
+        """Write a model-valid empty interface list when no interfaces are found."""
+        input_path = self.base_input_dir / "interfaces_extended_no_interfaces.txt"
+        for compressed in (False, True):
+            with (
+                self.subTest(compressed=compressed),
+                tempfile.TemporaryDirectory() as tmpdir,
+            ):
+                source = input_path
+                output = Path(tmpdir) / "interfaces_extended.json"
+                if compressed:
+                    source = Path(tmpdir) / "interfaces_extended.txt.gz"
+                    compress_and_store(input_path, source)
 
-        # Run
-        converter = ConvertInterfaceListToJSON(
-            path_txt=str(
-                self.base_input_dir.joinpath("interfaces_extended_no_interfaces.txt")
-            ),
-            path_json=str(path_output),
-        )
-        converter.parse()
+                ConvertInterfaceListToJSON(
+                    str(source), str(output), compressed=compressed
+                ).parse()
 
-        # Check
-        self.assertFalse(
-            path_output.exists(),
-            msg="Interface list JSON created when no interfaces were present.",
-        )
+                if compressed:
+                    output = output.with_suffix(".json.gz")
+                open_json = gzip.open if compressed else open
+                with open_json(output, "rt") as f:
+                    data = json.load(f)
+                self.assertEqual(data, {"interfaces": []})
+                self.assertEqual(
+                    InterfaceExtendedOutput.model_validate(data).model_dump(), data
+                )
 
 
 class TestConvertAssemblyListToJSON(TestCase):
@@ -1443,35 +1451,32 @@ class TestCompileInterfaceSummaryJSON(TestCase):
             )
 
     def test_compile_interface_summary_json_no_interfaces(self):
-        """
-        Test for no interfaces present. Should not create output JSON.
-        """
+        """Write an empty summary for missing, empty, or unrelated input files."""
+        for compressed in (False, True):
+            for directory_state in ("missing", "empty", "unrelated"):
+                with (
+                    self.subTest(
+                        compressed=compressed, directory_state=directory_state
+                    ),
+                    tempfile.TemporaryDirectory() as tmpdir,
+                ):
+                    interfaces = Path(tmpdir) / "interfaces"
+                    if directory_state != "missing":
+                        interfaces.mkdir()
+                    if directory_state == "unrelated":
+                        (interfaces / "notes.txt").write_text("not an interface")
 
-        self.input_interface_jsons = self.base_input_dir.joinpath(
-            "mock_data",
-            "interface_summary_parser",
-            "interfaces_none",
-        )
-        self.input_assembly_json = self.base_input_dir.joinpath(
-            "mock_data",
-            "interface_summary_parser",
-            "assemblies.json",
-        )
-        self.output_json = self.base_input_dir.joinpath(
-            "actual_output",
-            "interface_summary_no_interfaces.json",
-        )
+                    extension = ".json.gz" if compressed else ".json"
+                    output = Path(tmpdir) / ("interface_summary" + extension)
+                    CompileInterfaceSummaryJSON(
+                        path_interface_jsons=str(interfaces),
+                        path_assembly_json=str(Path(tmpdir) / ("assembly" + extension)),
+                        path_output_json=str(output),
+                        compressed=compressed,
+                    ).parse()
 
-        # Run
-        self.compiler = CompileInterfaceSummaryJSON(
-            path_interface_jsons=self.input_interface_jsons,
-            path_assembly_json=self.input_assembly_json,
-            path_output_json=self.output_json,
-        )
-        self.compiler.parse()
-
-        # Check
-        self.assertFalse(
-            self.output_json.exists(),
-            msg="Interface summary JSON created when no interfaces were present.",
-        )
+                    open_json = gzip.open if compressed else open
+                    with open_json(output, "rt") as f:
+                        self.assertEqual(
+                            json.load(f), {"n_interfaces": 0, "interface_types": []}
+                        )
