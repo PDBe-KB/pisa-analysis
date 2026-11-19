@@ -178,6 +178,15 @@ Service-specific options are:
 | `-z`, `--compress_output` | Off | Gzip the generated XML, extended text, and JSON files. |
 | `--run_all_pisa_commands` | Enabled | Extract and parse assemblies, interfaces, and monomers. This is already enabled by default; the CLI currently has no option to disable it. |
 
+After PISA and the parsers finish, the service writes an uncompressed
+`status.json` in the `--output_json` directory. A successful run reports
+`{"status_code": 0, "message": "Success"}`. If PISA or a parser raises an
+error, the file reports status code `1` and an error message, and the command
+exits unsuccessfully. Its `type` field is `"pisa calculation error"` for errors
+running PISA and `"parsing error"` for errors parsing its results. A previous
+status file is removed when a new run starts;
+argument parsing and validation errors occur before status reporting begins.
+
 The service always runs PISA. It accepts the shared `--force` flag, but that flag
 does not change service behaviour. `--input_updated_cif` belongs to the assembly
 command and is not a service option.

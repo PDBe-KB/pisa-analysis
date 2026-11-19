@@ -35,3 +35,8 @@ class AllowedModelFileFormats(str, Enum):
     PDB_GZ = ".pdb.gz"
     MMCIF_GZ = ".mmcif.gz"
     ENT_GZ = ".ent.gz"
+
+
+class ErrorLabels(str, Enum):
+    PISA_ERROR = "pisa_calc_error"
+    PARSING_ERROR = "parsing_error"

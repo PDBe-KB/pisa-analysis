@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import subprocess
@@ -9,6 +10,40 @@ from pisa_utils.constants import SUBDIR_EXTENDED_DATA
 from pisa_utils.file_io import compress_existing_file
 from pisa_utils.models.models import DataModes, LigandProcessingMode
 from pisa_utils.file_io import create_pisa_config
+
+
+class StatusReporter:
+    def __init__(self, output_base_path: str, filename: str = "status.json"):
+
+        self.output_base_path = output_base_path
+        self.filename = filename
+
+        self._initialise_directory()
+
+    def _initialise_directory(self) -> None:
+        os.makedirs(
+            self.output_base_path,
+            exist_ok=True,
+        )
+        status_path = os.path.join(self.output_base_path, self.filename)
+
+        if os.path.exists(status_path):
+            os.remove(status_path)
+
+    def write_service_status(
+        self, status_code: int, message: str, error_type: Optional[str] = None
+    ) -> None:
+        """Write the service result as an uncompressed JSON file."""
+
+        status = {"status_code": status_code, "message": message}
+
+        if error_type is not None:
+            status["type"] = error_type
+
+        status_path = os.path.join(self.output_base_path, self.filename)
+        with open(status_path, "w", encoding="utf-8") as status_file:
+            json.dump(status, status_file)
+            status_file.write("\n")
 
 
 def run_pisalite(

@@ -4,7 +4,7 @@ import os
 from pisa_utils.analyze import AnalysePisa
 from pisa_utils.cli_tools import collect_base_args
 from pisa_utils.constants import SUBDIR_EXTENDED_DATA
-from pisa_utils.models.models import LigandProcessingMode
+from pisa_utils.models.models import LigandProcessingMode, ErrorLabels
 from pisa_utils.parsers import (
     CompileInterfaceSummaryJSON,
     ConvertAssemblyListToJSON,
@@ -20,7 +20,7 @@ from pisa_utils.post_process_parsers import (
     PostProcessInterfaceTable,
     PostProcessInterfacingBondsTable,
 )
-from pisa_utils.run_pisa import run_pisa_service, run_pisalite
+from pisa_utils.run_pisa import StatusReporter, run_pisa_service, run_pisalite
 from pisa_utils.cli_tools import validate_args
 
 
@@ -124,25 +124,43 @@ def service():
     logging.info("output xml: {}".format(args.output_xml))
     logging.info("output json: {}".format(args.output_json))
 
-    os.makedirs(args.output_xml, exist_ok=True)
+    status_report = StatusReporter(args.output_json)
+    error_type = ErrorLabels.PISA_ERROR.value
 
+    try:
+        output_paths = run_pisa_service(
+            input_cif=args.input_cif,
+            xml_output_dir=args.output_xml,
+            pisa_binary=args.pisa_binary,
+            pisa_setup_dir=args.pisa_setup_dir,
+            asis=args.as_is,
+            lig_proc_mode=args.lig_proc_mode,
+            exclude_ligands=args.exclude_ligands,
+            extended_data=args.run_all_pisa_commands,
+            compress_output=args.compress_output,
+        )
+        error_type = ErrorLabels.PARSING_ERROR.value
+        _parse_service_results(args, output_paths)
+
+    except Exception as exc:
+        status_report.write_service_status(
+            status_code=1, message=f"{type(exc).__name__}: {exc}", error_type=error_type
+        )
+        raise
+
+    else:
+        status_report.write_service_status(0, "Success")
+
+
+def _parse_service_results(args, output_paths):
+    """Run the configured parsers on the PISA output."""
     (
         assembly_xml_file,
         interfaces_xml_file,
         assemblies_extended_file,
         interfaces_extended_file,
         monomers_extended_file,
-    ) = run_pisa_service(
-        input_cif=args.input_cif,
-        xml_output_dir=args.output_xml,
-        pisa_binary=args.pisa_binary,
-        pisa_setup_dir=args.pisa_setup_dir,
-        asis=args.as_is,
-        lig_proc_mode=args.lig_proc_mode,
-        exclude_ligands=args.exclude_ligands,
-        extended_data=args.run_all_pisa_commands,
-        compress_output=args.compress_output,
-    )
+    ) = output_paths
 
     if args.run_all_pisa_commands:
         data_parser = (
