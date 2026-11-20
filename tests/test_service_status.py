@@ -1,11 +1,12 @@
 import json
+import subprocess
 import sys
 from unittest.mock import Mock
 
 import pytest
 
 from pisa_utils import run
-from pisa_utils.models.models import ErrorLabels
+from pisa_utils.models.validation_error_handlers import ErrorLabels
 from pisa_utils.run_pisa import StatusReporter
 
 
@@ -90,16 +91,8 @@ def test_success_status_is_published_after_all_parsers(service_setup):
     assert list(output_dir.iterdir()) == [output_dir / "status.json"]
 
 
-@pytest.mark.parametrize(
-    ("failure", "error_label", "wire_value"),
-    [
-        ("pisa", ErrorLabels.PISA_ERROR, "pisa_calc_error"),
-        ("parser", ErrorLabels.PARSING_ERROR, "parsing_error"),
-    ],
-)
-def test_failure_status_and_exception_are_preserved(
-    service_setup, failure, error_label, wire_value
-):
+@pytest.mark.parametrize("failure", ["pisa", "parser"])
+def test_failure_status_and_exception_are_preserved(service_setup, failure):
     output_dir, pisa, parsers = service_setup
     error = RuntimeError(f"{failure} failed")
     if failure == "pisa":
@@ -111,14 +104,36 @@ def test_failure_status_and_exception_are_preserved(
         run.service()
 
     assert raised.value is error
-    assert error_label.value == wire_value
     assert json.loads((output_dir / "status.json").read_text()) == {
-        "status_code": 1,
+        "status_code": 999,
         "message": f"RuntimeError: {failure} failed",
-        "type": error_label.value,
+        "type": ErrorLabels.PARSING.value,
     }
     if failure == "parser":
         parsers[0].parse.assert_called_once()
         parsers[2].parse.assert_not_called()
     else:
         assert all(not parser.parse.called for parser in parsers)
+
+
+@pytest.mark.parametrize(
+    ("returncode", "error_label"),
+    [(7, ErrorLabels.PISA_NO_MOL_REF_DATA), (-9, ErrorLabels.PISA_UNKNOWN)],
+)
+def test_subprocess_failure_preserves_returncode(
+    service_setup, returncode, error_label
+):
+    output_dir, pisa, parsers = service_setup
+    error = subprocess.CalledProcessError(returncode, ["pisa", "-analyse"])
+    pisa.side_effect = error
+
+    with pytest.raises(subprocess.CalledProcessError) as raised:
+        run.service()
+
+    assert raised.value is error
+    assert json.loads((output_dir / "status.json").read_text()) == {
+        "status_code": returncode,
+        "message": f"CalledProcessError: {error}",
+        "type": error_label.value,
+    }
+    assert all(not parser.parse.called for parser in parsers)

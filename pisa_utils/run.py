@@ -1,10 +1,15 @@
 import logging
 import os
+import subprocess
 
 from pisa_utils.analyze import AnalysePisa
 from pisa_utils.cli_tools import collect_base_args
 from pisa_utils.constants import SUBDIR_EXTENDED_DATA
-from pisa_utils.models.models import LigandProcessingMode, ErrorLabels
+from pisa_utils.models.models import LigandProcessingMode
+from pisa_utils.models.validation_error_handlers import (
+    KNOWN_PISA_ERROR_CODES,
+    ErrorLabels,
+)
 from pisa_utils.parsers import (
     CompileInterfaceSummaryJSON,
     ConvertAssemblyListToJSON,
@@ -125,7 +130,6 @@ def service():
     logging.info("output json: {}".format(args.output_json))
 
     status_report = StatusReporter(args.output_json)
-    error_type = ErrorLabels.PISA_ERROR.value
 
     try:
         output_paths = run_pisa_service(
@@ -139,12 +143,18 @@ def service():
             extended_data=args.run_all_pisa_commands,
             compress_output=args.compress_output,
         )
-        error_type = ErrorLabels.PARSING_ERROR.value
         _parse_service_results(args, output_paths)
 
     except Exception as exc:
+        status_code = (
+            exc.returncode if isinstance(exc, subprocess.CalledProcessError) else 999
+        )
         status_report.write_service_status(
-            status_code=1, message=f"{type(exc).__name__}: {exc}", error_type=error_type
+            status_code=status_code,
+            message=f"{type(exc).__name__}: {exc}",
+            error_type=KNOWN_PISA_ERROR_CODES.get(
+                status_code, ErrorLabels.PISA_UNKNOWN
+            ),
         )
         raise
 

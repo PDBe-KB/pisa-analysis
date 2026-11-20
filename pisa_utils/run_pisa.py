@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import subprocess
+import sys
 import tempfile
 from time import time
 from typing import Optional, Tuple
@@ -232,10 +233,17 @@ def _run_pisa_command(
     logging.info(f"Running PISA command: {' '.join(command)}")
 
     # Run PISA -analyse
-    subprocess.run(
+    result = subprocess.run(
         command,
-        check=True,
+        capture_output=True,
+        text=True,
     )
+
+    # Emit output for API -- ensure change is non-breaking
+    sys.stdout.write(result.stdout)
+    sys.stderr.write(result.stderr)
+
+    result.check_returncode()
 
     # Run PISA -xml
     xml_interfaces_file = os.path.join(xml_output_dir, "interfaces.xml")
