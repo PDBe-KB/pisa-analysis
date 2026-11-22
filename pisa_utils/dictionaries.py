@@ -155,13 +155,23 @@ def get_bond_dict(bondtag, bondtype, updated_cif_block):
         # atoms in bonds, from updated cif file
 
         uniprot_info_1 = read_uniprot_info(
-            label_seqnum_1, seqnum_1, atname_1, res_1, updated_cif_block
+            label_seqnum_1, 
+            seqnum_1, 
+            atname_1, 
+            res_1, 
+            updated_cif_block,
+            orig_label_asym_id_1
         )
         unp_acc_1 = uniprot_info_1[0]
         unp_num_1 = uniprot_info_1[1]
 
         uniprot_info_2 = read_uniprot_info(
-            label_seqnum_2, seqnum_2, atname_2, res_2, updated_cif_block
+            label_seqnum_2, 
+            seqnum_2, 
+            atname_2, 
+            res_2, 
+            updated_cif_block,
+            orig_label_asym_id_2
         )
         unp_acc_2 = uniprot_info_2[0]
         unp_num_2 = uniprot_info_2[1]
