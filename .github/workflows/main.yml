@@ -82,10 +82,20 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/pisa-analysis:${{ env.DOCKER_TAG }}
             ${{ secrets.DOCKER_USERNAME }}/pisa-analysis:latest
       - name: Login to GitLab Container Registry
-        run: echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin ${{ vars.REGISTRY_URL }}
-      - name: Build and tag Docker image
-        run: docker build -t ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pisa-analysis:latest -t ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pisa-analysis:${{ env.DOCKER_TAG }} .
-      - name: Push Docker image to GitLab Container Registry
-        run: |
-          docker push ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pisa-analysis:latest
-          docker push ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pisa-analysis:${{ env.DOCKER_TAG }}
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ vars.REGISTRY_URL }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Build and push to GitLab Container Registry
+        uses: docker/build-push-action@v7
+        with:
+          push: true
+          platforms: linux/amd64
+          # Push a plain single-platform image manifest instead of an OCI index
+          # with attestation manifests
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pisa-analysis:latest
+            ${{ vars.REGISTRY_URL }}/${{ secrets.REGISTRY_USERNAME }}/packages/pisa-analysis:${{ env.DOCKER_TAG }}
