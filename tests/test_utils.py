@@ -49,7 +49,7 @@ class TestUtils(TestCase):
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
 
-        result = read_uniprot_info("-1", "3", "O", "ARG", updated_cif_block,"A")
+        result = read_uniprot_info("-1", "3", "O", "ARG", updated_cif_block, "A")
         self.assertEqual(result, (None, None))
 
     def test_read_uniprot_info_no_atom(self):
