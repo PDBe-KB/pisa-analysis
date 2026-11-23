@@ -36,9 +36,9 @@ class TestUtils(TestCase):
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
 
-        result = read_uniprot_info("5", "2", "N", "ALA", updated_cif_block)
+        result = read_uniprot_info("5", "2", "N", "ALA", updated_cif_block, "A")
         self.assertEqual(result, (("P48491", "2")))
-        result = read_uniprot_info("6", "3", "CA", "ARG", updated_cif_block)
+        result = read_uniprot_info("6", "3", "CA", "ARG", updated_cif_block, "A")
         self.assertEqual(result, (("P48491", "3")))
 
     def test_read_uniprot_info_valid_with_negative_number(self):
@@ -49,7 +49,7 @@ class TestUtils(TestCase):
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
 
-        result = read_uniprot_info("-1", "3", "O", "ARG", updated_cif_block)
+        result = read_uniprot_info("-1", "3", "O", "ARG", updated_cif_block,"A")
         self.assertEqual(result, (None, None))
 
     def test_read_uniprot_info_no_atom(self):
@@ -59,7 +59,7 @@ class TestUtils(TestCase):
         path_to_updated_cif = os.path.join(".", "tests", "data", "6nxr_updated.cif")
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
-        result = read_uniprot_info("6", "3", "CA", "GLY", updated_cif_block)
+        result = read_uniprot_info("6", "3", "CA", "GLY", updated_cif_block, "A")
         self.assertEqual(result, ((None, None)))
 
     def test_read_uniprot_info_no_mapping(self):
@@ -69,5 +69,5 @@ class TestUtils(TestCase):
         path_to_updated_cif = os.path.join(".", "tests", "data", "6nxr_updated.cif")
         doc = cif.read(path_to_updated_cif)
         updated_cif_block = doc.sole_block()
-        result = read_uniprot_info("4", "3", "CB", "ARG", updated_cif_block)
+        result = read_uniprot_info("4", "3", "CB", "ARG", updated_cif_block, "A")
         self.assertEqual(result, ((None, None)))
