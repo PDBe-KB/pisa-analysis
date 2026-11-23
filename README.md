@@ -178,6 +178,26 @@ Service-specific options are:
 | `-z`, `--compress_output` | Off | Gzip the generated XML, extended text, and JSON files. |
 | `--run_all_pisa_commands` | Enabled | Extract and parse assemblies, interfaces, and monomers. This is already enabled by default; the CLI currently has no option to disable it. |
 
+The service writes an uncompressed `status.json` in the `--output_json`
+directory after PISA and the parsers succeed, or when an exception interrupts
+the run. A successful run reports `{"status_code": 0, "message": "Success"}`.
+An error report contains `status_code`, `message`, and `type`:
+
+- For a failed subprocess, `status_code` is its return code. Known PISA codes
+  map to specific `type` values; for example, code `11` maps to
+  `"no_coordinate_data"`. An unrecognised code maps to `"unknown_pisa_error"`.
+  On Unix, a subprocess terminated by a signal has a negative return code.
+- For any other exception, `status_code` is `999` and `type` is
+  `"parsing_error"`. This includes non-subprocess exceptions raised while
+  running PISA as well as parser exceptions.
+
+The complete mapping is in
+[`KNOWN_PISA_ERROR_CODES`](pisa_utils/models/validation_error_handlers.py).
+The exception is re-raised after the status is written, so the CLI's own exit
+code may differ from the subprocess return code in the file. A previous status
+file is removed when a new run starts. Argument parsing and validation errors
+occur before status reporting begins.
+
 The service always runs PISA. It accepts the shared `--force` flag, but that flag
 does not change service behaviour. `--input_updated_cif` belongs to the assembly
 command and is not a service option.
@@ -202,6 +222,7 @@ The JSON output directory contains:
 
 | Path | Contents |
 | --- | --- |
+| `status.json` | Success or error status for the service run. |
 | `interfaces/interface_<id>.json` | One interface per file, including bonds, both molecules, and their residue properties. |
 | `assemblies.json` | Probable quaternary structure (PQS) sets and asymmetric-unit complex information. |
 | `interface_summary.json` | Interfaces grouped by interface type, with links to complex keys. |
@@ -217,8 +238,9 @@ The JSON output directory contains:
 | `bond_tables/interface_<id>_ss_bonds.json` | Disulfide bonds for one interface, using the same bond-row format. |
 | `bond_tables/interface_<id>_cov_bonds.json` | Covalent bonds for one interface, using the same bond-row format. |
 
-With `--compress_output`, these paths have an additional `.gz` suffix. Interface
-files and some derived outputs are omitted when there are no interfaces; the
+With `--compress_output`, these paths have an additional `.gz` suffix except
+for `status.json`, which remains uncompressed. Interface files and some
+derived outputs are omitted when there are no interfaces; the
 full output listing assumes interfaces are present.
 Each interface has all four bond-table files; absent bond types contain `[]`.
 
