@@ -5,7 +5,12 @@ logger = logging.getLogger(__name__)
 
 
 def read_uniprot_info(
-    int_lab_seqnum, int_seqnum, int_atname, int_resname, updated_cif_block
+    int_lab_seqnum,
+    int_seqnum,
+    int_atname,
+    int_resname,
+    updated_cif_block,
+    label_asym_id=None,
 ):
     """
     Function reads atom's UniProt accession numbers and sequence numbers
@@ -16,6 +21,7 @@ def read_uniprot_info(
     :param int_atname: type str - atom name
     :param int_resname: type str - atom residue name
     :param parsed updated cif data: type str - path to updated cif file
+    :param label_asym_id: type str - Chain ID in the asymmetric unit
     :return: (atom uniprot accession number, atom uniprot sequence number)
     """
 
@@ -38,8 +44,13 @@ def read_uniprot_info(
         db_acc = updated_cif_block.find_values("_pdbx_sifts_xref_db.unp_acc")
         db_num = updated_cif_block.find_values("_pdbx_sifts_xref_db.unp_num")
         res_name = updated_cif_block.find_values("_pdbx_sifts_xref_db.mon_id")
+        db_asym_id = updated_cif_block.find_values("_pdbx_sifts_xref_db.asym_id")
 
-        for labseqid, resname, dbacc, dbnum in zip(db_seq_id, res_name, db_acc, db_num):
+        for labseqid, resname, dbacc, dbnum, asymid in zip(
+            db_seq_id, res_name, db_acc, db_num, db_asym_id
+        ):
+            if label_asym_id is not None and asymid != label_asym_id.strip():
+                continue
             if labseqid == int_lab_seqnum.strip() and resname == int_resname.strip():
                 n += 1
                 if labseqid != ".":
