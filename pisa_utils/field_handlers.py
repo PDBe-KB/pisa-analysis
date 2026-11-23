@@ -13,17 +13,16 @@ def read_uniprot_info(
     label_asym_id=None,
 ):
     """
-        Function reads atom's UniProt accession numbers and sequence numbers
-        from updated cif file
+    Function reads atom's UniProt accession numbers and sequence numbers
+    from updated cif file
 
-        :param int_lab_seqnum: type str - atom label sequence id
-        :param int_seqnum: type str - atom sequence number
-        :param int_atname: type str - atom name
-        :param int_resname: type str - atom residue name
-        :param parsed updated cif data: type str - path to updated cif file
-        :param int_label_asym_id: type str - label_asym_id of the atom's chain in the
-    +        asymmetric unit (orig_label_asym_id for symmetry copies).
-        :return: (atom uniprot accession number, atom uniprot sequence number)
+    :param int_lab_seqnum: type str - atom label sequence id
+    :param int_seqnum: type str - atom sequence number
+    :param int_atname: type str - atom name
+    :param int_resname: type str - atom residue name
+    :param parsed updated cif data: type str - path to updated cif file
+    :param label_asym_id: type str - Chain ID in the asymmetric unit
+    :return: (atom uniprot accession number, atom uniprot sequence number)
     """
 
     unp_acc = None
