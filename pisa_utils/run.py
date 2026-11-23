@@ -154,7 +154,7 @@ def service():
             message=f"{type(exc).__name__}: {exc}",
             error_type=KNOWN_PISA_ERROR_CODES.get(
                 status_code, ErrorLabels.PISA_UNKNOWN
-            ),
+            ).value,
         )
         raise
 
